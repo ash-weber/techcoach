@@ -27,8 +27,8 @@ const createSubscription = async (planId) => {
       application_context: {
         brand_name: "Decision Coach",
         user_action: "SUBSCRIBE_NOW",
-        return_url: "http://localhost:3000/paypal/success",
-        cancel_url: "http://localhost:3000/paypal/cancel"
+        return_url: "https://dev-decision-coach.onrender.com/paypal/success",
+        cancel_url: "https://dev-decision-coach.onrender.com/paypal/cancel"
       }
     },
     {
