@@ -14,6 +14,7 @@ import './Readd.css';
 import withAuth from '../../withAuth';
 import TrendChart from './Views/TrendChart';
 import { formatDate } from '../../../Utility/utils';
+import LockIcon from '@mui/icons-material/Lock';
 
 const Readd = () => {
   const [data, setData] = useState([]);
@@ -26,6 +27,13 @@ const Readd = () => {
   const [selectedTag, setSelectedTag] = useState('');
   const [sortCriteria, setSortCriteria] = useState('');
   const [sortDirection, setSortDirection] = useState('asc');
+  const [subscriptionInfo, setSubscriptionInfo] = useState({
+    monthlyCount: 0,
+    limit: 1,
+    subscriptionRequired: false,
+    isSubscribed: false
+  });
+  const [subscriptionLoading, setSubscriptionLoading] = useState(false);
 
 
   useEffect(() => {
@@ -52,7 +60,21 @@ const Readd = () => {
       }
     };
 
+    const loadSubscriptionInfo = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await axios.get(
+          `${process.env.REACT_APP_API_URL}/api/decisions/monthly-count`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setSubscriptionInfo(res.data);
+      } catch (err) {
+        console.error('Subscription info error', err);
+      }
+    };
+
     loadData();
+    loadSubscriptionInfo();
   }, []);
 
 
@@ -90,6 +112,31 @@ const Readd = () => {
     setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
   };
 
+  const startSubscription = async () => {
+    try {
+      setSubscriptionLoading(true);
+
+      const token = localStorage.getItem('token');
+
+      const res = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/subscription/create`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      window.location.href = res.data.approvalUrl;
+
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to start subscription');
+      setSubscriptionLoading(false);
+    }
+  };
+
   const filteredData = data
     .filter(decision => (showPendingDecisions ? !decision.decision_taken_date : true))
     .filter(decision => {
@@ -119,7 +166,7 @@ const Readd = () => {
         <TableHead sx={{ backgroundColor: '#526D82' }}>
           <TableRow>
             <TableCell sx={{ color: 'white' }}>#</TableCell>
-            <TableCell sx={{ color: 'white' }}>Decision Name</TableCell>
+            <TableCell sx={{ color: 'white' }}>Decision Namess</TableCell>
             <TableCell sx={{ color: 'white', cursor: 'pointer' }} onClick={handleSortByDueDate}>
               Due Date {sortDirection === 'asc' ? '▲' : '▼'}
             </TableCell>
@@ -132,6 +179,7 @@ const Readd = () => {
           </TableRow>
         </TableHead>
         <TableBody>
+          {console.log("currentRecords", currentRecords)}
           {currentRecords.map((decision, index) => {
             const isPastDueDate = new Date(decision.decision_due_date) < new Date() && !decision.decision_taken_date;
             return (
@@ -629,21 +677,53 @@ const Readd = () => {
 
   return (
     <Box sx={{ padding: 3 }}>
-      <Link to="/decision" style={{ textDecoration: 'none' }}>
+      <Button
+        variant="contained"
+        onClick={() => {
+          if (subscriptionInfo.subscriptionRequired && !subscriptionInfo.isSubscribed) {
+            toast.info('Monthly limit reached. Please subscribe to continue.');
+          } else {
+            window.location.href = '/decision';
+          }
+        }}
+        sx={{
+          backgroundColor: '#526D82',
+          color: 'white',
+          '&:hover': { backgroundColor: '#405060' },
+          marginBottom: 1,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1
+        }}
+      >
+        Add Decision
+        {subscriptionInfo.subscriptionRequired && !subscriptionInfo.isSubscribed && (
+          <LockIcon fontSize="small" />
+        )}
+      </Button>
+
+      <Typography variant="body2" sx={{ mb: 1, color: '#526D82' }}>
+        Decisions this month: {subscriptionInfo.monthlyCount} / {subscriptionInfo.limit}
+      </Typography>
+
+      {subscriptionInfo.subscriptionRequired && !subscriptionInfo.isSubscribed && (
         <Button
           variant="contained"
-          sx={{
-            backgroundColor: '#526D82',
-            color: 'white',
-            '&:hover': {
-              backgroundColor: '#405060'
-            },
-            marginBottom: 2
-          }}
+          color="success"
+          onClick={startSubscription}
+          disabled={subscriptionLoading}
+          sx={{ mb: 2, minWidth: 180 }}
         >
-          Add Decision
+          {subscriptionLoading ? (
+            <>
+              <CircularProgress size={20} sx={{ color: 'white', mr: 1 }} />
+              Redirecting…
+            </>
+          ) : (
+            'Subscribe $1 / Month'
+          )}
         </Button>
-      </Link>
+      )}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
         <Box>
           <Button
