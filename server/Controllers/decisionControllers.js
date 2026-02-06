@@ -632,5 +632,54 @@ const getall = async (req, res) => {
   }
 };
 
+const getMonthlyDecisionCount = async (req, res) => {
+  let conn;
 
-module.exports = { postInfo, getallInfo, getInfo, putInfo, deleteInfo, getall, getInfo_Referred };
+  try {
+    conn = await getConnection();
+
+    const userId = req.user.id;
+
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    const startDate = startOfMonth.toISOString().slice(0, 10);
+
+    const rows = await conn.query(
+      `SELECT COUNT(*) AS count
+       FROM techcoach_lite.techcoach_decision
+       WHERE user_id = ?
+       AND creation_date >= ?`,
+      [userId, startDate]
+    );
+
+    // ✅ FIX: Convert BigInt to Number
+    const monthlyCount = Number(rows[0].count);
+
+    const LIMIT = 1;
+
+    // TODO: replace with real subscription DB check
+    const isSubscribed = false;
+
+    res.status(200).json({
+      monthlyCount,
+      limit: LIMIT,
+      subscriptionRequired: !isSubscribed && monthlyCount >= LIMIT,
+      isSubscribed
+    });
+
+  } catch (error) {
+    console.error('Monthly decision count error:', error);
+    res.status(500).json({
+      message: 'Failed to fetch monthly count',
+      error: error.message
+    });
+  } finally {
+    if (conn) conn.release();
+  }
+};
+
+
+
+module.exports = { postInfo, getallInfo, getInfo, putInfo, deleteInfo, getall, getInfo_Referred, getMonthlyDecisionCount };

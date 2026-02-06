@@ -15,6 +15,7 @@ const commentRoutes = require('./routes/commentRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const advancedProfileRoutes = require('./routes/advancedProfileRoutes');
 const advancedLinkRoutes = require('./routes/advancedLinkRoutes');
+const subscriptionRoutes = require('./routes/subscriptionRoutes');
 
 require('dotenv').config();
 
@@ -43,7 +44,8 @@ app.use('/group',commentRoutes);
 app.use('/api/admin',adminRoutes);
 app.use('/api',advancedProfileRoutes);
 app.use('/link',advancedLinkRoutes); 
- 
+app.use('/api/subscription', subscriptionRoutes);
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

@@ -1,5 +1,5 @@
 const express = require('express');
-const { postInfo, getallInfo, getInfo, putInfo, deleteInfo, getall, getInfo_Referred } = require('../Controllers/decisionControllers');
+const { postInfo, getallInfo, getInfo, putInfo, deleteInfo, getall, getInfo_Referred, getMonthlyDecisionCount } = require('../Controllers/decisionControllers');
 const authMiddleware = require('../Utility/AuthMiddleware');
 const createUserKey = require('../Utility/CreateUserKey');
 
@@ -15,5 +15,5 @@ router.get('/details/:id', getInfo);
 router.get('/getInfo_Referred/:id', getInfo_Referred);
 router.put('/details/:id', putInfo);
 router.delete('/details/:id', deleteInfo);
-
+router.get('/decisions/monthly-count', getMonthlyDecisionCount);
 module.exports = router;

@@ -38,6 +38,8 @@ import MemberSharedDecisions from './Components/Decision_Circle/MemberSharedDeci
 import SharedDecisionCircle from './Components/Decision_Circle/SharedDecisionCircle.js';
 import AdvancedProfile from './Components/pages/Profile_Table/AdvancedProfile.js';
 import AdvancedProfileTable from './Components/pages/Profile_Table/AdvancedProfileTable.js';
+import PaypalSuccess from './Components/pages/paypal/PaypalSuccess.js';
+import PaypalCancel from './Components/pages/paypal/PaypalCancel.js';
 
 function App() {
   console.log("one is working")
@@ -131,7 +133,8 @@ function App() {
         <Route path='/sharedByMe' element={<ShareWithMe />} />
         <Route path='/receivedDecisions' element={<ReceivedDecisionsTab />} />
         <Route path='/sharedDecisionCircle' element={<SharedDecisionCircle />} />
-
+        <Route path="/paypal/success" element={<PaypalSuccess />} />
+        <Route path="/paypal/cancel" element={<PaypalCancel />} />
 
         <Route path='/group' element={<MultipleMemberGroup />} />
         <Route path='/innerCircleDisplay' element={<DisplayInnerCircle />} />
