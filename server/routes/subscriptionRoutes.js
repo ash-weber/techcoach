@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createSubscription } = require('../Services/paypalService');
+const { createSubscription, getSubscriptionDetails } = require('../Services/paypalService');
 const getConnection = require('../Models/database');
 
 const ensureAuth = (req, res, next) => {
@@ -44,9 +44,9 @@ router.post('/confirm', ensureAuth, async (req, res) => {
 
     const details = await getSubscriptionDetails(subscriptionId);
 
-    if (details.status !== 'ACTIVE') {
+    if (!['ACTIVE', 'APPROVAL_PENDING'].includes(details.status)) {
       return res.status(400).json({
-        error: 'Subscription not active',
+        error: 'Subscription not valid',
         status: details.status
       });
     }
@@ -54,19 +54,26 @@ router.post('/confirm', ensureAuth, async (req, res) => {
     conn = await getConnection();
 
     await conn.query(
-      `INSERT INTO user_subscription (user_id, paypal_subscription_id, status)
-       VALUES (?, ?, 'ACTIVE')
+      `INSERT INTO user_subscription 
+       (user_id, paypal_subscription_id, status)
+       VALUES (?, ?, ?)
        ON DUPLICATE KEY UPDATE
        paypal_subscription_id = VALUES(paypal_subscription_id),
-       status = 'ACTIVE'`,
-      [req.user.id, subscriptionId]
+       status = VALUES(status)`,
+      [req.user.id, subscriptionId, details.status]
     );
 
     res.json({ success: true });
 
   } catch (error) {
-    console.error('Confirm subscription error:', error.response?.data || error);
-    res.status(500).json({ error: 'Subscription confirmation failed' });
+
+    console.error(error.response?.data || error);
+
+    res.status(500).json({
+      error: 'Subscription confirmation failed',
+      details: error.response?.data || error.message
+    });
+
   } finally {
     if (conn) conn.release();
   }
