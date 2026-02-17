@@ -29,7 +29,7 @@ const Readd = () => {
   const [sortDirection, setSortDirection] = useState('asc');
   const [subscriptionInfo, setSubscriptionInfo] = useState({
     monthlyCount: 0,
-    limit: 10,
+    limit: 2,
     subscriptionRequired: false,
     isSubscribed: false
   });

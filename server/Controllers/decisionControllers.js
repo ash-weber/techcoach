@@ -657,7 +657,7 @@ const getMonthlyDecisionCount = async (req, res) => {
     // ✅ FIX: Convert BigInt to Number
     const monthlyCount = Number(rows[0].count);
 
-    const LIMIT = 10;
+    const LIMIT = 2;
 
     // TODO: replace with real subscription DB check
     const isSubscribed = false;

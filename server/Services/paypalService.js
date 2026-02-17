@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const PAYPAL_BASE = 'https://api-m.sandbox.paypal.com';
+const PAYPAL_BASE = process.env.PAYPAL_BASE;
 
 const getAccessToken = async () => {
   const res = await axios.post(
