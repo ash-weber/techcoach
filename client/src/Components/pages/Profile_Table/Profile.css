@@ -85,12 +85,11 @@ h3 {
   align-items: center;
   width: 100%;
   padding: 10px;
-  margin-bottom: 20px;
 }
 
 .iconn {
-  font-size: 36px;
-  color: #52697b;
+  font-size: 24px;
+  color: #fff;
 }
 
 .users-name{
@@ -251,4 +250,492 @@ h3 {
     width: 80%;
     text-align: center;
   }
+}
+
+.profile-header-container {
+
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 30px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+
+}
+
+
+.profile-left {
+
+  flex: 1;
+  min-width: 320px;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+
+  border: 5px solid #526D82;
+
+  background: #ffffff;
+
+  border-radius: 10px;
+
+  padding: 20px;
+
+}
+
+
+.subscription-card {
+
+  flex: 1;
+  min-width: 320px;
+  max-width: 400px;
+
+  background: #ffffff;
+
+  border-radius: 10px;
+
+  padding: 20px;
+
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+
+  border: 5px solid #526D82;
+  margin-bottom: 50px;
+
+}
+
+
+.subscription-row {
+
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+
+}
+
+
+.status-active {
+
+  color: green;
+  font-weight: bold;
+
+}
+
+
+.status-inactive {
+
+  color: red;
+  font-weight: bold;
+
+}
+
+
+.subscribe-btn {
+
+  margin-top: 15px;
+
+  width: 100%;
+
+  padding: 10px;
+
+  border: none;
+
+  border-radius: 6px;
+
+  background-color: #526D82;
+
+  color: white;
+
+  cursor: pointer;
+
+  font-weight: 600;
+
+}
+
+
+.subscribe-btn:hover {
+
+  background-color: #405060;
+
+}
+
+.profile-top-section {
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 20px;
+
+  background: #ffffff;
+
+  border-radius: 10px;
+
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+
+  margin-bottom: 20px;
+
+  flex-wrap: wrap;
+
+}
+
+
+.profile-picture-container {
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+}
+
+
+.profile-picture {
+
+  width: 80px;
+  height: 80px;
+
+  border-radius: 50%;
+
+  object-fit: cover;
+
+  border: 3px solid #526D82;
+
+}
+
+
+.profile-placeholder {
+
+  width: 80px;
+  height: 80px;
+
+  border-radius: 50%;
+
+  background: #526D82;
+
+  color: white;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 30px;
+  font-weight: bold;
+
+}
+
+
+.profile-basic-info {
+
+  flex: 1;
+
+  margin-left: 20px;
+
+}
+
+
+.profile-name {
+
+  margin: 0;
+  color: #2c3e50;
+  text-align: left;
+
+}
+
+
+.profile-email {
+
+  margin: 5px 0 0 0;
+  color: #7f8c8d;
+
+}
+
+
+.profile-action-container {
+
+  display: flex;
+  align-items: center;
+
+}
+
+
+.linked-decisions-btn {
+
+  background-color: #526D82;
+
+  color: white;
+
+  padding: 10px 18px;
+
+  border-radius: 6px;
+
+  text-decoration: none;
+
+  font-weight: 600;
+
+  transition: 0.3s;
+
+}
+
+
+.linked-decisions-btn:hover {
+ color: #fff;
+
+}
+
+.profile-actions-container {
+
+  margin-top: 30px;
+
+  background: #ffffff;
+
+  padding: 20px;
+
+  border-radius: 10px;
+
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+
+}
+
+
+.section-title {
+
+  margin-bottom: 15px;
+
+  color: #2c3e50;
+
+}
+
+
+.danger-title {
+
+  color: #e74c3c;
+
+}
+
+
+.action-buttons {
+
+  display: flex;
+
+  gap: 15px;
+
+  flex-wrap: wrap;
+
+}
+
+
+.action-btn {
+
+  padding: 12px 20px;
+
+  border-radius: 6px;
+
+  border: none;
+
+  cursor: pointer;
+
+  font-weight: 600;
+
+  font-size: 14px;
+
+  transition: 0.3s;
+
+}
+
+
+.download-btn {
+
+  background-color: #526D82;
+
+  color: white;
+
+}
+
+
+.download-btn:hover {
+
+  background-color: #405060;
+
+}
+
+
+.danger-section {
+
+  margin-top: 25px;
+
+  padding-top: 20px;
+
+  border-top: 1px solid #eee;
+
+}
+
+
+.delete-btn {
+
+  background-color: #e74c3c;
+
+  color: white;
+
+}
+
+
+.delete-btn:hover {
+
+  background-color: #c0392b;
+
+}
+
+.swot-container {
+
+
+  background: white;
+
+  padding: 25px;
+
+  border-radius: 10px;
+
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+
+}
+
+
+.swot-header {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: flex-start;
+
+  margin-bottom: 20px;
+
+}
+
+
+.swot-title {
+
+  margin: 0;
+
+  color: #2c3e50;
+
+}
+
+
+.swot-desc {
+
+  margin-top: 5px;
+
+  color: #666;
+
+  font-size: 15px;
+
+  max-width: 600px;
+
+}
+
+
+.swot-link {
+
+  color: #526D82;
+
+  font-weight: 600;
+
+  text-decoration: none;
+
+}
+
+
+.swot-link:hover {
+
+  text-decoration: underline;
+
+}
+
+
+.swot-grid {
+
+  display: grid;
+
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+
+  gap: 20px;
+
+}
+
+
+.swot-card {
+
+  padding: 15px;
+
+  border-radius: 8px;
+
+  background: #f8f9fa;
+
+  border-left: 5px solid;
+
+}
+
+
+.swot-card h4 {
+
+  margin-bottom: 10px;
+
+}
+
+
+.swot-card.attitude {
+
+  border-color: #3498db;
+
+}
+
+
+.swot-card.strength {
+
+  border-color: #27ae60;
+
+}
+
+
+.swot-card.weakness {
+
+  border-color: #e67e22;
+
+}
+
+
+.swot-card.opportunity {
+
+  border-color: #8e44ad;
+
+}
+
+
+.swot-card.threat {
+
+  border-color: #e74c3c;
+
+}
+
+
+.profile-line {
+
+  padding: 4px 0;
+
+  font-size: 16px;
+
+  color: #444;
+
+}
+
+
+.no-profile-data {
+
+  padding: 20px;
+
+  background: #f8f9fa;
+
+  border-radius: 8px;
+
+  text-align: center;
+
+  color: #888;
+
 }

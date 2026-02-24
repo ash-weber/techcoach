@@ -16,6 +16,14 @@ const Profile = () => {
   const [userData, setUserData] = useState({});
   const [decisions, setDecisions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [subscription, setSubscription] = useState({
+    isSubscribed: false,
+    status: "INACTIVE",
+    lastPaymentTime: null,
+    nextBillingTime: null
+  });
+
+  const [subscriptionLoading, setSubscriptionLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -44,6 +52,17 @@ const Profile = () => {
             Authorization: `Bearer ${token}`
           }
         });
+
+        const subResp = await axios.get(
+          `${process.env.REACT_APP_API_URL}/api/subscription/status`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+
+        setSubscription(subResp.data);
         if (Array.isArray(decisionsResp.data.decisionData)) {
           setDecisions(decisionsResp.data.decisionData);
         } else {
@@ -58,6 +77,37 @@ const Profile = () => {
 
     loadData();
   }, []);
+
+  const startSubscription = async () => {
+
+    try {
+
+      setSubscriptionLoading(true);
+
+      const token = localStorage.getItem("token");
+
+      const res = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/subscription/create`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      window.location.href = res.data.approvalUrl;
+
+    }
+    catch {
+
+      toast.error("Failed to start subscription");
+
+      setSubscriptionLoading(false);
+
+    }
+
+  };
 
   const renderLines = (data) => {
     if (Array.isArray(data)) {
@@ -195,103 +245,239 @@ const Profile = () => {
     <div className="card1">
       <div >
         <h3>Profile</h3>
-        <div className=''>
-          <div className='data-aroundd'>
-            <div>
-              {userData.profilePicture && (
-                <div>
-                  <img src={userData.profilePicture} alt="Profile" className="profile-picture" />
+        <div className="profile-top-section">
+
+          {/* Profile Picture */}
+          <div className="profile-picture-container">
+
+            {userData.profilePicture ? (
+
+              <img
+                src={userData.profilePicture}
+                alt="Profile"
+                className="profile-picture"
+              />
+
+            ) : (
+
+              <div className="profile-placeholder">
+                {userData.displayname?.charAt(0).toUpperCase()}
+              </div>
+
+            )}
+
+          </div>
+
+
+          {/* User Basic Info */}
+          <div className="profile-basic-info">
+
+            <h3 className="profile-name">
+              {userData.displayname
+                ? userData.displayname.charAt(0).toUpperCase() + userData.displayname.slice(1)
+                : ""}
+            </h3>
+
+            <p className="profile-email">
+              {userData.email}
+            </p>
+
+            <div className='details'>
+              
+              <Link to='/profiletab'>
+              Edit Profile
+              </Link>
+            </div>
+
+          </div>
+
+
+          {/* Linked Decisions Button */}
+          <div className="profile-action-container">
+
+            <Link to="/getall" className="linked-decisions-btn">
+
+              View Linked Decisions
+
+            </Link>
+
+          </div>
+
+        </div>
+        <div className="profile-header-container">
+
+          <div className="subscription-card">
+
+            <h3>Subscription</h3>
+
+            <div className="subscription-row">
+              <span>Status:</span>
+
+              <span className={
+                subscription.isSubscribed
+                  ? "status-active"
+                  : "status-inactive"
+              }>
+                {subscription.isSubscribed ? "Active" : "Inactive"}
+              </span>
+            </div>
+
+
+            {subscription.lastPaymentTime && (
+              <div className="subscription-row">
+                <span>Last Payment:</span>
+                <span>
+                  {new Date(subscription.lastPaymentTime).toLocaleDateString()}
+                </span>
+              </div>
+            )}
+
+
+            {subscription.nextBillingTime && (
+              <div className="subscription-row">
+                <span>Next Billing:</span>
+                <span>
+                  {new Date(subscription.nextBillingTime).toLocaleDateString()}
+                </span>
+              </div>
+            )}
+
+
+            {!subscription.isSubscribed && (
+              <button
+                className="subscribe-btn"
+                onClick={startSubscription}
+                disabled={subscriptionLoading}
+              >
+                {subscriptionLoading
+                  ? "Redirecting..."
+                  : "Subscribe $1 / Month"}
+              </button>
+            )}
+
+          </div>
+
+        </div>
+
+        {Object.keys(formData).length ? (
+
+          <div className="swot-container">
+
+            {/* Header */}
+            <div className="swot-header">
+
+              <div>
+
+                <p className="swot-desc">
+                  Your ability to take better decisions is influenced by your Self Awareness.
+                  This section helps you align your strengths and weaknesses with your decisions.
+                </p>
+              </div>
+
+              <a
+                href="https://academy.greenestep.com/courses/swot-analysis/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="swot-link"
+              >
+                Learn SWOT Analysis
+              </a>
+
+            </div>
+
+
+            {/* SWOT Grid */}
+            <div className="swot-grid">
+
+              {formData.attitude && (
+                <div className="swot-card attitude">
+                  <h4>Attitude</h4>
+                  {renderLines(formData.attitude)}
                 </div>
               )}
+
+              {formData.strength && (
+                <div className="swot-card strength">
+                  <h4>Strength</h4>
+                  {renderLines(formData.strength)}
+                </div>
+              )}
+
+              {formData.weakness && (
+                <div className="swot-card weakness">
+                  <h4>Weakness</h4>
+                  {renderLines(formData.weakness)}
+                </div>
+              )}
+
+              {formData.opportunity && (
+                <div className="swot-card opportunity">
+                  <h4>Opportunity</h4>
+                  {renderLines(formData.opportunity)}
+                </div>
+              )}
+
+              {formData.threat && (
+                <div className="swot-card threat">
+                  <h4>Threat</h4>
+                  {renderLines(formData.threat)}
+                </div>
+              )}
+
             </div>
-            <button className='linked-decisions'>
-              <Link to='/getall' className='linked-decisions'>
-                <p>View Linked Decisions</p>
-              </Link>
-            </button>
+
           </div>
-        </div>
-        <div className='users-name'>
-          <strong>Username:</strong>
-          <span>{userData.displayname}</span>
-        </div>
-        <div>
-          <strong>Email:</strong>
-          <span>{userData.email}</span>
-        </div>
-        <div className='details'>
-          <Link to='/profiletab'>
-            <button className='profiletab'>Edit Detail</button>
-          </Link>
-          <div> 
-            <Link to='/profiletab'>
-              <FaUserEdit className='iconn' />
-            </Link>
-          </div>
-        </div>
-        {Object.keys(formData).length ? (
-          <div className="profile-details">
-            {/* <div className="profile-field">
-              <strong>Gender: </strong>
-              <span>{formData.gender}</span>
-            </div> */}
-            <div className='addition-one'>
-              <p><b>Desc:</b> Your ability to take better decisions is influenced by your Self Awareness. Profile section enables you to add more details about yourself that can be aligned with your decisions.</p>
-              <a href="https://academy.greenestep.com/courses/swot-analysis/" className='analysis' target="_blank" rel="noopener noreferrer">
-                SWOT Analysis
-              </a>
-            </div>
-            {formData.attitude && (
-              <div className="sub-card">
-                <strong>Attitude: </strong>
-                {renderLines(formData.attitude)}
-              </div>
-            )}
-            {formData.strength && (
-              <div className="sub-card">
-                <strong>Strength: </strong>
-                {renderLines(formData.strength)}
-              </div>
-            )}
-            {formData.weakness && (
-              <div className="sub-card">
-                <strong>Weakness: </strong>
-                {renderLines(formData.weakness)}
-              </div>
-            )}
-            {formData.opportunity && (
-              <div className="sub-card">
-                <strong>Opportunity: </strong>
-                {renderLines(formData.opportunity)}
-              </div>
-            )}
-            {formData.threat && (
-              <div className="sub-card">
-                <strong>Threat: </strong>
-                {renderLines(formData.threat)}
-              </div>
-            )}
-          </div>
+
         ) : (
-          <div>No data available</div>
+
+          <div className="no-profile-data">
+            No profile data available
+          </div>
+
         )}
       </div>
-      <div className='data-around'>
-        <div className='download-data'>
-          <p onClick={handleDownloadData}>Download my Decision data</p>
-        </div>
-        <div className='download-profile'>
-          <p onClick={handleDownloadProfile}>Download Profile data</p>
-        </div>
-        <ToastContainer />
-      </div>
-      <center>
-        <div className='delete-button'>
-          <div className='delete-account'>
-            <p onClick={handleDeleteAccount}>Delete Account</p>
+      
+      <div className="profile-actions-container">
+
+        {/* Download Section */}
+        <div className="download-section">
+
+          <div className="action-buttons">
+
+            <button
+              className="action-btn download-btn"
+              onClick={handleDownloadData}
+            >
+              Download Decision Data
+            </button>
+
+            <button
+              className="action-btn download-btn"
+              onClick={handleDownloadProfile}
+            >
+              Download Profile Data
+            </button>
+
           </div>
+
         </div>
-      </center>
+
+
+        {/* Danger Section */}
+        <div className="danger-section">
+
+          <button
+            className="action-btn delete-btn"
+            onClick={handleDeleteAccount}
+          >
+            Delete Account
+          </button>
+
+        </div>
+
+        <ToastContainer />
+
+      </div>
     </div>
   );
 };
