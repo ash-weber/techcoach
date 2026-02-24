@@ -29,7 +29,7 @@ const Readd = () => {
   const [sortDirection, setSortDirection] = useState('asc');
   const [subscriptionInfo, setSubscriptionInfo] = useState({
     monthlyCount: 0,
-    limit: 2,
+    limit: 10,
     subscriptionRequired: false,
     isSubscribed: false
   });
@@ -37,48 +37,54 @@ const Readd = () => {
 
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        const responseData = response.data;
-        if (Array.isArray(responseData.decisionData)) {
-          const sortedData = responseData.decisionData.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-          setData(sortedData);
-          sortedData.forEach(decision => {
-            fetchComments(decision.decision_id);
-          });
-        } else {
-          console.error('Invalid response format:', responseData);
-        }
-      } catch (error) {
-        console.error('Error fetching data:', error.message);
-      }
-    };
-
-    const loadSubscriptionInfo = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const res = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/decisions/monthly-count`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setSubscriptionInfo(res.data);
-      } catch (err) {
-        console.error('Subscription info error', err);
-      }
-    };
-
     loadData();
     loadSubscriptionInfo();
+
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("subscription_id")) {
+      loadSubscriptionInfo();
+    }
   }, []);
 
 
   // console.log("dataa", data);
+
+  const loadData = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      const responseData = response.data;
+      if (Array.isArray(responseData.decisionData)) {
+        const sortedData = responseData.decisionData.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        setData(sortedData);
+        sortedData.forEach(decision => {
+          fetchComments(decision.decision_id);
+        });
+      } else {
+        console.error('Invalid response format:', responseData);
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error.message);
+    }
+  };
+
+  const loadSubscriptionInfo = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(
+        `${process.env.REACT_APP_API_URL}/api/decisions/monthly-count`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setSubscriptionInfo(res.data);
+    } catch (err) {
+      console.error('Subscription info error', err);
+    }
+  };
 
 
   const fetchComments = async decisionId => {
@@ -663,16 +669,40 @@ const Readd = () => {
   };
 
   const deleteDecision = async id => {
+
     if (window.confirm('Are you sure that you want to delete this decision?')) {
+
       try {
-        await axios.delete(`${process.env.REACT_APP_API_URL}/api/details/${id}`);
+
+        const token = localStorage.getItem('token');
+
+        await axios.delete(
+          `${process.env.REACT_APP_API_URL}/api/details/${id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+
         toast.success('Decision deleted successfully');
-        setData(prevData => prevData.filter(decision => decision.decision_id !== id));
-      } catch (error) {
-        console.error('Error deleting decision:', error);
-        toast.error('An error occurred while deleting the decision');
+
+        setData(prevData =>
+          prevData.filter(decision => decision.decision_id !== id)
+        );
+
+        // ✅ IMPORTANT: refresh count after delete
+        await loadSubscriptionInfo();
+
       }
+      catch (error) {
+
+        console.error('Error deleting decision:', error);
+
+        toast.error('An error occurred while deleting the decision');
+
+      }
+
     }
+
   };
 
   return (
@@ -697,16 +727,21 @@ const Readd = () => {
         }}
       >
         Add Decision
-        {subscriptionInfo.subscriptionRequired && !subscriptionInfo.isSubscribed && (
+        {!subscriptionInfo.isSubscribed && subscriptionInfo.subscriptionRequired && (
           <LockIcon fontSize="small" />
         )}
       </Button>
 
-      <Typography variant="body2" sx={{ mb: 1, color: '#526D82' }}>
-        Decisions this month: {subscriptionInfo.monthlyCount} / {subscriptionInfo.limit}
-      </Typography>
+      {subscriptionInfo.isSubscribed && (
+        <Typography
+          variant="body2"
+          sx={{ color: "green", mb: 1 }}
+        >
+          Subscription Active ✓
+        </Typography>
+      )}
 
-      {subscriptionInfo.subscriptionRequired && !subscriptionInfo.isSubscribed && (
+      {!subscriptionInfo.isSubscribed && subscriptionInfo.subscriptionRequired && (
         <Button
           variant="contained"
           color="success"

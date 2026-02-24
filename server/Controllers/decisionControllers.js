@@ -637,9 +637,9 @@ const getMonthlyDecisionCount = async (req, res) => {
 
   try {
     conn = await getConnection();
-
     const userId = req.user.id;
 
+    // Get monthly decision count
     const startOfMonth = new Date();
     startOfMonth.setDate(1);
     startOfMonth.setHours(0, 0, 0, 0);
@@ -654,13 +654,51 @@ const getMonthlyDecisionCount = async (req, res) => {
       [userId, startDate]
     );
 
-    // ✅ FIX: Convert BigInt to Number
     const monthlyCount = Number(rows[0].count);
 
-    const LIMIT = 2;
+    // Check subscription status
+    const subRows = await conn.query(
+      `SELECT status, next_billing_time
+       FROM techcoach_lite.user_subscription
+       WHERE user_id = ?
+       LIMIT 1`,
+      [userId]
+    );
 
-    // TODO: replace with real subscription DB check
-    const isSubscribed = false;
+    let isSubscribed = false;
+
+    if (subRows.length > 0) {
+
+      const subscription = subRows[0];
+
+      const now = new Date();
+
+      if (
+        subscription.status === 'ACTIVE' &&
+        subscription.next_billing_time &&
+        new Date(subscription.next_billing_time) > now
+      ) {
+        isSubscribed = true;
+      }
+
+      // Auto expire subscription if billing time passed
+      if (
+        subscription.next_billing_time &&
+        new Date(subscription.next_billing_time) <= now
+      ) {
+
+        await conn.query(
+          `UPDATE techcoach_lite.user_subscription
+           SET status = 'INACTIVE'
+           WHERE user_id = ?`,
+          [userId]
+        );
+
+        isSubscribed = false;
+      }
+    }
+
+    const LIMIT = 10;
 
     res.status(200).json({
       monthlyCount,
@@ -670,13 +708,18 @@ const getMonthlyDecisionCount = async (req, res) => {
     });
 
   } catch (error) {
+
     console.error('Monthly decision count error:', error);
+
     res.status(500).json({
       message: 'Failed to fetch monthly count',
       error: error.message
     });
+
   } finally {
+
     if (conn) conn.release();
+
   }
 };
 

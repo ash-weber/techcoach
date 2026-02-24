@@ -97,12 +97,9 @@ const PaypalSuccess = () => {
 
             <Button
               variant="contained"
+              className='btn-primary'
               component={Link}
               to="/dashboard"
-              sx={{
-                backgroundColor: '#526D82',
-                '&:hover': { backgroundColor: '#405060' }
-              }}
             >
               Go to Dashboard
             </Button>
@@ -126,6 +123,7 @@ const PaypalSuccess = () => {
 
             <Button
               variant="contained"
+              className='btn-primary'
               component={Link}
               to="/dashboard"
             >
