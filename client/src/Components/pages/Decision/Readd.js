@@ -29,7 +29,7 @@ const Readd = () => {
   const [sortDirection, setSortDirection] = useState('asc');
   const [subscriptionInfo, setSubscriptionInfo] = useState({
     monthlyCount: 0,
-    limit: 10,
+    limit: 20,
     subscriptionRequired: false,
     isSubscribed: false
   });
@@ -870,6 +870,26 @@ const Readd = () => {
           </Box>
         )}
       </Box>
+      {/* Data issue notice */}
+      {data.length === 0 || data.some(d => !d.decision_name) ? (
+
+        <Box
+          sx={{
+            backgroundColor: '#fff3cd',
+            color: '#856404',
+            border: '1px solid #ffeeba',
+            padding: '12px 16px',
+            borderRadius: '6px',
+            marginBottom: '15px',
+            fontSize: '15px'
+          }}
+        >
+
+          ⚠️ Note: Some decision titles may appear blank due to recent updates. We are actively working to resolve this issue and it will be fixed soon.
+
+        </Box>
+
+      ) : null}
       {view === 'table' && renderTableView()}
       {view === 'timeline' && renderTimelineView()}
       {view === 'tabular' && renderTabularView()}
