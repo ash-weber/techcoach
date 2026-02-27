@@ -698,7 +698,7 @@ const getMonthlyDecisionCount = async (req, res) => {
       }
     }
 
-    const LIMIT = 10;
+    const LIMIT = 20;
 
     res.status(200).json({
       monthlyCount,

@@ -1,6 +1,7 @@
 const axios = require('axios');
 
 const PAYPAL_BASE = process.env.PAYPAL_BASE;
+const CLIENT_URL = process.env.CLIENT_URL;
 
 const getAccessToken = async () => {
   const res = await axios.post(
@@ -27,8 +28,8 @@ const createSubscription = async (planId) => {
       application_context: {
         brand_name: "Decision Coach",
         user_action: "SUBSCRIBE_NOW",
-        return_url: "https://dev-decision-coach.onrender.com/paypal/success",
-        cancel_url: "https://dev-decision-coach.onrender.com/paypal/cancel"
+        return_url: `${CLIENT_URL}/paypal/success`,
+        cancel_url: `${CLIENT_URL}/paypal/cancel`
       }
     },
     {
