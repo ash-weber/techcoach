@@ -766,6 +766,7 @@ const getMemberSharedDecisions = async (req, res) => {
     let conn;
 
     const decryptText = (text, key) => {
+        if (!text) return text;
         try {
             const decipher = crypto.createDecipher('aes-256-cbc', key);
             let decryptedText = decipher.update(text, 'hex', 'utf8');
@@ -773,18 +774,6 @@ const getMemberSharedDecisions = async (req, res) => {
             return decryptedText;
         } catch (error) {
             console.error('Error decrypting text:', error);
-            return 'Decryption failed';
-        }
-    };
-
-    const encryptText = (text, key) => {
-        try {
-            const cipher = crypto.createCipher('aes-256-cbc', key);
-            let encryptedText = cipher.update(text, 'utf8', 'hex');
-            encryptedText += cipher.final('hex');
-            return encryptedText;
-        } catch (error) {
-            console.error('Error encrypting text:', error);
             return null;
         }
     };
@@ -814,64 +803,68 @@ const getMemberSharedDecisions = async (req, res) => {
         const getDecisions = await conn.query(decisionQuery, [groupId]);
 
         if (!Array.isArray(getDecisions) || !getDecisions.length) {
-            return res.status(200).json({ message: 'No decisions found', results: [], decisionCount: 0 });
+            return res.status(200).json({
+                message: 'No decisions found',
+                results: [],
+                decisionCount: 0
+            });
         }
 
         const decisionDetailsMap = new Map();
 
-        // Loop through decisions, decrypt fields and fetch additional data
         for (const decision of getDecisions) {
             const { decision_id, shared_by, shared_by_email } = decision;
 
-            // Key generation for decryption (you might need to modify this logic)
-            const keyData = undefined + shared_by + shared_by_email;
-            const encryptedKey = encryptText(keyData, process.env.PUBLIC_KEY);
+            // ✅ CORRECT KEY (same as encryption)
+            const key = `${shared_by}${shared_by_email}`;
 
-            // Decrypt fields
-            decision.decision_name = decryptText(decision.decision_name, encryptedKey);
-            decision.user_statement = decryptText(decision.user_statement, encryptedKey);
+            // ✅ Decrypt main fields
+            decision.decision_name = decryptText(decision.decision_name, key);
+            decision.user_statement = decryptText(decision.user_statement, key);
 
-            // Fetch and decrypt decision reasons
-            const decisionReasonQuery = `
-                SELECT decision_reason_text 
-                FROM techcoach_lite.techcoach_decision_reason 
-                WHERE decision_id = ?`;
+            // Fetch decision reasons
+            const decisionReasons = await conn.query(
+                `SELECT decision_reason_text 
+                 FROM techcoach_lite.techcoach_decision_reason 
+                 WHERE decision_id = ?`,
+                [decision_id]
+            );
 
-            const decisionReasons = await conn.query(decisionReasonQuery, [decision_id]);
-
+            // ✅ Decrypt reasons
             decision.reasons = decisionReasons.map(reason =>
-                decryptText(reason.decision_reason_text, encryptedKey)
+                decryptText(reason.decision_reason_text, key)
             );
 
             decisionDetailsMap.set(decision_id, decision);
         }
 
-        // Extract decision IDs for querying tags
+        // Fetch tags
         const decisionIds = [...decisionDetailsMap.keys()];
 
         if (decisionIds.length > 0) {
-            // Fetch tags associated with the decisions
-            const tagQuery = `
-                SELECT dt.decision_id, t.tag_name, t.tag_type 
-                FROM techcoach_lite.techcoach_decision_tag_linked_info dt
-                JOIN techcoach_lite.techcoach_tag_info t ON dt.tag_id = t.id
-                WHERE dt.decision_id IN (?)`;
+            const decisionTags = await conn.query(
+                `SELECT dt.decision_id, t.tag_name, t.tag_type 
+                 FROM techcoach_lite.techcoach_decision_tag_linked_info dt
+                 JOIN techcoach_lite.techcoach_tag_info t ON dt.tag_id = t.id
+                 WHERE dt.decision_id IN (?)`,
+                [decisionIds]
+            );
 
-            const decisionTags = await conn.query(tagQuery, [decisionIds]);
-
-            // Attach tags to corresponding decisions
             decisionTags.forEach(tag => {
                 const decision = decisionDetailsMap.get(tag.decision_id);
                 if (decision) {
-                    if (!decision.tags) {
-                        decision.tags = [];
-                    }
-                    decision.tags.push({ tag_name: tag.tag_name, tag_type: tag.tag_type });
+                    if (!decision.tags) decision.tags = [];
+                    decision.tags.push({
+                        tag_name: tag.tag_name,
+                        tag_type: tag.tag_type
+                    });
                 }
             });
         }
 
         const decryptedResults = [...decisionDetailsMap.values()];
+
+        await conn.commit();
 
         res.status(200).json({
             message: 'Group members and decisions fetched successfully',
@@ -879,11 +872,12 @@ const getMemberSharedDecisions = async (req, res) => {
             decisionCount: decryptedResults.length
         });
 
-        await conn.commit();
     } catch (error) {
         console.error('Error fetching group members with decisions:', error);
         if (conn) await conn.rollback();
-        res.status(500).json({ error: 'An error occurred while fetching group members and decisions' });
+        res.status(500).json({
+            error: 'An error occurred while fetching group members and decisions'
+        });
     } finally {
         if (conn) conn.release();
     }
