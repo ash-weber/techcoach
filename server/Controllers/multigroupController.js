@@ -442,12 +442,14 @@ const sendDecisionCircleInvitation = async (req, res) => {
 
         const emailPayload = {
             from: {
-                address: "Decision-Coach@www.careersheets.in"
+                address: "noreply@ibacustechlabs.live",
+                name: "Decision Coach"
             },
             to: [
                 {
                     email_address: {
-                        address: email
+                        address: email,
+                        name: "Decision Coach"
                     }
                 }
             ],
@@ -979,7 +981,6 @@ const decisionCirclePostComment = async (req, res) => {
                 console.warn(`Skipping email for ${groupMember.member_name}: No email provided.`);
                 return;  // Skip sending email if the member email is invalid
             }
-
             const htmlBody = `
                 <div style="font-family: Arial, sans-serif; color: #333;">
                     <p>Dear ${groupMember.member_name},</p>
@@ -994,12 +995,14 @@ const decisionCirclePostComment = async (req, res) => {
 
             const emailPayload = {
                 from: {
-                    address: "Decision-Coach@www.careersheets.in"
+                    address: "noreply@ibacustechlabs.live",
+                    name: "Decision Coach"
                 },
                 to: [
                     {
                         email_address: {
-                            address: groupMember.member_email
+                            address: groupMember.member_email?.trim(),
+                            name: groupMember.member_name?.trim()
                         }
                     }
                 ],
@@ -1107,8 +1110,9 @@ const decisionCircleReplyComment = async (req, res) => {
             `;
 
             const emailPayload = {
-                from: { address: "Decision-Coach@www.careersheets.in" },
-                to: [{ email_address: { address: groupMember.member_email } }],
+                from: { address: "noreply@ibacustechlabs.live",
+                    name: "Decision Coach" },
+                to: [{ email_address: { address: groupMember.member_email?.trim(), name: groupMember.member_name?.trim() } }],
                 subject: "New Reply on Your Shared Decision Circle",
                 htmlbody: htmlBody,
             };
