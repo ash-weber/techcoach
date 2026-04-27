@@ -8,13 +8,14 @@ async function sendWelcomeEmail(user) {
 
             const emailPayload = {
                 from: {
-                    address: "Decision-Coach@www.careersheets.in",
+                    address: "noreply@ibacustechlabs.live",
                     name: "Techcoach Lite"
                 },
                 to: [
                     {
                         email_address: {
-                            address: process.env.USER_EMAILNAME
+                            address: process.env.USER_EMAILNAME,
+                            name: "Techcoach Lite"
                         }
                     }
                 ],
@@ -51,10 +52,10 @@ async function sendWelcomeEmail(user) {
 async function sendOtpEmail(email, otp) {
     const emailPayload = {
         from: {
-            address: "Decision-Coach@www.careersheets.in",
+            address: "noreply@ibacustechlabs.live",
             name: "Techcoach Lite"
         },
-        to: [ { email_address: { address: email } } ],
+        to: [ { email_address: { address: email, name: "Techcoach Lite" } } ],
         subject: "Your Verification Code",
         htmlbody: `
             <p>Hello,</p>

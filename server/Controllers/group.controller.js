@@ -993,12 +993,14 @@ const innerCirclePostComment = async (req, res) => {
 
         const emailPayload = {
             from: {
-                address: "Decision-Coach@www.careersheets.in"
+                address: "noreply@ibacustechlabs.live",
+                name: "Decision Coach"
             },
             to: [
                 {
                     email_address: {
-                        address: email
+                        address: email,
+                        name: "Decision Coach"
                     }
                 }
             ],
@@ -1071,12 +1073,14 @@ const innerCircleDecisionShare = async (req, res) => {
 
         const emailPayload = {
             from: {
-                address: "Decision-Coach@www.careersheets.in"
+                address: "noreply@ibacustechlabs.live",
+                name: "Decision Coach"
             },
             to: [
                 {
                     email_address: {
-                        address: memberEmail
+                        address: memberEmail,
+                        name: memberName
                     }
                 }
             ],
@@ -1190,8 +1194,9 @@ const innerCirclePostReply = async (req, res) => {
                           </div>
                               `;
         const emailPayload = {
-            from: { address: "Decision-Coach@www.careersheets.in" },
-            to: [{ email_address: { address: originalCommentPoster?.email } }],
+            from: { address: "noreply@ibacustechlabs.live",
+                name: "Decision Coach" },
+            to: [{ email_address: { address: originalCommentPoster?.email, name: originalCommentPoster?.displayname } }],
             subject: "Reply Posted on Your Shared Decision",
             htmlbody: htmlBody
         };
@@ -1245,8 +1250,9 @@ const innerCircleInvitation = async (req, res) => {
         const [senderDetails] = await conn.query(senderDetailsQuery, [senderId]);
 
         const emailPayload = {
-            from: { address: "Decision-Coach@www.careersheets.in" },
-            to: [{ email_address: { address: email } }],
+            from: { address: "noreply@ibacustechlabs.live",
+                name: "Decision Coach" },
+            to: [{ email_address: { address: email, name: "Decision Coach" } }],
             subject: `Join ${senderDetails.displayname}'s Inner Circle`,
             htmlbody: `<div style="font-family: Arial, sans-serif; color: #333;">
                 <p>Hi ,</p>
@@ -1300,12 +1306,14 @@ const innerCircleAddInvitation = async (req, res) => {
 
         const emailPayload = {
             from: {
-                address: "Decision-Coach@www.careersheets.in"
+                address: "noreply@ibacustechlabs.live",
+                name: "Decision Coach"
             },
             to: [
                 {
                     email_address: {
-                        address: email
+                        address: email,
+                        name: "Decision Coach"
                     }
                 }
             ],
