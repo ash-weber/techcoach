@@ -8,7 +8,7 @@ async function sendWelcomeEmail(user) {
 
             const emailPayload = {
                 from: {
-                    address: "noreply@ibacustechlabs.live",
+                    address: "noreply@ibacustechlabs.in",
                     name: "Techcoach Lite"
                 },
                 to: [
@@ -52,7 +52,7 @@ async function sendWelcomeEmail(user) {
 async function sendOtpEmail(email, otp) {
     const emailPayload = {
         from: {
-            address: "noreply@ibacustechlabs.live",
+            address: "noreply@ibacustechlabs.in",
             name: "Techcoach Lite"
         },
         to: [ { email_address: { address: email, name: "Techcoach Lite" } } ],

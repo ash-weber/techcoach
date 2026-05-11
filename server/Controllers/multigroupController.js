@@ -442,7 +442,7 @@ const sendDecisionCircleInvitation = async (req, res) => {
 
         const emailPayload = {
             from: {
-                address: "noreply@ibacustechlabs.live",
+                address: "noreply@ibacustechlabs.in",
                 name: "Decision Coach"
             },
             to: [
@@ -995,7 +995,7 @@ const decisionCirclePostComment = async (req, res) => {
 
             const emailPayload = {
                 from: {
-                    address: "noreply@ibacustechlabs.live",
+                    address: "noreply@ibacustechlabs.in",
                     name: "Decision Coach"
                 },
                 to: [
@@ -1110,7 +1110,7 @@ const decisionCircleReplyComment = async (req, res) => {
             `;
 
             const emailPayload = {
-                from: { address: "noreply@ibacustechlabs.live",
+                from: { address: "noreply@ibacustechlabs.in",
                     name: "Decision Coach" },
                 to: [{ email_address: { address: groupMember.member_email?.trim(), name: groupMember.member_name?.trim() } }],
                 subject: "New Reply on Your Shared Decision Circle",

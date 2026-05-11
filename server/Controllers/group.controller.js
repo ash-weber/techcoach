@@ -993,7 +993,7 @@ const innerCirclePostComment = async (req, res) => {
 
         const emailPayload = {
             from: {
-                address: "noreply@ibacustechlabs.live",
+                address: "noreply@ibacustechlabs.in",
                 name: "Decision Coach"
             },
             to: [
@@ -1073,7 +1073,7 @@ const innerCircleDecisionShare = async (req, res) => {
 
         const emailPayload = {
             from: {
-                address: "noreply@ibacustechlabs.live",
+                address: "noreply@ibacustechlabs.in",
                 name: "Decision Coach"
             },
             to: [
@@ -1194,7 +1194,7 @@ const innerCirclePostReply = async (req, res) => {
                           </div>
                               `;
         const emailPayload = {
-            from: { address: "noreply@ibacustechlabs.live",
+            from: { address: "noreply@ibacustechlabs.in",
                 name: "Decision Coach" },
             to: [{ email_address: { address: originalCommentPoster?.email, name: originalCommentPoster?.displayname } }],
             subject: "Reply Posted on Your Shared Decision",
@@ -1250,7 +1250,7 @@ const innerCircleInvitation = async (req, res) => {
         const [senderDetails] = await conn.query(senderDetailsQuery, [senderId]);
 
         const emailPayload = {
-            from: { address: "noreply@ibacustechlabs.live",
+            from: { address: "noreply@ibacustechlabs.in",
                 name: "Decision Coach" },
             to: [{ email_address: { address: email, name: "Decision Coach" } }],
             subject: `Join ${senderDetails.displayname}'s Inner Circle`,
@@ -1306,7 +1306,7 @@ const innerCircleAddInvitation = async (req, res) => {
 
         const emailPayload = {
             from: {
-                address: "noreply@ibacustechlabs.live",
+                address: "noreply@ibacustechlabs.in",
                 name: "Decision Coach"
             },
             to: [
