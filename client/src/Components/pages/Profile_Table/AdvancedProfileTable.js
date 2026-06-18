@@ -189,9 +189,6 @@ import axios from 'axios';
 import withAuth from '../../withAuth';
 
 
-// Function to validate only alphabets and spaces (no numbers/special characters)
-const isValidText = (text) => /^[A-Za-z\s]+$/.test(text.trim());
-
 const AdvancedProfileTable = () => {
     const [formsData, setFormsData] = useState({
         goals: [''],
@@ -322,17 +319,12 @@ const AdvancedProfileTable = () => {
         const token = localStorage.getItem('token');
         const { goals, values, resolutions, constraints, otherFactors } = formsData;
 
-        // Validate inputs
+        // Validate required inputs
         const fieldsToValidate = { goals, values, resolutions, constraints, otherFactors };
         for (const [key, values] of Object.entries(fieldsToValidate)) {
             for (let val of values) {
                 if (!val.trim()) {
                     toast.error(`${displayNames[key]} cannot be empty.`); //  Empty check
-                    setLoading(false);
-                    return;
-                }
-                if (!isValidText(val)) {
-                    toast.error(`${displayNames[key]} must contain only letters and spaces.`); //  Format check
                     setLoading(false);
                     return;
                 }
@@ -398,7 +390,7 @@ const AdvancedProfileTable = () => {
   id={`${type}-${index}`}
   type='text'
   value={item}
-  placeholder={`Enter your ${displayNames[type].toLowerCase()}... (letters only)`}
+  placeholder={`Enter your ${displayNames[type].toLowerCase()}...`}
   onChange={(e) => handleChange(type, index, e.target.value)}
 />
 
