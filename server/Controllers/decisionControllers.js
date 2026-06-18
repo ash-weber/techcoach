@@ -509,13 +509,22 @@ const deleteInfo = async (req, res) => {
     );
 
     await conn.query(
+      "DELETE FROM techcoach_lite.techcoach_shared_decisions WHERE decisionId = ?",
+      [id]
+    );
+
+    await conn.query(
+      "DELETE FROM techcoach_lite.techcoach_conversations WHERE decisionId = ?",
+      [id]
+    );
+
+    await conn.query(
       "DELETE FROM techcoach_lite.techcoach_decision WHERE decision_id = ?",
       [id]
     );
 
     // Commit transaction and send success response
     await conn.commit();
-    if (conn) conn.release() 
 
     res.status(200).json({ message: 'Data deleted successfully' });
 
