@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Card, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Grid, Box, CircularProgress, Button } from '@mui/material';
-import { AssignmentTurnedIn, HourglassEmpty, Share } from '@mui/icons-material';
+import { AssignmentTurnedIn, HourglassEmpty, Insights, Share } from '@mui/icons-material';
 import ModelTrainingIcon from '@mui/icons-material/ModelTraining';
 import { getSharedDecisionDetails } from '../../Group/Network_Call';
 import './Nav.css';
@@ -142,7 +142,7 @@ useEffect(() => {
   return (
     <div style={{ maxWidth: "95%", display: "flex", flexDirection: "column", gap: "1rem", margin: "3rem" }}>
       <Grid container spacing={4}>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={4}>
           <CustomCard
             icon={<AssignmentTurnedIn />}
             title="Total Decisions"
@@ -150,7 +150,7 @@ useEffect(() => {
             onClick={navigateToTotalDecisions}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={4}>
           <CustomCard
             icon={<HourglassEmpty />}
             title="Pending Decisions"
@@ -158,7 +158,7 @@ useEffect(() => {
             onClick={togglePendingDecisions}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={4}>
           <CustomCard
             icon={<ModelTrainingIcon />}
             title="Shared with me"
@@ -167,7 +167,7 @@ useEffect(() => {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={4}>
           <CustomCard
             icon={<Share />}
             title="Shared by me"
@@ -176,11 +176,20 @@ useEffect(() => {
           />
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid item xs={12} sm={6} md={4}>
           <CustomCard
             icon={<MdFormatListBulletedAdd style={{ fontSize: "30px" }} />}
             title="Log a Decision"
             onClick={navigateToDecision}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={4}>
+          <CustomCard
+            icon={<Insights style={{ fontSize: "30px" }} />}
+            title="Insights"
+            onClick={() =>
+              window.open("https://decision-coach-insights.onrender.com/login", "_blank", "noopener,noreferrer")
+            }
           />
         </Grid>
       

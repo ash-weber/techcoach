@@ -109,6 +109,7 @@ const Header = () => {
                                     <li className="nav-item">
                                         <Link to='/innerCircleDisplay' className="nav-link">Inner Circle</Link>
                                     </li>
+
                                     <li className="nav-item" style={{ marginRight: "0.5rem" }}>
                                         <Link to='/notification' className="nav-link position-relative">
                                             Notifications
@@ -120,6 +121,8 @@ const Header = () => {
                                             )}
                                         </Link>
                                     </li>
+
+                                    
 
                                     <li className="nav-item dropdown">
                                         <a className="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -139,6 +142,9 @@ const Header = () => {
                                                 <Link to='/' onClick={handleLogout} className="dropdown-item">Logout</Link>
                                             </li>
                                         </ul>
+                                    </li>
+                                    <li className="nav-item">
+                                        <Link to='https://decision-coach-insights.onrender.com/login' className="nav-link" target="_blank" >Insights</Link>
                                     </li>
                                 </>
                             ) : (
