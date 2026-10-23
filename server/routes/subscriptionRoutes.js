@@ -1,79 +1,74 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { createSubscription, getSubscriptionDetails } = require('../Services/paypalService');
-const getConnection = require('../Models/database');
+const {
+  createSubscription,
+  getSubscriptionDetails,
+  createOneTimeOrder,
+  captureOneTimeOrder,
+} = require("../Services/paypalService");
+const getConnection = require("../Models/database");
 
 const ensureAuth = (req, res, next) => {
   if (!req.user) {
-    return res.status(401).json({ message: 'Unauthorized' });
+    return res.status(401).json({ message: "Unauthorized" });
   }
   next();
 };
 
-router.post('/create', ensureAuth, async (req, res) => {
+router.post("/create", ensureAuth, async (req, res) => {
   try {
     const subscription = await createSubscription(process.env.PAYPAL_PLAN_ID);
 
     const approvalLink = subscription.links.find(
-      link => link.rel === 'approve'
+      (link) => link.rel === "approve",
     );
 
     if (!approvalLink) {
-      return res.status(500).json({ error: 'Approval link not found' });
+      return res.status(500).json({ error: "Approval link not found" });
     }
 
     res.json({
-      approvalUrl: approvalLink.href
+      approvalUrl: approvalLink.href,
     });
-
   } catch (err) {
-    console.error('PayPal subscription error:', err.response?.data || err);
-    res.status(500).json({ error: 'PayPal subscription failed' });
+    console.error("PayPal subscription error:", err.response?.data || err);
+    res.status(500).json({ error: "PayPal subscription failed" });
   }
 });
 
-router.post('/confirm', ensureAuth, async (req, res) => {
-
+router.post("/confirm", ensureAuth, async (req, res) => {
   let conn;
 
   try {
-
     const { subscriptionId } = req.body;
 
     const details = await getSubscriptionDetails(subscriptionId);
 
-    if (!['ACTIVE', 'APPROVAL_PENDING'].includes(details.status)) {
-
+    if (!["ACTIVE", "APPROVAL_PENDING"].includes(details.status)) {
       return res.status(400).json({
-        error: 'Subscription not valid',
-        status: details.status
+        error: "Subscription not valid",
+        status: details.status,
       });
-
     }
 
     // ✅ Convert ISO date → MySQL DATETIME
     const convertPaypalDate = (paypalDate) => {
-
       if (!paypalDate) return null;
 
-      return new Date(paypalDate)
-        .toISOString()
-        .slice(0, 19)
-        .replace('T', ' ');
+      return new Date(paypalDate).toISOString().slice(0, 19).replace("T", " ");
     };
 
     const nextBillingTime = convertPaypalDate(
-      details.billing_info?.next_billing_time
+      details.billing_info?.next_billing_time,
     );
 
     const lastPaymentTime = convertPaypalDate(
-      details.billing_info?.last_payment?.time
+      details.billing_info?.last_payment?.time,
     );
 
     conn = await getConnection();
 
     await conn.query(
-
       `INSERT INTO techcoach_lite.user_subscription
       (user_id, paypal_subscription_id, status, next_billing_time, last_payment_time)
       VALUES (?, ?, ?, ?, ?)
@@ -88,38 +83,27 @@ router.post('/confirm', ensureAuth, async (req, res) => {
         subscriptionId,
         details.status,
         nextBillingTime,
-        lastPaymentTime
-      ]
-
+        lastPaymentTime,
+      ],
     );
 
     res.json({ success: true });
-
-  }
-  catch (error) {
-
+  } catch (error) {
     console.error(error);
 
     res.status(500).json({
-      error: 'Subscription confirmation failed',
-      details: error.message
+      error: "Subscription confirmation failed",
+      details: error.message,
     });
-
-  }
-  finally {
-
+  } finally {
     if (conn) conn.release();
-
   }
-
 });
 
-router.get('/status', ensureAuth, async (req, res) => {
-
+router.get("/status", ensureAuth, async (req, res) => {
   let conn;
 
   try {
-
     conn = await getConnection();
 
     const rows = await conn.query(
@@ -133,16 +117,14 @@ router.get('/status', ensureAuth, async (req, res) => {
        WHERE user_id = ?
        ORDER BY updated_at DESC
        LIMIT 1`,
-      [req.user.id]
+      [req.user.id],
     );
 
     if (!rows.length) {
-
       return res.json({
         isSubscribed: false,
-        status: "INACTIVE"
+        status: "INACTIVE",
       });
-
     }
 
     const sub = rows[0];
@@ -156,21 +138,63 @@ router.get('/status', ensureAuth, async (req, res) => {
       isSubscribed,
       status: sub.status,
       lastPaymentTime: sub.last_payment_time,
-      nextBillingTime: sub.next_billing_time
+      nextBillingTime: sub.next_billing_time,
     });
-
-  }
-  catch (err) {
-
+  } catch (err) {
     res.status(500).json({ error: err.message });
-
-  }
-  finally {
-
+  } finally {
     if (conn) conn.release();
-
   }
+});
+router.post("/orders/create", ensureAuth, async (req, res) => {
+  try {
+    const orderPayload = req.body;
+    const order = await createOneTimeOrder(orderPayload);
+    res.json({ id: order.id });
+  } catch (err) {
+    console.error("Order creation error:", err.response?.data || err.message);
+    res.status(500).json({ error: "Failed to create PayPal order" });
+  }
+});
 
+router.post("/orders/:orderId/capture", ensureAuth, async (req, res) => {
+  let conn;
+  try {
+    const { orderId } = req.params;
+    const captureData = await captureOneTimeOrder(orderId);
+
+    if (captureData.status === "COMPLETED") {
+      conn = await getConnection();
+      const nextBillingTime = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .slice(0, 19)
+        .replace("T", " ");
+
+      const lastPaymentTime = new Date()
+        .toISOString()
+        .slice(0, 19)
+        .replace("T", " ");
+
+      await conn.query(
+        `INSERT INTO techcoach_lite.user_subscription
+        (user_id, paypal_subscription_id, status, next_billing_time, last_payment_time)
+        VALUES (?, ?, 'ACTIVE', ?, ?)
+        ON DUPLICATE KEY UPDATE
+        paypal_subscription_id = VALUES(paypal_subscription_id),
+        status = 'ACTIVE',
+        next_billing_time = VALUES(next_billing_time),
+        last_payment_time = VALUES(last_payment_time)`,
+        [req.user.id, `ONETIME_${orderId}`, nextBillingTime, lastPaymentTime],
+      );
+    }
+
+    res.json(captureData);
+  } catch (err) {
+    console.error("Order capture error:", err.response?.data || err.message);
+    res.status(500).json({ error: "Failed to capture payment" });
+  } finally {
+    if (conn) conn.release();
+  }
 });
 
 module.exports = router;

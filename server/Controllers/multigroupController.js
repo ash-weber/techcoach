@@ -207,7 +207,7 @@ const getdecisionCirclesByUser = async (req, res) => {
     }
 };
 
-const getdecisionCirclesByUserAndMember = async (req, res) => {
+/* const getdecisionCirclesByUserAndMember = async (req, res) => {
     const user_id = req.user.id;
 
     if (!user_id) {
@@ -256,7 +256,110 @@ const getdecisionCirclesByUserAndMember = async (req, res) => {
     } finally {
         if (conn) conn.release();
     }
+}; */
+
+
+const getdecisionCirclesByUserAndMember = async (req, res) => {
+    const user_id = req.user.id;
+
+    if (!user_id) {
+        return res.status(400).json({
+            error: 'User ID is required.'
+        });
+    }
+
+    let conn;
+
+    try {
+        conn = await getConnection();
+
+        const groups = await conn.query(
+            `SELECT
+                g.id AS group_id,
+                g.group_name,
+                g.type_of_group,
+                g.created_at,
+                g.created_by AS group_creator_id,
+                creator.displayname AS creator_displayname,
+                creator.email AS creator_email,
+
+                m.member_id,
+                u.displayname AS member_displayname,
+                u.email AS member_email,
+                m.status AS member_status
+
+            FROM techcoach_lite.techcoach_groups g
+
+            LEFT JOIN techcoach_lite.techcoach_users creator
+                ON g.created_by = creator.user_id
+
+            LEFT JOIN techcoach_lite.techcoach_group_members m
+                ON g.id = m.group_id
+
+            LEFT JOIN techcoach_lite.techcoach_users u
+                ON m.member_id = u.user_id
+
+            WHERE
+                (g.created_by = ? OR g.id IN (
+                    SELECT gm.group_id
+                    FROM techcoach_lite.techcoach_group_members gm
+                    WHERE gm.member_id = ?
+                ))
+                AND g.type_of_group = 'decision_circle'
+
+            ORDER BY g.id, m.member_id`,
+            [user_id, user_id]
+        );
+
+        // Group all member rows under their respective decision circles
+        const groupMap = new Map();
+
+        for (const row of groups) {
+            if (!groupMap.has(row.group_id)) {
+                groupMap.set(row.group_id, {
+                    group_id: row.group_id,
+                    group_name: row.group_name,
+                    type_of_group: row.type_of_group,
+                    created_at: row.created_at,
+                    group_creator_id: row.group_creator_id,
+                    creator_displayname: row.creator_displayname,
+                    creator_email: row.creator_email,
+                    members: []
+                });
+            }
+
+            // Add every associated member to this group
+            if (row.member_id !== null) {
+                groupMap.get(row.group_id).members.push({
+                    member_id: row.member_id,
+                    member_displayname: row.member_displayname,
+                    member_email: row.member_email,
+                    status: row.member_status
+                });
+            }
+        }
+
+        const result = Array.from(groupMap.values());
+
+        return res.status(200).json({
+            groups: result
+        });
+
+    } catch (error) {
+        console.error(
+            'Error fetching decision circles:',
+            error.message
+        );
+
+        return res.status(500).json({
+            error: 'An error occurred while fetching the decision circles.'
+        });
+
+    } finally {
+        if (conn) conn.release();
+    }
 };
+
 
 // const getAllGroups = async (req, res) => {
 //     let conn;

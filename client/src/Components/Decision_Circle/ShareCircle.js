@@ -132,7 +132,7 @@ const ShareCircle = () => {
             </Box>
             <div>
                 <Button sx={{ mb: 2, p: 2, bgcolor: "#526D82", borderRadius: 2, display: "flex", justifyContent: "center", width: "100%" }} variant="contained" onClick={handleShowShareOptions}>
-                    Share Above the Decision
+                    Share Above Decision
                 </Button>
             </div>
 

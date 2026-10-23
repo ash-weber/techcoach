@@ -5,6 +5,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './Decision.css';
 import withAuth from '../../withAuth';
+import { notifyTeamsChannel } from '../../../Utility/teamsWebhook';
 
 const Decision = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -216,14 +217,21 @@ const Decision = () => {
       decision_reason: decision_reason.map(reason => ({ decision_reason_text: reason })),
     };
 
+
     try {
       if (!id) {
         await axios.post(`${process.env.REACT_APP_API_URL}/api/details`, data);
+
+        await notifyTeamsChannel('CREATED', data);
+
         toast.success("Decision added successfully");
         console.log("Decision added Successfully", formData);
-        setIsDataSaved(true); // Update state to indicate data has been saved
+        setIsDataSaved(true); 
       } else {
         await axios.put(`${process.env.REACT_APP_API_URL}/api/details/${id}`, data);
+
+        await notifyTeamsChannel('UPDATED', data);
+
         toast.success("Decision updated successfully");
         console.log("Decision updated Successfully", formData);
         setIsDataSaved(true); // Update state to indicate data has been saved

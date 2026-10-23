@@ -1,60 +1,67 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
+import React from "react";
+import { useState, useEffect } from "react";
 // import { FaEye } from "react-icons/fa";
 // import { IoMdEyeOff } from "react-icons/io";
-import axios from 'axios';
-import './Login.css';
-import Test from './assets/testimonial.png';
-import Test1 from './assets/testimonial2.png';
+import axios from "axios";
+import "./Login.css";
+import Test from "./assets/testimonial.png";
+import Test1 from "./assets/testimonial2.png";
 
 const Home = () => {
-    const [mode, setMode] = useState('login');
-    
-    const [isLoading, setIsLoading] = useState(false);
+  const [mode, setMode] = useState("login");
 
-    // Commented email/password related state
-    // const [email, setEmail] = useState('');
-    // const [password, setPassword] = useState('');
-    // const [username, setUsername] = useState('');
-    // const [otp, setOtp] = useState('');
-    
-    // const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-    useEffect(() => {
-        // Commented reset logic for email/password
-        // setUsername('');
-        // setEmail('');
-        // setPassword('');
-        // setOtp('');
-        // setIsPasswordVisible(false); 
-    }, [mode]); 
+  // Commented email/password related state
+  // const [email, setEmail] = useState('');
+  // const [password, setPassword] = useState('');
+  // const [username, setUsername] = useState('');
+  // const [otp, setOtp] = useState('');
 
-    // Commented password visibility toggle
-    /*
+  // const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
+  useEffect(() => {
+    // Commented reset logic for email/password
+    // setUsername('');
+    // setEmail('');
+    // setPassword('');
+    // setOtp('');
+    // setIsPasswordVisible(false);
+  }, [mode]);
+
+  // Commented password visibility toggle
+  /*
     const togglePasswordVisibility = () => {
         setIsPasswordVisible(!isPasswordVisible);
     };
     */
 
-    // Google login (ACTIVE)
-    const loginwithgoogle = () => {
-        window.open(`${process.env.REACT_APP_API_URL}/auth/google`, '_self');
-    };
+  // Google login (ACTIVE)
+  const loginwithgoogle = () => {
+    window.open(`${process.env.REACT_APP_API_URL}/auth/google`, "_self");
+  };
 
-    // Generic API handler (keep if needed later)
-    const handleApiCall = async (apiCall) => {
-        setIsLoading(true);
-        try {
-            await apiCall();
-        } catch (error) {
-            alert('Operation Failed: ' + (error.response?.data?.message || 'Server error'));
-        } finally {
-            setIsLoading(false);
-        }
-    };
+  const loginWithMicrosoft = () => {
+    window.open(`${process.env.REACT_APP_API_URL}/auth/microsoft`, "_self");
+  };
 
-    // Commented email/password login
-    /*
+  // Generic API handler (keep if needed later)
+  const handleApiCall = async (apiCall) => {
+    setIsLoading(true);
+    try {
+      await apiCall();
+    } catch (error) {
+      alert(
+        "Operation Failed: " +
+          (error.response?.data?.message || "Server error"),
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Commented email/password login
+  /*
     const handleLogin = (e) => {
         e.preventDefault();
         handleApiCall(async () => {
@@ -66,8 +73,8 @@ const Home = () => {
     };
     */
 
-    // Commented register
-    /*
+  // Commented register
+  /*
     const handleRegister = (e) => {
         e.preventDefault();
         handleApiCall(async () => {
@@ -78,8 +85,8 @@ const Home = () => {
     };
     */
 
-    // Commented OTP verification
-    /*
+  // Commented OTP verification
+  /*
     const handleVerifyOtp = (e) => {
         e.preventDefault();
         handleApiCall(async () => {
@@ -91,51 +98,59 @@ const Home = () => {
     };
     */
 
-    return (
-        <div className='home-container'>
-            <div className='login-page'>
-                <div className='form'>
-                    <h1>Login</h1>
-                    {/* Only Google Login Button */}
-                    <button 
-                        type="button" 
-                        className='login-with-google-btn' 
-                        onClick={loginwithgoogle}
-                        disabled={isLoading}
-                    >
-                        {isLoading ? 'Redirecting...' : 'Sign in with Google'}
-                    </button>
+  return (
+    <div className="home-container">
+      <div className="login-page">
+        <div className="form">
+          <h1>Login</h1>
+          {/* Only Google Login Button */}
+          <button
+            type="button"
+            className="login-with-google-btn"
+            onClick={loginwithgoogle}
+            disabled={isLoading}
+          >
+            {isLoading ? "Redirecting..." : "Sign in with Google"}
+          </button>
 
-                    {/* Commented Login Form */}
-                    {/*
+          <button
+            type="button"
+            className="login-with-google-btn"
+            onClick={loginWithMicrosoft}
+            disabled={isLoading}
+          >
+            {isLoading ? "Redirecting..." : "Sign in with Microsoft"}
+          </button>
+
+          {/* Commented Login Form */}
+          {/*
                     <form className="login-form" onSubmit={handleLogin}>
                         ...
                     </form>
                     */}
 
-                    {/* Commented Register Form */}
-                    {/*
+          {/* Commented Register Form */}
+          {/*
                     <form className="register-form" onSubmit={handleRegister}>
                         ...
                     </form>
                     */}
 
-                    {/* Commented OTP Form */}
-                    {/*
+          {/* Commented OTP Form */}
+          {/*
                     <form className="otp-form" onSubmit={handleVerifyOtp}>
                         ...
                     </form>
                     */}
-
-                </div>
-            </div>
-
-            <div className='test'>
-                <img src={Test} alt='Testimonial' className='testimonial' />
-                <img src={Test1} alt='Testimonial' className='testimonial2' />
-            </div>
         </div>
-    );
+      </div>
+
+      <div className="test">
+        <img src={Test} alt="Testimonial" className="testimonial" />
+        <img src={Test1} alt="Testimonial" className="testimonial2" />
+      </div>
+    </div>
+  );
 };
 
 export default Home;

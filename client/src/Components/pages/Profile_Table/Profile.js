@@ -1,15 +1,28 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Link, useNavigate } from 'react-router-dom';
-import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 import { FaUserEdit } from "react-icons/fa";
-import { ToastContainer, toast } from 'react-toastify';
-import withAuth from '../../withAuth';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
-import './Profile.css';
-
+import { ToastContainer, toast } from "react-toastify";
+import withAuth from "../../withAuth";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import "./Profile.css";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  Divider,
+  Box,
+  Typography
+} from '@mui/material';
+import GooglePayButton from './GooglePayButton';
 
 const Profile = () => {
   const [formData, setFormData] = useState({});
@@ -20,46 +33,73 @@ const Profile = () => {
     isSubscribed: false,
     status: "INACTIVE",
     lastPaymentTime: null,
-    nextBillingTime: null
+    nextBillingTime: null,
   });
 
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
   const navigate = useNavigate();
 
+  const [openPaymentModal, setOpenPaymentModal] = useState(false);
+  const [paymentType, setPaymentType] = useState("recurring"); // 'recurring' | 'onetime'
+
+  const handlePaymentSuccess = () => {
+    toast.success("Payment completed successfully!");
+    setOpenPaymentModal(false);
+    setTimeout(() => window.location.reload(), 1500);
+  };
+
+  const handlePaymentError = (err) => {
+    toast.error(
+      err.response?.data?.error || "Payment failed. Please try again.",
+    );
+  };
+
   useEffect(() => {
     const loadData = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const userResp = await axios.get(`${process.env.REACT_APP_API_URL}/api/user/profile`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        const user = userResp.data.tasks && userResp.data.tasks.length ? userResp.data.tasks[0] : {};
-        console.log('asas', userResp);
+        const token = localStorage.getItem("token");
+        const userResp = await axios.get(
+          `${process.env.REACT_APP_API_URL}/api/user/profile`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+        const user =
+          userResp.data.tasks && userResp.data.tasks.length
+            ? userResp.data.tasks[0]
+            : {};
+        console.log("asas", userResp);
         setUserData(user);
 
-        const formResp = await axios.get(`${process.env.REACT_APP_API_URL}/api/user/data`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+        const formResp = await axios.get(
+          `${process.env.REACT_APP_API_URL}/api/user/data`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
         setFormData(formResp.data);
-        console.log('Fetched profile data:', formResp.data);
+        console.log("Fetched profile data:", formResp.data);
 
-        const decisionsResp = await axios.get(`${process.env.REACT_APP_API_URL}/api/`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+        const decisionsResp = await axios.get(
+          `${process.env.REACT_APP_API_URL}/api/`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
 
         const subResp = await axios.get(
           `${process.env.REACT_APP_API_URL}/api/subscription/status`,
           {
             headers: {
-              Authorization: `Bearer ${token}`
-            }
-          }
+              Authorization: `Bearer ${token}`,
+            },
+          },
         );
 
         setSubscription(subResp.data);
@@ -70,7 +110,7 @@ const Profile = () => {
         }
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching data:', error.message);
+        console.error("Error fetching data:", error.message);
         setLoading(false);
       }
     };
@@ -79,9 +119,7 @@ const Profile = () => {
   }, []);
 
   const startSubscription = async () => {
-
     try {
-
       setSubscriptionLoading(true);
 
       const token = localStorage.getItem("token");
@@ -91,29 +129,24 @@ const Profile = () => {
         {},
         {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+            Authorization: `Bearer ${token}`,
+          },
+        },
       );
 
       window.location.href = res.data.approvalUrl;
-
-    }
-    catch {
-
+    } catch {
       toast.error("Failed to start subscription");
 
       setSubscriptionLoading(false);
-
     }
-
   };
 
   const renderLines = (data) => {
     if (Array.isArray(data)) {
       return data.map((item, index) => (
         <div key={index} className="profile-line">
-          {item.value ? item.value.trim() : ''}
+          {item.value ? item.value.trim() : ""}
         </div>
       ));
     }
@@ -121,66 +154,102 @@ const Profile = () => {
   };
 
   const handleDeleteAccount = async () => {
-    const confirmation = window.confirm("Are you sure you want to delete your account? Your data is protected through Encryption. At any point you want us to delete your data, you can use the delete account option. We recommend that you download a copy of the data before you delete your account This action cannot be undone.");
+    const confirmation = window.confirm(
+      "Are you sure you want to delete your account? Your data is protected through Encryption. At any point you want us to delete your data, you can use the delete account option. We recommend that you download a copy of the data before you delete your account This action cannot be undone.",
+    );
     if (confirmation) {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
         await axios.delete(`${process.env.REACT_APP_API_URL}/api/user/data`, {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
-        localStorage.removeItem('token');
+        localStorage.removeItem("token");
         window.location.reload();
         navigate("/");
       } catch (error) {
-        console.error('Error deleting account:', error.message);
+        console.error("Error deleting account:", error.message);
       }
     }
   };
 
   const handleDownloadData = () => {
-    const decisionData = decisions.map(decision => ({
-      'Decision Name': decision.decision_name,
-      'Decision Due Date': new Date(decision.decision_due_date).toLocaleDateString(),
-      'Decision Taken Date': decision.decision_taken_date ? new Date(decision.decision_taken_date).toLocaleDateString() : '--',
-      'Decision Details': decision.user_statement,
-      'Tags': decision.tags ? decision.tags.map(tag => tag.tag_name).join(', ') : '',
-      'Decision Reasons': decision.decision_reason ? decision.decision_reason.map(reason => reason.decision_reason_text).join(', ') : ''
+    const decisionData = decisions.map((decision) => ({
+      "Decision Name": decision.decision_name,
+      "Decision Due Date": new Date(
+        decision.decision_due_date,
+      ).toLocaleDateString(),
+      "Decision Taken Date": decision.decision_taken_date
+        ? new Date(decision.decision_taken_date).toLocaleDateString()
+        : "--",
+      "Decision Details": decision.user_statement,
+      Tags: decision.tags
+        ? decision.tags.map((tag) => tag.tag_name).join(", ")
+        : "",
+      "Decision Reasons": decision.decision_reason
+        ? decision.decision_reason
+            .map((reason) => reason.decision_reason_text)
+            .join(", ")
+        : "",
     }));
 
     const worksheetDecisions = XLSX.utils.json_to_sheet(decisionData);
 
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheetDecisions, 'Decisions Data');
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheetDecisions,
+      "Decisions Data",
+    );
 
-    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-    const data = new Blob([excelBuffer], { type: 'application/octet-stream' });
-    saveAs(data, 'decisions_data.xlsx');
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+    const data = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(data, "decisions_data.xlsx");
     if (data) {
-      toast('downloaded successfully')
+      toast("downloaded successfully");
     }
   };
-
 
   const handleDownloadProfile = () => {
     const doc = new jsPDF();
 
     doc.setFontSize(20);
-    doc.text('Profile Data:', 20, 20);
+    doc.text("Profile Data:", 20, 20);
 
     const extractData = (data) => {
       if (Array.isArray(data)) {
-        return data.map(item => (item.value ? item.value.trim() : '')).join('\n\n');
+        return data
+          .map((item) => (item.value ? item.value.trim() : ""))
+          .join("\n\n");
       }
-      return data ? data.trim() : 'N/A';
+      return data ? data.trim() : "N/A";
     };
 
     const profileData = [
-      { category: 'Strength', details: extractData(formData.strength), color: [13, 97, 16] },
-      { category: 'Weakness', details: extractData(formData.weakness), color: [41, 128, 185] },
-      { category: 'Opportunity', details: extractData(formData.opportunity), color: [153, 77, 28] },
-      { category: 'Threat', details: extractData(formData.threat), color: [165, 42, 42] }
+      {
+        category: "Strength",
+        details: extractData(formData.strength),
+        color: [13, 97, 16],
+      },
+      {
+        category: "Weakness",
+        details: extractData(formData.weakness),
+        color: [41, 128, 185],
+      },
+      {
+        category: "Opportunity",
+        details: extractData(formData.opportunity),
+        color: [153, 77, 28],
+      },
+      {
+        category: "Threat",
+        details: extractData(formData.threat),
+        color: [165, 42, 42],
+      },
     ];
 
     let yPos = 40;
@@ -193,135 +262,118 @@ const Profile = () => {
       const rowIndex = Math.floor(index / 2);
       const colIndex = index % 2;
 
-      const xPos = 20 + (colIndex * (cellWidth + colSpacing));
+      const xPos = 20 + colIndex * (cellWidth + colSpacing);
 
       // Set cell properties
       doc.setFontSize(16);
-      doc.setFont('helvetica', 'bold');
+      doc.setFont("helvetica", "bold");
       doc.setTextColor(item.color[0], item.color[1], item.color[2]);
-      doc.text(item.category, xPos, yPos + (rowIndex * (cellHeight + rowSpacing)) - 10);
+      doc.text(
+        item.category,
+        xPos,
+        yPos + rowIndex * (cellHeight + rowSpacing) - 10,
+      );
 
       // Create autoTable for each cell
       doc.autoTable({
-        startY: yPos + (rowIndex * (cellHeight + rowSpacing)),
+        startY: yPos + rowIndex * (cellHeight + rowSpacing),
         margin: { left: xPos },
         head: [[item.category]],
-        body: item.details.split('\n\n').map(detail => [detail]),
-        theme: 'grid',
+        body: item.details.split("\n\n").map((detail) => [detail]),
+        theme: "grid",
         headStyles: {
           fillColor: item.color,
           textColor: [255, 255, 255],
-          fontStyle: 'bold'
+          fontStyle: "bold",
         },
         styles: {
           cellPadding: 4,
-          textColor: 'black',
+          textColor: "black",
           fontSize: 12,
-          valign: 'middle',
+          valign: "middle",
           lineWidth: 0.1,
-          cellWidth: cellWidth - 10
+          cellWidth: cellWidth - 10,
         },
         alternateRowStyles: { fillColor: [240, 240, 240] },
         rowStyles: {
           0: { fillColor: [240, 240, 240] },
-          1: { fillColor: [245, 230, 235] }
-        }
+          1: { fillColor: [245, 230, 235] },
+        },
       });
     });
 
-    doc.save('profile_data.pdf');
-    toast('Profile data downloaded successfully');
+    doc.save("profile_data.pdf");
+    toast("Profile data downloaded successfully");
   };
 
   if (loading) {
     return (
       <div className="loading-spinner">
-        <div className='spinner'></div>
+        <div className="spinner"></div>
       </div>
     );
   }
 
   return (
     <div className="card1">
-      <div >
+      <div>
         <h3>Profile</h3>
         <div className="profile-top-section">
-
           {/* Profile Picture */}
           <div className="profile-picture-container">
-
             {userData.profilePicture ? (
-
               <img
                 src={userData.profilePicture}
                 alt="Profile"
                 className="profile-picture"
               />
-
             ) : (
-
               <div className="profile-placeholder">
                 {userData.displayname?.charAt(0).toUpperCase()}
               </div>
-
             )}
-
           </div>
-
 
           {/* User Basic Info */}
           <div className="profile-basic-info">
-
             <h3 className="profile-name">
               {userData.displayname
-                ? userData.displayname.charAt(0).toUpperCase() + userData.displayname.slice(1)
+                ? userData.displayname.charAt(0).toUpperCase() +
+                  userData.displayname.slice(1)
                 : ""}
             </h3>
 
-            <p className="profile-email">
-              {userData.email}
-            </p>
+            <p className="profile-email">{userData.email}</p>
 
-            <div className='details'>
-              
-              <Link to='/profiletab'>
-              Edit Profile
-              </Link>
+            <div className="details">
+              <Link to="/profiletab">Edit Profile</Link>
             </div>
-
           </div>
-
 
           {/* Linked Decisions Button */}
           <div className="profile-action-container">
-
             <Link to="/getall" className="linked-decisions-btn">
-
               View Linked Decisions
-
             </Link>
-
           </div>
-
         </div>
         <div className="profile-header-container">
-
           <div className="subscription-card">
-
             <h3>Subscription</h3>
 
             <div className="subscription-row">
               <span>Status:</span>
 
-              <span className={
-                subscription.isSubscribed
-                  ? "status-active"
-                  : "status-inactive"
-              }>
+              <span
+                className={
+                  subscription.isSubscribed
+                    ? "status-active"
+                    : "status-inactive"
+                }
+              >
                 {subscription.isSubscribed ? "Active" : "Inactive"}
               </span>
             </div>
-
 
             {subscription.lastPaymentTime && (
               <div className="subscription-row">
@@ -332,7 +384,6 @@ const Profile = () => {
               </div>
             )}
 
-
             {subscription.nextBillingTime && (
               <div className="subscription-row">
                 <span>Next Billing:</span>
@@ -342,8 +393,7 @@ const Profile = () => {
               </div>
             )}
 
-
-            {!subscription.isSubscribed && (
+            {/* {!subscription.isSubscribed && (
               <button
                 className="subscribe-btn"
                 onClick={startSubscription}
@@ -353,24 +403,144 @@ const Profile = () => {
                   ? "Redirecting..."
                   : "Subscribe $1 / Month"}
               </button>
+            )} */}
+
+            {!subscription.isSubscribed && (
+              <button
+                className="subscribe-btn"
+                onClick={() => setOpenPaymentModal(true)}
+              >
+                Upgrade / Subscribe
+              </button>
             )}
 
-          </div>
+            {/* Payment Modal */}
+            <Dialog
+              open={openPaymentModal}
+              onClose={() => setOpenPaymentModal(false)}
+              maxWidth="xs"
+              fullWidth
+            >
+              <DialogTitle sx={{ textAlign: "center", fontWeight: "bold" }}>
+                Choose Payment Option
+              </DialogTitle>
 
+              <DialogContent dividers>
+                <RadioGroup
+                  value={paymentType}
+                  onChange={(e) => setPaymentType(e.target.value)}
+                >
+                  <Box
+                    sx={{
+                      border: "1px solid #ddd",
+                      borderRadius: 2,
+                      p: 1.5,
+                      mb: 1.5,
+                      cursor: "pointer",
+                    }}
+                    onClick={() => setPaymentType("recurring")}
+                  >
+                    <FormControlLabel
+                      value="recurring"
+                      control={<Radio />}
+                      label={
+                        <Box>
+                          <Typography variant="subtitle1" fontWeight="bold">
+                            Monthly Subscription ($1 / Month)
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Auto-renews every month via PayPal. Cancel anytime.
+                          </Typography>
+                        </Box>
+                      }
+                    />
+                  </Box>
+
+                  <Box
+                    sx={{
+                      border: "1px solid #ddd",
+                      borderRadius: 2,
+                      p: 1.5,
+                      cursor: "pointer",
+                    }}
+                    onClick={() => setPaymentType("onetime")}
+                  >
+                    <FormControlLabel
+                      value="onetime"
+                      control={<Radio />}
+                      label={
+                        <Box>
+                          <Typography variant="subtitle1" fontWeight="bold">
+                            One-Time Payment ($10.00)
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Pay once with Google Pay (via PayPal) for 30 days
+                            access.
+                          </Typography>
+                        </Box>
+                      }
+                    />
+                  </Box>
+                </RadioGroup>
+
+                <Divider sx={{ my: 2 }} />
+
+                {/* Dynamic Action Area */}
+                {paymentType === "recurring" ? (
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    sx={{
+                      backgroundColor: "#0070ba",
+                      py: 1.2,
+                      textTransform: "none",
+                    }}
+                    onClick={startSubscription}
+                    disabled={subscriptionLoading}
+                  >
+                    {subscriptionLoading
+                      ? "Redirecting..."
+                      : "Proceed with PayPal Subscription"}
+                  </Button>
+                ) : (
+                  <Box sx={{ textAlign: "center" }}>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ mb: 1 }}
+                    >
+                      Click below to pay with Google Pay:
+                    </Typography>
+                    <GooglePayButton
+                      amount="10.00"
+                      onSuccess={handlePaymentSuccess}
+                      onError={handlePaymentError}
+                    />
+                  </Box>
+                )}
+              </DialogContent>
+
+              <DialogActions>
+                <Button
+                  onClick={() => setOpenPaymentModal(false)}
+                  color="inherit"
+                >
+                  Cancel
+                </Button>
+              </DialogActions>
+            </Dialog>
+          </div>
         </div>
 
         {Object.keys(formData).length ? (
-
           <div className="swot-container">
-
             {/* Header */}
             <div className="swot-header">
-
               <div>
-
                 <p className="swot-desc">
-                  Your ability to take better decisions is influenced by your Self Awareness.
-                  This section helps you align your strengths and weaknesses with your decisions.
+                  Your ability to take better decisions is influenced by your
+                  Self Awareness. This section helps you align your strengths
+                  and weaknesses with your decisions.
                 </p>
               </div>
 
@@ -382,13 +552,10 @@ const Profile = () => {
               >
                 Learn SWOT Analysis
               </a>
-
             </div>
-
 
             {/* SWOT Grid */}
             <div className="swot-grid">
-
               {formData.attitude && (
                 <div className="swot-card attitude">
                   <h4>Attitude</h4>
@@ -423,27 +590,17 @@ const Profile = () => {
                   {renderLines(formData.threat)}
                 </div>
               )}
-
             </div>
-
           </div>
-
         ) : (
-
-          <div className="no-profile-data">
-            No profile data available
-          </div>
-
+          <div className="no-profile-data">No profile data available</div>
         )}
       </div>
-      
-      <div className="profile-actions-container">
 
+      <div className="profile-actions-container">
         {/* Download Section */}
         <div className="download-section">
-
           <div className="action-buttons">
-
             <button
               className="action-btn download-btn"
               onClick={handleDownloadData}
@@ -457,26 +614,20 @@ const Profile = () => {
             >
               Download Profile Data
             </button>
-
           </div>
-
         </div>
-
 
         {/* Danger Section */}
         <div className="danger-section">
-
           <button
             className="action-btn delete-btn"
             onClick={handleDeleteAccount}
           >
             Delete Account
           </button>
-
         </div>
 
         <ToastContainer />
-
       </div>
     </div>
   );

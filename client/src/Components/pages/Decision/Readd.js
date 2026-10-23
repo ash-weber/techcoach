@@ -15,6 +15,7 @@ import withAuth from '../../withAuth';
 import TrendChart from './Views/TrendChart';
 import { formatDate } from '../../../Utility/utils';
 import LockIcon from '@mui/icons-material/Lock';
+import { notifyTeamsChannel } from '../../../Utility/teamsWebhook';
 
 const Readd = () => {
   const [data, setData] = useState([]);
@@ -676,12 +677,18 @@ const Readd = () => {
 
         const token = localStorage.getItem('token');
 
+        const decisionToDelete = data.find(item => item.decision_id === id);
+
+        console.log("daaaa", decisionToDelete);
+
         await axios.delete(
           `${process.env.REACT_APP_API_URL}/api/details/${id}`,
           {
             headers: { Authorization: `Bearer ${token}` }
           }
         );
+
+        await notifyTeamsChannel('DELETED', decisionToDelete);
 
         toast.success('Decision deleted successfully');
 

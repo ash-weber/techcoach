@@ -7,7 +7,7 @@ const GroupSelection = () => {
     const navigate = useNavigate();
 
     const navigateToInnerCircle = () => {
-        navigate('/innerCircle?type_of_group=inner_circle');
+        navigate('/innerCircle?type_of_group=inner_circle');   
     };
 
     // const navigateTodecisioncircle = () => {

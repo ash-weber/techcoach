@@ -163,7 +163,6 @@ const getInnerCircleAcceptNotification = async () => {
         }
     });
 
-    console.log("shhshshshhssssss  frommm getInnerCircleAcceptNotification", response);
     return response.data;
 };
 
