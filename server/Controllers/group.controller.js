@@ -469,6 +469,8 @@ const getSharedDecisions = async (req, res) => {
 
     const decryptText = (text, key) => {
         try {
+
+            console.log("shareddddd", text, key)
             const decipher = crypto.createDecipher('aes-256-cbc', key);
             let decryptedText = decipher.update(text, 'hex', 'utf8');
             decryptedText += decipher.final('utf8');
@@ -572,11 +574,14 @@ const getSharedDecisions = async (req, res) => {
             const groupUserDetails = groupUserMap.get(groupDetails.created_by);
             if (!groupUserDetails) continue;
 
-            const keyData = undefined + groupUserDetails.displayname + groupUserDetails.email;
+            const keyData = groupUserDetails.displayname + groupUserDetails.email;
             const encryptedKey = encryptText(keyData, process.env.PUBLIC_KEY);
 
-            decisionDetails.decision_name = decryptText(decisionDetails.decision_name, encryptedKey);
-            decisionDetails.user_statement = decryptText(decisionDetails.user_statement, encryptedKey);
+            console.log("cilucsaas", decisionDetails.decision_name)
+
+
+            decisionDetails.decision_name = decryptText(decisionDetails.decision_name, keyData);
+            decisionDetails.user_statement = decryptText(decisionDetails.user_statement, keyData);
 
             // Fetch decision reasons in one query per decisionId
             const decisionReasonQuery = await conn.query(`
@@ -586,7 +591,7 @@ const getSharedDecisions = async (req, res) => {
             `, [decisionId]);
 
             decisionDetails.reasons = decisionReasonQuery.map(reasonEntry =>
-                decryptText(reasonEntry.decision_reason_text, encryptedKey)
+                decryptText(reasonEntry.decision_reason_text, keyData)
             );
 
             // Fetch comments and replies together
@@ -1434,13 +1439,13 @@ const getSharedDecisionDetails = async (req, res) => {
             [decisionIds]
         );
 
-        const keyData = undefined + currentUser.displayname + currentUser.email;
+        const keyData = currentUser.displayname + currentUser.email;
         const encryptedKey = encryptText(keyData, process.env.PUBLIC_KEY);
 
         // Decrypt decision details
         decisions.forEach(decision => {
-            decision.decision_name = decryptText(decision.decision_name, encryptedKey);
-            decision.user_statement = decryptText(decision.user_statement, encryptedKey);
+            decision.decision_name = decryptText(decision.decision_name, keyData);
+            decision.user_statement = decryptText(decision.user_statement, keyData);
         });
 
         // Fetch and link tag information

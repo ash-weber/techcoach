@@ -43,36 +43,70 @@ const SharedDecision = () => {
   const [buttonLoading, setButtonLoading] = useState({});
   const [dateSortOrder, setDateSortOrder] = useState("desc");
 
-  const fetchSharedDecisions = async () => {
+/*   const fetchSharedDecisions = async () => {
     try {
       const response = await getSharedDecisions();
       console.log("responseeee", response);
-      const sortedDecisions = [...sharedDecisions].sort((a, b) => {
-  const dateA = new Date(
-    a.decisionDetails.creation_date
-  ).getTime();
 
-  const dateB = new Date(
-    b.decisionDetails.creation_date
-  ).getTime();
+      const sortedDecisions = [...response].sort((a, b) => {
+        const dateA = new Date(a.decisionDetails.creation_date).getTime();
 
-  return dateSortOrder === "desc"
-    ? dateB - dateA
-    : dateA - dateB;
-});
+        const dateB = new Date(b.decisionDetails.creation_date).getTime();
+
+        return dateSortOrder === "desc" ? dateB - dateA : dateA - dateB;
+      });
+
       setSharedDecisions(sortedDecisions);
+
       const initialCommentTexts = {};
+
       sortedDecisions.forEach((item) => {
         initialCommentTexts[item.decisionDetails.decision_id] = "";
       });
+
       setCommentTexts(initialCommentTexts);
-      setLoading(false); // Set loading to false once data is fetched
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching shared decisions:", error);
       toast("An error occurred while fetching shared decisions");
-      setLoading(false); // Set loading to false even if there's an error
+      setLoading(false); 
     }
-  };
+  }; */
+
+  const fetchSharedDecisions = async () => {
+  try {
+    const response = await getSharedDecisions();
+    console.log("responseeee", response);
+
+    const sortedDecisions = [...response].sort((a, b) => {
+      const dateA = new Date(
+        a.decisionDetails.creation_date
+      ).getTime();
+
+      const dateB = new Date(
+        b.decisionDetails.creation_date
+      ).getTime();
+
+      return dateSortOrder === "desc"
+        ? dateB - dateA
+        : dateA - dateB;
+    });
+
+    setSharedDecisions(sortedDecisions);
+
+    const initialCommentTexts = {};
+    sortedDecisions.forEach((item) => {
+      initialCommentTexts[item.decisionDetails.decision_id] = "";
+    });
+
+    setCommentTexts(initialCommentTexts);
+  } catch (error) {
+    console.error("Error fetching shared decisions:", error);
+    toast("An error occurred while fetching shared decisions");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const getRecentCommentTimestamp = (decision) => {
     if (!decision.comments || decision.comments.length === 0)
@@ -91,9 +125,27 @@ const SharedDecision = () => {
     fetchSharedDecisions();
   }, []);
 
+  useEffect(() => {
+  setSharedDecisions((prevDecisions) =>
+    [...prevDecisions].sort((a, b) => {
+      const dateA = new Date(
+        a.decisionDetails.creation_date
+      ).getTime();
+
+      const dateB = new Date(
+        b.decisionDetails.creation_date
+      ).getTime();
+
+      return dateSortOrder === "desc"
+        ? dateB - dateA
+        : dateA - dateB;
+    })
+  );
+}, [dateSortOrder]);
+
   const handlePostComment = async (decisionId, groupMemberID, groupId) => {
     try {
-      setButtonLoading((prevState) => ({ ...prevState, [decisionId]: true })); // Set loading to true
+      setButtonLoading((prevState) => ({ ...prevState, [decisionId]: true }));
       const commentText = commentTexts[decisionId];
       const response = await postCommentForDecision(
         decisionId,

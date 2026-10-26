@@ -821,8 +821,8 @@ const getdecisionSharedDecisionCircle = async (req, res) => {
             const keyData = undefined + shared_by + shared_by_email; // Adjust keyData as needed
             const encryptedKey = encryptText(keyData, process.env.PUBLIC_KEY);
 
-            decision.decision_name = decryptText(decision.decision_name, encryptedKey);
-            decision.user_statement = decryptText(decision.user_statement, encryptedKey);
+            decision.decision_name = decryptText(decision.decision_name, req.user.key);
+            decision.user_statement = decryptText(decision.user_statement, req.user.key);
 
             const decisionReasonQuery = `
                 SELECT decision_reason_text 
@@ -832,7 +832,7 @@ const getdecisionSharedDecisionCircle = async (req, res) => {
             const decisionReasons = await conn.query(decisionReasonQuery, [decision_id]);
 
             decision.reasons = decisionReasons.map(reason =>
-                decryptText(reason.decision_reason_text, encryptedKey)
+                decryptText(reason.decision_reason_text, req.user.key)
             );
         }
 
@@ -1614,7 +1614,6 @@ const getUserSharedDecisions = async (req, res) => {
         conn = await getConnection();
         await conn.beginTransaction();
 
-        // Fetch decisions shared with the group and specific user
         const decisionQuery = `
             SELECT 
     tsd.decisionId AS decision_id,
@@ -1641,6 +1640,8 @@ GROUP BY tsd.decisionId
 
         const getDecisions = await conn.query(decisionQuery, [userId]);
 
+        console.log("askjomasffas", getDecisions)
+
         if (!Array.isArray(getDecisions) || !getDecisions.length) {
             return res.status(200).json({ message: 'No decisions found for the user', results: [], decisionCount: 0 });
         }
@@ -1656,8 +1657,8 @@ GROUP BY tsd.decisionId
             const encryptedKey = encryptText(keyData, process.env.PUBLIC_KEY);
 
             // Decrypt fields
-            decision.decision_name = decryptText(decision.decision_name, encryptedKey);
-            decision.user_statement = decryptText(decision.user_statement, encryptedKey);
+            decision.decision_name = decryptText(decision.decision_name, req.user.key);
+            decision.user_statement = decryptText(decision.user_statement, req.user.key);
 
             // Fetch and decrypt decision reasons
             const decisionReasonQuery = `
@@ -1668,7 +1669,7 @@ GROUP BY tsd.decisionId
             const decisionReasons = await conn.query(decisionReasonQuery, [decision_id]);
 
             decision.reasons = decisionReasons.map(reason =>
-                decryptText(reason.decision_reason_text, encryptedKey)
+                decryptText(reason.decision_reason_text, req.user.key)
             );
 
             decisionDetailsMap.set(decision_id, decision);

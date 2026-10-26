@@ -17,4 +17,8 @@ router.get("/data",userController.getProfile);
 router.put("/data",userController.putProfile);
 router.delete("/data",userController.deleteProfile);
 
+router.post(
+  "/migrate-google-to-microsoft",userController.migrateGoogleToMicrosoft
+);
+
 module.exports = router;
