@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { sendDecisionCardToUser } = require('../Services/teamsGraphService');
+const { sendDecisionCardToUser } = require('../services/teamsGraphService');
 
 
 router.post('/notify', async (req, res) => {

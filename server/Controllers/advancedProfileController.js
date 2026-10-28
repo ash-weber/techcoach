@@ -1,4 +1,4 @@
-const getConnection = require("../Models/database");
+const getConnection = require("../models/database");
 const crypto = require('crypto');
 
 
@@ -6,7 +6,6 @@ const getUserList = async (req, res) => {
     let conn;
     try {
       const userId = req.user.id;
-      //console.log("User ID from getUserList:", userId);
   
       conn = await getConnection();
       await conn.beginTransaction();
@@ -30,7 +29,6 @@ const getUserList = async (req, res) => {
 
 const postAdvancedProfile = async (req, res) => {
     const { goals,values,resolutions,constraints,other_factors } = req.body;
-    //console.log(req.body, 'General Profile Data');
   
     let conn;
     try {
@@ -38,10 +36,8 @@ const postAdvancedProfile = async (req, res) => {
       await conn.beginTransaction();
   
       const userId = req.user.id;
-      //console.log("User ID from getUserList:", userId);
   
       const currentDate = new Date().toISOString().slice(0, 10);
-      //console.log("Current Date:", currentDate);
   
       const encryptText = (text, key) => {
         try {
@@ -74,9 +70,7 @@ const postAdvancedProfile = async (req, res) => {
           );
   
           const headerId = headerRows[0]?.header_id;
-  
-        //   console.log("header idddddddd", headerId);
-  
+    
           if (!headerId) {
             throw new Error(`Header ID not found for header name: ${headerName}`);
           }
@@ -118,14 +112,12 @@ const getMasterProfiles = async (req,res) => {
     try {
       conn = await getConnection();
       const rows = await conn.query("SELECT header_id ,header_name FROM techcoach_lite.techcoach_profile_swot_headers WHERE type_of_profile = 'Advanced_Profile' ");
-      //console.log('Fetched master profile:',rows);
       if (rows.length > 0) {
         res.status(200).json({profiles : rows })
       } else {
         res.status(404).json({ message: 'No profiles found' });
       }
     } catch (error) {
-      console.log('Error fetching master profiles:',error);
       res.status(500).json({ error:'An error occured while fetching master profiles'});
     } finally {
       if (conn) conn.release();
@@ -195,8 +187,6 @@ const getAdvancedProfile = async (req, res) => {
         ...profileDetails
       };
   
-      // console.log('Full Profile:', fullProfile);
-
       res.status(200).json(fullProfile);
     } catch (error) {
       console.error('Error retrieving profile data:', error);

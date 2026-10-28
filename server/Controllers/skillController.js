@@ -1,4 +1,4 @@
-const getConnection = require('../Models/database');
+const getConnection = require('../models/database');
 
 const postSkill = async (req, res) => {
   const { skill_name, rating, comments } = req.body;
@@ -30,7 +30,6 @@ const postSkill = async (req, res) => {
     await conn.commit();
     res.status(200).json({ message: 'Skill data inserted successfully' });
   } catch (error) {
-    console.log('Error inserting skill data:', error);
     if (conn) {
       await conn.rollback();
     }
@@ -46,12 +45,10 @@ const getMasterSkills = async (req, res) => {
     conn = await getConnection();
     const rows = await conn.query("SELECT skill_id, skill_name,description FROM techcoach_lite.techcoach_soft_skill");
 
-    // console.log('Fetched master skills:', rows); 
     if (rows.length > 0) {
       res.status(200).json({ skills: rows });
     }
   } catch (error) {
-    console.log('Error fetching master skills:', error);
     res.status(500).json({ error: 'An error occurred while fetching master skills' });
   } finally {
     if (conn) conn.release();
@@ -87,9 +84,7 @@ AND
     );
 
     res.status(200).json({ skills: rows });
-    // console.log(rows,"assss")
   } catch (error) {
-    console.log('Error fetching skill data:', error);
     res.status(500).json({ error: 'An error occurred while fetching skill data' });
   } finally {
     if (conn) conn.release();
@@ -138,7 +133,6 @@ const getSkill = async (req, res) => {
 
     res.status(200).json({ skill: rows }); 
   } catch (error) {
-    console.log('Error fetching skill data:', error);
     res.status(500).json({ error: 'An error occurred while fetching skill data' });
   } finally {
     if (conn) conn.release();
@@ -187,7 +181,6 @@ const putSkill = async (req, res) => {
     await conn.commit();
     res.status(200).json({ message: 'Skill data updated successfully' });
   } catch (error) {
-    console.log('Error updating skill data:', error);
     if (conn) {
       await conn.rollback();
     }
@@ -216,7 +209,6 @@ const deleteAllSkill = async (req, res) => {
     await conn.commit();
     res.status(200).json({ message: 'Skill data deleted successfully' });
   } catch (error) {
-    console.log('Error deleting skill data:', error);
     if (conn) {
       await conn.rollback();
     }
@@ -262,7 +254,6 @@ const deleteSkill = async (req, res) => {
 
     res.status(200).json({ message: 'Skill deleted successfully' });
   } catch (error) {
-    console.log('Error deleting skill data:', error);
     res.status(500).json({ error: 'An error occurred while deleting skill data' });
   } finally {
     if (conn) conn.release();

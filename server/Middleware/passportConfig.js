@@ -3,8 +3,8 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth2').Strategy;
 const mariadb = require('mariadb');
 const jwt = require('jsonwebtoken');
-const { sendWelcomeEmail } = require('../Utility/mail');
-const getConnection = require('../Models/database');
+const { sendWelcomeEmail } = require('../utils/mail');
+const getConnection = require('../models/database');
 
 
 const MicrosoftStrategy = require('passport-microsoft').Strategy;
@@ -25,40 +25,29 @@ passport.use(new GoogleStrategy({
     clientID: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
     callbackURL: process.env.CALLBACK_URL,
-    session: true // Enable session support
+    session: true 
 }, async (accessToken, refreshToken, profile, done) => {
     const connection = await getConnection();
     try {
-        // console.log('Google profile object:', profile); // Log the profile object
-
-        // Determine the correct path for the profile picture
         const profilePicture = profile.photos && profile.photos.length > 0 ? profile.photos[0].value : null;
 
         const [existingUser] = await connection.query("SELECT * FROM techcoach_lite.techcoach_users WHERE email=?", [profile.email]);
         // connection.release();
 
         if (!existingUser || existingUser.length === 0) {
-            // Insert the new user
             const user = await connection.query("INSERT INTO techcoach_lite.techcoach_users (displayname, email,profilePicture) VALUES (?, ?, ?) RETURNING* ", [profile.displayName, profile.email,profilePicture]);
-            // console.log(user,"jfjyfku")
             sendWelcomeEmail(user);
             logLoginHistory(user.user_id);
             if (connection) connection.release();
 
-            return done(null, { id: user[0].user_id, email: profile.email }); // Pass user info along with token
+            return done(null, { id: user[0].user_id, email: profile.email });
         }
 
-        logLoginHistory(existingUser.user_id); // Log login history
-        console.log(logLoginHistory, 'history')
-        // console.log(existingUser,"kkkkkkkkk")
+        logLoginHistory(existingUser.user_id); 
         if (connection) {
-            // console.log(2);
             connection.release();
           }
-        return done(null, { id: existingUser.user_id, email: profile.email }); // Pass user info along with token
-
-        // Sign JWT token with user id and email
-        // const token = jwt.sign({ id: profile.id, email: profile.email }, "111")
+        return done(null, { id: existingUser.user_id, email: profile.email }); /
 
     } catch (error) {
         if (connection) {
@@ -104,7 +93,6 @@ passport.use(new MicrosoftStrategy({
         }
 
         if (connection) connection.release();
-        console.log("existinguser", existingUser)
         logLoginHistory(existingUser.user_id);
         return done(null, { id: existingUser.user_id, email: email });
     } catch (error) {
@@ -122,7 +110,6 @@ passport.deserializeUser((user, done) => {
     done(null, user);
 });
 
-// Function to log login history
 async function logLoginHistory(userId) {
     try {
         const connection = await pool.getConnection();

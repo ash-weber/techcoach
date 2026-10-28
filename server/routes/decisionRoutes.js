@@ -1,7 +1,7 @@
 const express = require('express');
-const { postInfo, getallInfo, getInfo, putInfo, deleteInfo, getall, getInfo_Referred, getMonthlyDecisionCount } = require('../Controllers/decisionControllers');
-const authMiddleware = require('../Utility/AuthMiddleware');
-const createUserKey = require('../Utility/CreateUserKey');
+const { postInfo, getallInfo, getInfo, putInfo, deleteInfo, getall, getInfo_Referred, getMonthlyDecisionCount } = require('../controllers/decisionControllers');
+const authMiddleware = require('../utils/AuthMiddleware');
+const createUserKey = require('../utils/CreateUserKey');
 
 const router = express.Router();
 

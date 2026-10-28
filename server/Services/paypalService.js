@@ -56,6 +56,7 @@ const getSubscriptionDetails = async (subscriptionId) => {
 };
 const createOneTimeOrder = async (orderPayload) => {
   const token = await getAccessToken();
+
   const res = await axios.post(
     `${PAYPAL_BASE}/v2/checkout/orders`,
     orderPayload,
@@ -83,9 +84,27 @@ const captureOneTimeOrder = async (orderId) => {
   );
   return res.data;
 };
+
+const getClientToken = async () => {
+  const token = await getAccessToken();
+  const res = await axios.post(
+    `${PAYPAL_BASE}/v1/identity/generate-token`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Accept-Language": "en_US",
+        "Content-Type": "application/json",
+      },
+    },
+  );
+  return res.data.client_token;
+};
+
 module.exports = {
   createSubscription,
   getSubscriptionDetails,
   createOneTimeOrder,
   captureOneTimeOrder,
+  getClientToken,
 };

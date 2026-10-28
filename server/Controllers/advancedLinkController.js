@@ -1,4 +1,4 @@
-const getConnection = require('../Models/database');
+const getConnection = require('../models/database');
 const crypto = require('crypto');
 
 const postAdvancedProfile = async (req,res) =>{
@@ -10,7 +10,6 @@ const postAdvancedProfile = async (req,res) =>{
         await conn.beginTransaction();
 
         const userId = req.user.id;
-        //console.log('User Id From:',userId);
 
         const decisionRows = await conn.query('SELECT * FROM techcoach_lite.techcoach_decision WHERE decision_id = ?',[decision_id]);
         if (decisionRows.length === 0) {
@@ -38,7 +37,6 @@ const postAdvancedProfile = async (req,res) =>{
                 [decision_id,userId,v_id]
             );
         }
-        //console.log('v_ids:',vIds);
         await conn.commit();
         res.status(200).json({message:'Records inserted succesfully'});
         
@@ -127,7 +125,6 @@ const deleteAdvancedProfileLink = async (req,res) => {
      await conn.beginTransaction();
  
       const userId = req.user.id;
-      //console.log('Deleting decision link for user:',userId);
  
       const result = await conn.query(
          "DELETE FROM techcoach_lite.techcoach_decision_swot_linked_info WHERE decision_id = ?",
@@ -138,7 +135,6 @@ const deleteAdvancedProfileLink = async (req,res) => {
       res.status(200).json({message:'Decision-link data deleted successfully'});
  
     } catch (error) {
-     //console.log('Error deleting decision-link data:',error);
      if (conn) {
          await conn.rollback();
      }

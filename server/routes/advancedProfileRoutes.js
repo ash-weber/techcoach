@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 
-const advancedProfileController = require("../Controllers/advancedProfileController");
+const advancedProfileController = require("../controllers/advancedProfileController");
 
-const authMiddleware = require("../Utility/AuthMiddleware");
-const createUserKey = require("../Utility/CreateUserKey");
+const authMiddleware = require("../utils/AuthMiddleware");
+const createUserKey = require("../utils/CreateUserKey");
  
 router.use(authMiddleware);
 router.use(createUserKey);

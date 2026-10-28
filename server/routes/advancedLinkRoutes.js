@@ -1,7 +1,7 @@
 const express = require('express');
-const authMiddleware = require('../Utility/AuthMiddleware');
-const createUserKey = require('../Utility/CreateUserKey');
-const advancedLinkController = require('../Controllers/advancedLinkController');
+const authMiddleware = require('../utils/AuthMiddleware');
+const createUserKey = require('../utils/CreateUserKey');
+const advancedLinkController = require('../controllers/advancedLinkController');
 
 const router = express.Router();
 

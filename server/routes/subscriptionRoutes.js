@@ -5,8 +5,9 @@ const {
   getSubscriptionDetails,
   createOneTimeOrder,
   captureOneTimeOrder,
-} = require("../Services/paypalService");
-const getConnection = require("../Models/database");
+  getClientToken,
+} = require("../services/paypalService");
+const getConnection = require("../models/database");
 
 const ensureAuth = (req, res, next) => {
   if (!req.user) {
@@ -165,7 +166,10 @@ router.post("/orders/:orderId/capture", ensureAuth, async (req, res) => {
 
     if (captureData.status === "COMPLETED") {
       conn = await getConnection();
-      const nextBillingTime = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+      const nextBillingDate = new Date();
+      nextBillingDate.setFullYear(nextBillingDate.getFullYear() + 1);
+
+      const nextBillingTime = nextBillingDate
         .toISOString()
         .slice(0, 19)
         .replace("T", " ");
@@ -194,6 +198,19 @@ router.post("/orders/:orderId/capture", ensureAuth, async (req, res) => {
     res.status(500).json({ error: "Failed to capture payment" });
   } finally {
     if (conn) conn.release();
+  }
+});
+
+router.get("/client-token", ensureAuth, async (req, res) => {
+  try {
+    const clientToken = await getClientToken();
+    res.json({ clientToken });
+  } catch (err) {
+    console.error(
+      "Client token generation error:",
+      err.response?.data || err.message,
+    );
+    res.status(500).json({ error: "Failed to generate client token" });
   }
 });
 

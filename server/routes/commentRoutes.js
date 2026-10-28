@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const commentController = require("../Controllers/commentController");
-const authMiddleware = require("../Utility/AuthMiddleware");
-const createUserKey = require("../Utility/CreateUserKey");
+const commentController = require("../controllers/commentController");
+const authMiddleware = require("../utils/AuthMiddleware");
+const createUserKey = require("../utils/CreateUserKey");
 
 router.use(authMiddleware);
 router.use(createUserKey);

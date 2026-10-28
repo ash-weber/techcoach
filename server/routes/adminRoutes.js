@@ -1,8 +1,8 @@
 const express = require('express');
-const authMiddleware = require('../Utility/AuthMiddleware');
-const createUserKey = require('../Utility/CreateUserKey');
+const authMiddleware = require('../utils/AuthMiddleware');
+const createUserKey = require('../utils/CreateUserKey');
 const router = express.Router();
-const adminController = require("../Controllers/adminController");
+const adminController = require("../controllers/adminController");
 
 router.use(authMiddleware);
 router.use(createUserKey);

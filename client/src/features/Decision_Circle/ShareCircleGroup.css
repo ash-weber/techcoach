@@ -1,0 +1,79 @@
+.share-circle-group {
+    padding: 1rem;
+    background-color: #fff;
+    max-width: 60%;
+    margin: 0 auto;
+}
+
+.icon-close-card {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.group-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+}
+
+.selectgroup {
+    background-color: #a7cdf5;
+    width: 30%; 
+    margin: 10px 0; 
+    font-size: 16px; 
+    border: 1px solid #ccc; 
+    border-radius: 4px; 
+    outline: none; 
+    transition: border-color 0.3s ease; 
+  }
+  
+  .selectgroup:focus {
+    border-color: #007bff; 
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); 
+  }
+  
+.group-item {
+    display: flex;
+    align-items: center;
+    background-color:lightblue;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.circles {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.circle-item {
+    display: flex;
+    align-items: center;
+}
+
+@media (max-width: 768px) {
+    .group-container,
+    .circles {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .icon-close-card {
+        font-size: 1.2rem;
+    }
+
+    .share-btn {
+        width: 100%;
+        padding: 1rem;
+        font-size: 1rem;
+    }
+}
+
+@media (min-width: 769px) {
+    .group-container,
+    .circles {
+        display: flex;
+        flex-wrap: wrap;
+    }
+}

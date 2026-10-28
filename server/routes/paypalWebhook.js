@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const getConnection = require('../Models/database');
+const getConnection = require('../models/database');
 
 router.post('/paypal', async (req, res) => {
   const event = req.body;

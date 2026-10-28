@@ -1,11 +1,10 @@
-// const getConnection = require('../Models/database');
+// const getConnection = require('../models/database');
 
 
 // const postComment = async (req, res) => {
 //     const { groupId, commentText, decisionId } = req.body;
 //     const memberId = req.user.id;
 
-//     console.log('Request Body:', req.body);
 //     let conn;
 
 //     try {
@@ -82,20 +81,17 @@
 
 
 
-const getConnection = require('../Models/database');
+const getConnection = require('../models/database');
 
 const postComment = async (req, res) => {
     const { groupId, commentText, decisionId } = req.body;
     const memberId = req.user.id;
     let conn;
 
-    console.log('Request Body:', req.body);
-
     try {
         await getConnection(async (conn) => {
             await conn.beginTransaction();
 
-            // Validate groupId
             const group = await conn.query(
                 'SELECT id FROM techcoach_lite.techcoach_groups WHERE id = ?',
                 [groupId]
@@ -307,10 +303,6 @@ const updateComment = async (req, res) => {
 
 const replyToComment = async (req, res) => {
     const { parentCommentId, groupId, commentText, decisionId } = req.body;
-    // console.log('parentId',parentCommentId);
-    // console.log('groupId',groupId);
-    // console.log('commentText',commentText);
-    // console.log('decision',decisionId);
     const userId = req.user.id;
     let conn;
 
@@ -318,21 +310,16 @@ const replyToComment = async (req, res) => {
         conn = await getConnection();
         await conn.beginTransaction();
 
-        // Check if the parent comment exists
         const parentComment = await conn.query('SELECT id FROM techcoach_lite.techcoach_conversations WHERE id = ?', [parentCommentId]);
         if (parentComment.length === 0) {
-            //console.log("Invalid parentCommentId:", parentCommentId);
             return res.status(400).json({ message: 'Invalid parent comment ID, comment does not exist' });
         }
 
-        // Check if the group exists
         const group = await conn.query('SELECT id FROM techcoach_lite.techcoach_groups WHERE id = ?', [groupId]);
         if (group.length === 0) {
-            //console.log("Invalid groupId:", groupId);
             return res.status(400).json({ message: 'Invalid group_id, group does not exist' });
         }
 
-        // Insert the reply comment
         const sql = `
             INSERT INTO techcoach_lite.techcoach_conversations 
             (groupId, groupMember, comment, decisionId, parentCommentId, created_at)
@@ -386,10 +373,6 @@ const deleteComment = async (req, res) => {
 const postShareWithComment = async (req, res) => {
     const { groupId, commentText, decisionId } = req.body;
     const memberId = req.user.id;
-    // console.log('Logged-in user ID:', req.user.id);
-    // console.log('groupId:', groupId); 
-    // console.log('memberId:', memberId);
-    // console.log('Request Body:', req.body);
     let conn;
 
     try {
@@ -414,20 +397,16 @@ const postShareWithComment = async (req, res) => {
             return res.status(400).json({ message: 'Invalid decision_id, decision does not exist' });
         }
 
-        // Check if the logged-in user is a member of the group
         const member = await conn.query(
             'SELECT member_id FROM techcoach_lite.techcoach_group_members WHERE group_id = ? AND member_id = ?',
             [groupId, memberId]
         );
         if (member.length === 0) {
-            //console.log(`User ${memberId} is not a member of group ${groupId}`);
             return res.status(403).json({
                 message: 'You are not authorized to post comments in this group',
             });
         }
         
-
-        // Insert comment for the logged-in user
         await conn.query(
             `
             INSERT INTO techcoach_lite.techcoach_conversations 
@@ -506,7 +485,6 @@ const getWithComments = async (req, res) => {
                 tc.groupId = ? AND tc.decisionId = ?  
             ORDER BY tc.created_at DESC;     
         `,[groupId, decisionId]);
-        // console.log('Comments fetched:', comments); 
         const uniqueComments = Array.from(
             new Map(comments.map((comment) => [comment.commentId, comment])).values()
         );
@@ -514,7 +492,6 @@ const getWithComments = async (req, res) => {
         uniqueComments.forEach((comment) => {
             comment.type_of_member = comment.groupMember === userId ? 'author' : 'member';
         });
-        // console.log('Unique Comments:', uniqueComments);
         res.status(200).json({
             message: 'Comments retrieved successfully',
             comments: uniqueComments,
@@ -535,8 +512,6 @@ const getWithComments = async (req, res) => {
 const editComments = async (req, res) => {
     const { commentId }  = req.params;
     const { comment } = req.body; 
-    // console.log('annana',commentId);
-    // console.log('naan',comment);
     let conn;
 
     if (!commentId || !comment) {
@@ -588,15 +563,11 @@ const postdecisionGroup = async (req, res) => {
 
         const created_by = req.user.id;
 
-        // Insert into the decision group table
         const groupResult = await conn.query(
             `INSERT INTO techcoach_lite.techcoach_groups (created_by, created_at, type_of_group, group_name) VALUES (?, NOW(), ?, ?)`,
             [created_by, type_of_group, group_name]
         );
 
-        //console.log('Group Result:', groupResult);  // Log the result to inspect its structure
-
-        // Use groupResult.insertId if the result is an object
         const groupId = groupResult.insertId ? groupResult.insertId.toString() : groupResult[0].insertId.toString();
         await conn.commit();
 

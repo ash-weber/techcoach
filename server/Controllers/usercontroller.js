@@ -1,21 +1,10 @@
-const getConnection = require('../Models/database');
+const getConnection = require('../models/database');
 const crypto = require('crypto');
-
-const ALGORITHM = 'aes-256-cbc'; // Defin the standard algorithm
-
-/**
- * @param {string} keyString - The user's unique key.
- * @returns {string} A 32-byte key.
- */
+const ALGORITHM = 'aes-256-cbc'; 
 const getSecureKey = (keyString) => {
   return crypto.createHash('sha256').update(String(keyString)).digest('base64').substr(0, 32);
 };
 
-/**
- * @param {string} text - The text to encrypt.
- * @param {string} userKey - The user's unique key.
- * @returns {string} The IV and encrypted text, separated by a colon.
- */
 const encryptText = (text, userKey) => {
   const key = getSecureKey(userKey);
   const iv = crypto.randomBytes(16);
@@ -25,11 +14,6 @@ const encryptText = (text, userKey) => {
   return iv.toString('hex') + ':' + encrypted.toString('hex');
 };
 
-/**
-* @param {string} text - The encrypted text.
- * @param {string} userKey - The user's unique key.
- * @returns {string|null} The decrypted text, or null if input is invalid.
- */
 const decryptText = (text, userKey) => {
   if (!text || typeof text !== 'string') {
     return null;
@@ -37,7 +21,6 @@ const decryptText = (text, userKey) => {
 
   if (text.includes(':')) {
     try {
-      // --- NEW DECRYPTION LOGIC ---
       const key = getSecureKey(userKey);
       const textParts = text.split(':');
       const iv = Buffer.from(textParts.shift(), 'hex');
@@ -86,9 +69,6 @@ const postGeneralProfile = async (req, res) => {
         await conn.beginTransaction();
         const userId = req.user.id;
 
-        // NOTE: The old 'encryptText' function that was here has been removed.
-        // It now uses the secure one defined at the top of the file.
-
         const headersAndValues = [
             { headerName: 'Attitude', headerValue: attitude },
             { headerName: 'Strength', headerValue: strength },
@@ -136,7 +116,6 @@ const getMasterProfiles = async (req,res) => {
             res.status(404).json({ message: 'No profiles found' });
         }
     } catch (error) {
-        console.log('Error fetching master profiles:',error);
         res.status(500).json({ error:'An error occured while fetching master profiles'});
     } finally {
         if (conn) conn.release();

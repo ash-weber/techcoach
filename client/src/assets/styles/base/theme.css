@@ -1,0 +1,283 @@
+:root {
+  --bg-primary: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-hover: #f1f5f9;
+  --border-color: #e2e8f0;
+  --border-focus: #6366f1;
+
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-light: #eef2ff;
+
+  --success: #10b981;
+  --success-light: #ecfdf5;
+  --warning: #f59e0b;
+  --warning-light: #fffbeb;
+  --danger: #ef4444;
+  --danger-light: #fef2f2;
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md:
+    0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --shadow-lg:
+    0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.04);
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  --font-sans:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  --surface-canvas: #f8fafc;
+  --surface-card: #ffffff;
+  --surface-card-hover: #f1f5f9;
+  --surface-border: #e2e8f0;
+  --surface-border-hover: #cbd5e1;
+  --surface-border-focus: #6366f1;
+
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --text-subtle: #94a3b8;
+  --text-inverse: #f8fafc;
+
+  --brand-primary: #4f46e5;
+  --brand-primary-hover: #4338ca;
+  --brand-primary-light: #eef2ff;
+  --brand-primary-ring: rgba(99, 102, 241, 0.15);
+
+  --status-success: #10b981;
+  --status-success-light: #ecfdf5;
+  --status-warning: #f59e0b;
+  --status-warning-light: #fffbeb;
+  --status-danger: #ef4444;
+  --status-danger-light: #fef2f2;
+
+  --nav-bg: #0f172a;
+  --nav-bg-elevated: #1e293b;
+  --nav-bg-hover: rgba(255, 255, 255, 0.08);
+  --nav-border: #1e293b;
+  --nav-border-strong: #334155;
+  --nav-text: #94a3b8;
+  --nav-text-active: #ffffff;
+  --nav-text-hover: #ffffff;
+  --nav-admin-text: #c084fc;
+  --nav-admin-bg: rgba(192, 132, 252, 0.12);
+  --nav-admin-border: rgba(192, 132, 252, 0.25);
+  --nav-admin-active: #9333ea;
+  --nav-badge-bg: #ef4444;
+  --nav-badge-text: #ffffff;
+
+  --nav-shell-bg: rgba(8, 12, 24, 0.92);
+  --nav-shell-border: rgba(148, 163, 184, 0.12);
+  --nav-shell-shadow: 0 6px 24px -8px rgba(0, 0, 0, 0.55);
+  --nav-max-width: 1400px;
+  --nav-pad-y: 0.6rem;
+  --nav-pad-x: 1.75rem;
+
+  --nav-brand-gap: 0.75rem;
+  --nav-brand-gradient: linear-gradient(135deg, #ffffff 0%, #a5b4fc 100%);
+  --nav-logo-size: 38px;
+  --nav-logo-bg: #ffffff;
+  --nav-logo-pad: 3px;
+  --nav-logo-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+  --nav-logo-shadow-hover: 0 4px 14px rgba(79, 70, 229, 0.45);
+
+  --nav-list-gap: 0.2rem;
+  --nav-item-gap: 0.35rem;
+  --nav-item-pad-y: 0.5rem;
+  --nav-item-pad-x: 0.85rem;
+
+  --nav-hover-bg: rgba(148, 163, 184, 0.14);
+  --nav-active-bg: rgba(79, 70, 229, 0.22);
+  --nav-active-bg-hover: rgba(79, 70, 229, 0.3);
+  --nav-active-ring: rgba(99, 102, 241, 0.35);
+  --nav-accent-width: 3px;
+  --nav-accent-bg: var(--brand-primary);
+  --nav-accent-glow: 0 0 8px rgba(79, 70, 229, 0.7);
+
+  --nav-admin-glow: 0 2px 12px rgba(147, 51, 234, 0.45);
+  --nav-admin-accent: #e9d5ff;
+  --nav-admin-accent-glow: 0 0 8px #c084fc;
+
+  --nav-badge-size: 18px;
+  --nav-badge-margin: 0.35rem;
+  --nav-badge-pad: 0.35rem;
+  --nav-badge-font: 0.6875rem;
+  --nav-badge-ring: #080c18;
+
+  --nav-dropdown-offset: 0.25rem;
+  --nav-dropdown-gap: 10px;
+  --nav-dropdown-min-width: 210px;
+  --nav-dropdown-bg: #0b1120;
+  --nav-dropdown-mobile-bg: #060a14;
+  --nav-dropdown-border: rgba(148, 163, 184, 0.18);
+  --nav-dropdown-shadow:
+    0 16px 36px -8px rgba(0, 0, 0, 0.65), 0 4px 12px -4px rgba(0, 0, 0, 0.4);
+  --nav-dropdown-pad: 0.45rem;
+  --nav-dropdown-text: #cbd5e1;
+  --nav-dropdown-link-pad-y: 0.55rem;
+  --nav-dropdown-link-pad-x: 0.85rem;
+  --nav-dropdown-divider: rgba(148, 163, 184, 0.15);
+  --nav-dropdown-divider-my: 0.4rem;
+  --nav-dropdown-divider-mx: 0.25rem;
+
+  --nav-logout-text: #f87171;
+  --nav-logout-text-hover: #fca5a5;
+  --nav-logout-bg-hover: rgba(239, 68, 68, 0.18);
+
+  --nav-anim-y: -6px;
+  --nav-anim-scale: 0.98;
+
+  --nav-toggle-border: rgba(148, 163, 184, 0.25);
+  --nav-toggle-pad: 0.45rem;
+  --nav-toggle-text: #f1f5f9;
+  --nav-mobile-pad-y: 0.75rem;
+  --nav-mobile-pad-x: 1.25rem;
+  --nav-collapse-mt: 0.75rem;
+  --nav-collapse-pt: 0.75rem;
+  --nav-collapse-border: rgba(148, 163, 184, 0.15);
+  --nav-mobile-list-gap: 0.3rem;
+  --nav-mobile-item-pad-y: 0.7rem;
+  --nav-mobile-item-pad-x: 0.9rem;
+
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 0.75rem;
+  --space-lg: 1rem;
+  --space-xl: 1.5rem;
+  --space-2xl: 2rem;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md:
+    0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --shadow-lg:
+    0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.04);
+  --shadow-nav: 0 4px 20px -4px rgba(15, 23, 42, 0.35);
+  --shadow-dropdown:
+    0 12px 28px -6px rgba(0, 0, 0, 0.45), 0 4px 12px -4px rgba(0, 0, 0, 0.3);
+
+  --font-sans:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-size-sm: 0.8125rem;
+  --font-size-base: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+
+  --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  --z-nav: 1000;
+  --z-dropdown: 1050;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+}
+
+.modern-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: 1.5rem;
+  transition: var(--transition);
+}
+
+.modern-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: #cbd5e1;
+}
+
+.btn-modern-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: var(--primary);
+  color: #ffffff;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-modern-primary:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.btn-modern-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: var(--bg-surface);
+  color: var(--text-main);
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-modern-secondary:hover {
+  background-color: var(--bg-surface-hover);
+  border-color: #cbd5e1;
+}
+
+.modern-input {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-main);
+  font-size: 0.875rem;
+  box-sizing: border-box;
+  transition: var(--transition);
+}
+
+.modern-input:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.badge-success {
+  background: var(--success-light);
+  color: var(--success);
+}
+.badge-warning {
+  background: var(--warning-light);
+  color: var(--warning);
+}
+.badge-danger {
+  background: var(--danger-light);
+  color: var(--danger);
+}
