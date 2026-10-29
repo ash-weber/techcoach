@@ -1,21 +1,10 @@
-const getConnection = require('../Models/database');
+const getConnection = require('../models/database');
 const crypto = require('crypto');
-
-const ALGORITHM = 'aes-256-cbc'; // Defin the standard algorithm
-
-/**
- * @param {string} keyString - The user's unique key.
- * @returns {string} A 32-byte key.
- */
+const ALGORITHM = 'aes-256-cbc'; 
 const getSecureKey = (keyString) => {
   return crypto.createHash('sha256').update(String(keyString)).digest('base64').substr(0, 32);
 };
 
-/**
- * @param {string} text - The text to encrypt.
- * @param {string} userKey - The user's unique key.
- * @returns {string} The IV and encrypted text, separated by a colon.
- */
 const encryptText = (text, userKey) => {
   const key = getSecureKey(userKey);
   const iv = crypto.randomBytes(16);
@@ -25,11 +14,6 @@ const encryptText = (text, userKey) => {
   return iv.toString('hex') + ':' + encrypted.toString('hex');
 };
 
-/**
-* @param {string} text - The encrypted text.
- * @param {string} userKey - The user's unique key.
- * @returns {string|null} The decrypted text, or null if input is invalid.
- */
 const decryptText = (text, userKey) => {
   if (!text || typeof text !== 'string') {
     return null;
@@ -37,7 +21,6 @@ const decryptText = (text, userKey) => {
 
   if (text.includes(':')) {
     try {
-      // --- NEW DECRYPTION LOGIC ---
       const key = getSecureKey(userKey);
       const textParts = text.split(':');
       const iv = Buffer.from(textParts.shift(), 'hex');
@@ -86,9 +69,6 @@ const postGeneralProfile = async (req, res) => {
         await conn.beginTransaction();
         const userId = req.user.id;
 
-        // NOTE: The old 'encryptText' function that was here has been removed.
-        // It now uses the secure one defined at the top of the file.
-
         const headersAndValues = [
             { headerName: 'Attitude', headerValue: attitude },
             { headerName: 'Strength', headerValue: strength },
@@ -136,7 +116,6 @@ const getMasterProfiles = async (req,res) => {
             res.status(404).json({ message: 'No profiles found' });
         }
     } catch (error) {
-        console.log('Error fetching master profiles:',error);
         res.status(500).json({ error:'An error occured while fetching master profiles'});
     } finally {
         if (conn) conn.release();
@@ -258,4 +237,241 @@ const deleteProfile = async (req, res) => {
     }
 };
 
-module.exports = { getUserList, postGeneralProfile, getMasterProfiles, getProfile, putProfile, deleteProfile };
+const migrateGoogleToMicrosoft = async (req, res) => {
+  const { migrations } = req.body;
+
+  if (!Array.isArray(migrations) || migrations.length === 0) {
+    return res.status(400).json({
+      error: "Provide a non-empty migrations array.",
+    });
+  }
+
+  const seenPersonalEmails = new Set();
+  const seenWorkEmails = new Set();
+
+  for (const item of migrations) {
+    if (
+      typeof item.personalEmail !== "string" ||
+      typeof item.workEmail !== "string" ||
+      !item.personalEmail.trim() ||
+      !item.workEmail.trim()
+    ) {
+      return res.status(400).json({
+        error: "Each migration requires personalEmail and workEmail.",
+      });
+    }
+
+    const personal = item.personalEmail.trim().toLowerCase();
+    const work = item.workEmail.trim().toLowerCase();
+
+    if (
+      personal === work ||
+      seenPersonalEmails.has(personal) ||
+      seenWorkEmails.has(work)
+    ) {
+      return res.status(400).json({
+        error: "Duplicate or identical emails found in migration list.",
+      });
+    }
+
+    seenPersonalEmails.add(personal);
+    seenWorkEmails.add(work);
+  }
+
+  const decryptText = (text, key) => {
+    if (text == null || text === "") {
+      throw new Error("Encrypted value is empty.");
+    }
+
+    const decipher = crypto.createDecipher("aes-256-cbc", key);
+    let result = decipher.update(text, "hex", "utf8");
+    result += decipher.final("utf8");
+    return result;
+  };
+
+  const encryptText = (text, key) => {
+    if (text == null) {
+      throw new Error("Cannot encrypt a null value.");
+    }
+
+    const cipher = crypto.createCipher("aes-256-cbc", key);
+    let result = cipher.update(String(text), "utf8", "hex");
+    result += cipher.final("hex");
+    return result;
+  };
+
+  const results = [];
+
+  try {
+    for (const item of migrations) {
+      const personalEmail = item.personalEmail.trim();
+      const workEmail = item.workEmail.trim();
+
+      const conn = await getConnection();
+
+      try {
+        await conn.beginTransaction();
+
+        const oldUsers = await conn.query(
+          `SELECT user_id, displayname, email
+           FROM techcoach_lite.techcoach_users
+           WHERE LOWER(email) = ?
+           FOR UPDATE`,
+          [personalEmail.toLowerCase()]
+        );
+
+        const newUsers = await conn.query(
+          `SELECT user_id, displayname, email, personal_email
+           FROM techcoach_lite.techcoach_users
+           WHERE LOWER(email) = ?
+           FOR UPDATE`,
+          [workEmail.toLowerCase()]
+        );
+
+        if (oldUsers.length !== 1 || newUsers.length !== 1) {
+          throw new Error(
+            `Expected exactly one account for each email: ` +
+            `${personalEmail} -> ${workEmail}`
+          );
+        }
+
+        const oldUser = oldUsers[0];
+        const newUser = newUsers[0];
+
+        if (oldUser.user_id === newUser.user_id) {
+          throw new Error("Personal and work accounts are already the same user.");
+        }
+
+        if (
+          newUser.personal_email &&
+          newUser.personal_email.toLowerCase() !==
+            oldUser.email.toLowerCase()
+        ) {
+          throw new Error(
+            `Work account ${workEmail} is already linked to another personal email.`
+          );
+        }
+
+        const oldKey = oldUser.displayname + oldUser.email;
+        const newKey = newUser.displayname + newUser.email;
+
+        const decisions = await conn.query(
+          `SELECT decision_id, decision_name, user_statement
+           FROM techcoach_lite.techcoach_decision
+           WHERE user_id = ?
+           FOR UPDATE`,
+          [oldUser.user_id]
+        );
+
+        const preparedDecisions = [];
+
+        for (const decision of decisions) {
+          const plainName = decryptText(
+            decision.decision_name,
+            oldKey
+          );
+
+          const plainStatement =
+            decision.user_statement == null
+              ? null
+              : decryptText(decision.user_statement, oldKey);
+
+          const reasons = await conn.query(
+            `SELECT decision_reason_text
+             FROM techcoach_lite.techcoach_decision_reason
+             WHERE decision_id = ?
+             FOR UPDATE`,
+            [decision.decision_id]
+          );
+
+          const preparedReasons = reasons.map((reason) => ({
+            oldCiphertext: reason.decision_reason_text,
+            newCiphertext: encryptText(
+              decryptText(reason.decision_reason_text, oldKey),
+              newKey
+            ),
+          }));
+
+          preparedDecisions.push({
+            decisionId: decision.decision_id,
+            oldName: decision.decision_name,
+            oldStatement: decision.user_statement,
+            newName: encryptText(plainName, newKey),
+            newStatement:
+              plainStatement == null
+                ? null
+                : encryptText(plainStatement, newKey),
+            reasons: preparedReasons,
+          });
+        }
+
+        await conn.query(
+          `UPDATE techcoach_lite.techcoach_users
+           SET personal_email = ?
+           WHERE user_id = ?`,
+          [oldUser.email, newUser.user_id]
+        );
+
+        for (const decision of preparedDecisions) {
+          await conn.query(
+            `UPDATE techcoach_lite.techcoach_decision
+             SET decision_name = ?,
+                 user_statement = ?,
+                 user_id = ?
+             WHERE decision_id = ? AND user_id = ?`,
+            [
+              decision.newName,
+              decision.newStatement,
+              newUser.user_id,
+              decision.decisionId,
+              oldUser.user_id,
+            ]
+          );
+
+          for (const reason of decision.reasons) {
+            await conn.query(
+              `UPDATE techcoach_lite.techcoach_decision_reason
+               SET decision_reason_text = ?
+               WHERE decision_id = ?
+                 AND decision_reason_text = ?`,
+              [
+                reason.newCiphertext,
+                decision.decisionId,
+                reason.oldCiphertext,
+              ]
+            );
+          }
+        }
+
+        await conn.commit();
+
+        results.push({
+          personalEmail,
+          workEmail,
+          migratedDecisionCount: preparedDecisions.length,
+          status: "success",
+        });
+      } catch (error) {
+        await conn.rollback();
+        throw error;
+      } finally {
+        conn.release();
+      }
+    }
+
+    return res.status(200).json({
+      message: "All requested account migrations completed.",
+      results,
+    });
+  } catch (error) {
+    console.error("Account migration failed:", error.message);
+
+    return res.status(500).json({
+      error: "Migration failed. The current user's transaction was rolled back.",
+      completedMigrations: results,
+      failedMigrationIndex: results.length,
+    });
+  }
+};
+
+module.exports = { getUserList, postGeneralProfile, getMasterProfiles, getProfile, putProfile, deleteProfile, migrateGoogleToMicrosoft };

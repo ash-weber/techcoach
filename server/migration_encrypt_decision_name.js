@@ -1,5 +1,5 @@
 const crypto = require("crypto");
-const getConnection = require("./Models/database");
+const getConnection = require("./models/database");
 
 function decryptOld(encryptedHex, key) {
 
@@ -22,9 +22,6 @@ function decryptOld(encryptedHex, key) {
 
   }
   catch (err) {
-
-    console.log("Decrypt failed with key:", key);
-
     return null;
 
   }
@@ -53,13 +50,8 @@ async function testDecrypt() {
       (row.displayName || "").trim() +
       (row.email || "").trim();
 
-    console.log("\nTesting decision:", row.decision_id);
-
     const decrypted =
       decryptOld(row.decision_name, key);
-
-    console.log("Result:", decrypted);
-
   }
 
   conn.release();

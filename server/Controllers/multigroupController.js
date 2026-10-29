@@ -1,4 +1,4 @@
-const getConnection = require('../Models/database');
+const getConnection = require('../models/database');
 const crypto = require('crypto');
 const axios = require('axios');
 
@@ -7,7 +7,6 @@ const getUserList = async (req, res) => {
     try {
 
         const userId = req.user.id;
-        // console.log("user id from get user list", userId);
         conn = await getConnection();
         await conn.beginTransaction();
 
@@ -207,7 +206,7 @@ const getdecisionCirclesByUser = async (req, res) => {
     }
 };
 
-const getdecisionCirclesByUserAndMember = async (req, res) => {
+/* const getdecisionCirclesByUserAndMember = async (req, res) => {
     const user_id = req.user.id;
 
     if (!user_id) {
@@ -256,7 +255,110 @@ const getdecisionCirclesByUserAndMember = async (req, res) => {
     } finally {
         if (conn) conn.release();
     }
+}; */
+
+
+const getdecisionCirclesByUserAndMember = async (req, res) => {
+    const user_id = req.user.id;
+
+    if (!user_id) {
+        return res.status(400).json({
+            error: 'User ID is required.'
+        });
+    }
+
+    let conn;
+
+    try {
+        conn = await getConnection();
+
+        const groups = await conn.query(
+            `SELECT
+                g.id AS group_id,
+                g.group_name,
+                g.type_of_group,
+                g.created_at,
+                g.created_by AS group_creator_id,
+                creator.displayname AS creator_displayname,
+                creator.email AS creator_email,
+
+                m.member_id,
+                u.displayname AS member_displayname,
+                u.email AS member_email,
+                m.status AS member_status
+
+            FROM techcoach_lite.techcoach_groups g
+
+            LEFT JOIN techcoach_lite.techcoach_users creator
+                ON g.created_by = creator.user_id
+
+            LEFT JOIN techcoach_lite.techcoach_group_members m
+                ON g.id = m.group_id
+
+            LEFT JOIN techcoach_lite.techcoach_users u
+                ON m.member_id = u.user_id
+
+            WHERE
+                (g.created_by = ? OR g.id IN (
+                    SELECT gm.group_id
+                    FROM techcoach_lite.techcoach_group_members gm
+                    WHERE gm.member_id = ?
+                ))
+                AND g.type_of_group = 'decision_circle'
+
+            ORDER BY g.id, m.member_id`,
+            [user_id, user_id]
+        );
+
+        // Group all member rows under their respective decision circles
+        const groupMap = new Map();
+
+        for (const row of groups) {
+            if (!groupMap.has(row.group_id)) {
+                groupMap.set(row.group_id, {
+                    group_id: row.group_id,
+                    group_name: row.group_name,
+                    type_of_group: row.type_of_group,
+                    created_at: row.created_at,
+                    group_creator_id: row.group_creator_id,
+                    creator_displayname: row.creator_displayname,
+                    creator_email: row.creator_email,
+                    members: []
+                });
+            }
+
+            // Add every associated member to this group
+            if (row.member_id !== null) {
+                groupMap.get(row.group_id).members.push({
+                    member_id: row.member_id,
+                    member_displayname: row.member_displayname,
+                    member_email: row.member_email,
+                    status: row.member_status
+                });
+            }
+        }
+
+        const result = Array.from(groupMap.values());
+
+        return res.status(200).json({
+            groups: result
+        });
+
+    } catch (error) {
+        console.error(
+            'Error fetching decision circles:',
+            error.message
+        );
+
+        return res.status(500).json({
+            error: 'An error occurred while fetching the decision circles.'
+        });
+
+    } finally {
+        if (conn) conn.release();
+    }
 };
+
 
 // const getAllGroups = async (req, res) => {
 //     let conn;
@@ -424,9 +526,6 @@ const getGroupDetails = async (req, res) => {
 };
 
 const sendDecisionCircleInvitation = async (req, res) => {
-    // console.log("Request body invitation:", req.user);
-    // console.log("Request body invitation:", req.body);
-
     const { email } = req.body;
     const { email: senderEmail } = req.user;
 
@@ -538,9 +637,6 @@ const decisionshareDecisionCircle = async (req, res) => {
 //     const userId = req.user.id;
 //     const { groupId } = req.params;
 //     let conn;
-//     // console.log('User ID:', userId); 
-//     // console.log('Group ID:', groupId);
-
 //     const decryptText = (text, key) => {
 //         if (!text) return text;
 //         try {
@@ -576,7 +672,6 @@ const decisionshareDecisionCircle = async (req, res) => {
 //       `;
 
 //         const sharedDecisions = await conn.query(sharedDecisionsQuery, [userId, groupId]);
-//         // console.log('Shared Decisions Query Result:', sharedDecisions);
 
 
 //         if (!Array.isArray(sharedDecisions)) {
@@ -593,10 +688,7 @@ const decisionshareDecisionCircle = async (req, res) => {
 //         const decryptedDecisionData = await Promise.all(sharedDecisions.map(async (decision) => {
 //             const decryptedDecisionName = decryptText(decision.decision_name, req.user.key);
 //             const decryptedUserStatement = decryptText(decision.user_statement, req.user.key);
-//             // console.log('Decrypted Decision Name:', decryptedDecisionName); // Log decryption result
-//             // console.log('Decrypted User Statement:', decryptedUserStatement);
-
-//             // Fetch decision reasons for each decision
+//           
 //             const decisionReasons = await conn.query(`
 //           SELECT decision_reason_text 
 //           FROM techcoach_lite.techcoach_decision_reason 
@@ -718,8 +810,8 @@ const getdecisionSharedDecisionCircle = async (req, res) => {
             const keyData = undefined + shared_by + shared_by_email; // Adjust keyData as needed
             const encryptedKey = encryptText(keyData, process.env.PUBLIC_KEY);
 
-            decision.decision_name = decryptText(decision.decision_name, encryptedKey);
-            decision.user_statement = decryptText(decision.user_statement, encryptedKey);
+            decision.decision_name = decryptText(decision.decision_name, req.user.key);
+            decision.user_statement = decryptText(decision.user_statement, req.user.key);
 
             const decisionReasonQuery = `
                 SELECT decision_reason_text 
@@ -729,7 +821,7 @@ const getdecisionSharedDecisionCircle = async (req, res) => {
             const decisionReasons = await conn.query(decisionReasonQuery, [decision_id]);
 
             decision.reasons = decisionReasons.map(reason =>
-                decryptText(reason.decision_reason_text, encryptedKey)
+                decryptText(reason.decision_reason_text, req.user.key)
             );
         }
 
@@ -1014,23 +1106,19 @@ const decisionCirclePostComment = async (req, res) => {
             const zeptoMailApiKey = process.env.ZEPTO_MAIL_API_KEY;
 
             try {
-                // Make sure the email recipient is valid before making the API call
                 await axios.post(zeptoMailApiUrl, emailPayload, {
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Zoho-enczapikey ${zeptoMailApiKey}`
                     }
                 });
-                // console.log(`Email sent to ${groupMember.member_email}`);
             } catch (err) {
                 console.error(`Failed to send email to ${groupMember.member_email}:`, err.message);
             }
         });
 
-        // Wait for all email sending promises to resolve
         await Promise.all(emailPromises);
 
-        // Commit transaction
         await conn.commit();
         res.status(200).json({ message: 'Emails sent successfully to group members and creator' });
     } catch (error) {
@@ -1044,14 +1132,11 @@ const decisionCirclePostComment = async (req, res) => {
 
 const decisionCircleReplyComment = async (req, res) => {
     const { parentCommentId,decision, reply, groupId } = req.body;
-    // console.log('decision:', decision);
-    // console.log('groupId:', groupId);
     const memberId = req.user.id;
 
 
     let conn;
 
-    // Helper to truncate text
     const truncateText = (text, maxLength) => {
         if (typeof text !== 'string') return '';
         if (!text || text.length <= maxLength) return text;
@@ -1079,11 +1164,9 @@ const decisionCircleReplyComment = async (req, res) => {
         const groupMembers = await conn.query(groupAndPosterQuery, [parentCommentId,groupId]);
 
         if (!groupMembers || groupMembers.length === 0) {
-            console.log("No group members or original poster found.");
             return res.status(400).json({ message: 'Invalid group or comment ID.' });
         }
 
-       // Fetch replying user's details
         const replyingUserQuery = `SELECT displayname, email FROM techcoach_lite.techcoach_users WHERE user_id = ?`;
         const replyingUser = (await conn.query(replyingUserQuery, [memberId]))[0];
 
@@ -1127,13 +1210,11 @@ const decisionCircleReplyComment = async (req, res) => {
                         'Authorization': `Zoho-enczapikey ${zeptoMailApiKey}`
                     }
                 });
-                // console.log(`Email sent to: ${groupMember.member_email}`);
             } catch (emailError) {
                 console.error(`Failed to send email to: ${groupMember.member_email}`, emailError.message);
             }
         });
 
-        // Wait for all email promises to complete
         await Promise.all(emailPromises);
 
         await conn.commit();
@@ -1511,7 +1592,6 @@ const getUserSharedDecisions = async (req, res) => {
         conn = await getConnection();
         await conn.beginTransaction();
 
-        // Fetch decisions shared with the group and specific user
         const decisionQuery = `
             SELECT 
     tsd.decisionId AS decision_id,
@@ -1544,19 +1624,15 @@ GROUP BY tsd.decisionId
 
         const decisionDetailsMap = new Map();
 
-        // Loop through decisions, decrypt fields and fetch additional data
         for (const decision of getDecisions) {
             const { decision_id, shared_by, shared_by_email } = decision;
 
-            // Key generation for decryption (you might need to modify this logic)
             const keyData = undefined + shared_by + shared_by_email;
             const encryptedKey = encryptText(keyData, process.env.PUBLIC_KEY);
 
-            // Decrypt fields
-            decision.decision_name = decryptText(decision.decision_name, encryptedKey);
-            decision.user_statement = decryptText(decision.user_statement, encryptedKey);
+            decision.decision_name = decryptText(decision.decision_name, req.user.key);
+            decision.user_statement = decryptText(decision.user_statement, req.user.key);
 
-            // Fetch and decrypt decision reasons
             const decisionReasonQuery = `
                 SELECT decision_reason_text 
                 FROM techcoach_lite.techcoach_decision_reason 
@@ -1565,7 +1641,7 @@ GROUP BY tsd.decisionId
             const decisionReasons = await conn.query(decisionReasonQuery, [decision_id]);
 
             decision.reasons = decisionReasons.map(reason =>
-                decryptText(reason.decision_reason_text, encryptedKey)
+                decryptText(reason.decision_reason_text, req.user.key)
             );
 
             decisionDetailsMap.set(decision_id, decision);

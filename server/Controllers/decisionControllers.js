@@ -1,4 +1,4 @@
-const getConnection = require('../Models/database');
+const getConnection = require('../models/database');
 const crypto = require('crypto');
 
 const postInfo = async (req, res) => {
@@ -13,16 +13,8 @@ const postInfo = async (req, res) => {
     const userName = req.user.name;
 
     const currentDate = new Date().toISOString().slice(0, 10);
-    // console.log("Current Date:", currentDate);
-    
-    // console.log("Decision Due Date:", decision_due_date);
-    // console.log("Decision Taken Date:", decision_taken_date);
-
     const formattedDueDate = decision_due_date ? new Date(decision_due_date).toISOString().slice(0, 10) : null;
     const formattedTakenDate = decision_taken_date ? new Date(decision_taken_date).toISOString().slice(0, 10) : null;
-
-    // console.log("Formatted Due Date:", formattedDueDate);
-    // console.log("Formatted Taken Date:", formattedTakenDate);
 
     function encryptText(text, key) {
       const cipher = crypto.createCipher('aes-256-cbc', key);
@@ -234,8 +226,6 @@ const getInfo_Referred = async (req, res) => {
 
     const decryptedDecisionData = decisionData.map(decision => {
 
-      // console.log("decisionnnnnnnnnnnnnnnnnnnnnnnnnnn", decision);  
-
       const tags = typeof decision.tags === 'string' ? JSON.parse(decision.tags) : decision.tags; 
       const reasons = typeof decision.reasons === 'string' ? JSON.parse(decision.reasons) : decision.reasons;
 
@@ -281,8 +271,6 @@ const getInfo_Referred = async (req, res) => {
 
 const getallInfo = async (req, res) => {
   let conn;
-  // console.log('qawqaw')
-  // console.log(req.user)
 
   try {
     conn = await getConnection();
@@ -625,15 +613,14 @@ const getall = async (req, res) => {
       };
     });
 
-    // console.log('Decrypted Decisions:', decryptedDecisionData);
 
     res.status(200).json({ decisionData: decryptedDecisionData });
   } catch (error) {
     console.error('Error processing query parameters:', error);
     if (conn) {
-      await conn.rollback(); // Rollback the transaction in case of error
+      await conn.rollback(); 
     }
-    res.status(500).send({ message: 'Internal Server Error' }); // Handle the error gracefully
+    res.status(500).send({ message: 'Internal Server Error' }); 
   } finally {
     if (conn) {
       conn.release();

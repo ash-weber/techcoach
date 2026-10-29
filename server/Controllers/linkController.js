@@ -1,4 +1,4 @@
-const getConnection = require('../Models/database');
+const getConnection = require('../models/database');
 const crypto = require('crypto');
 
 const postSkillLink = async (req, res) => {
@@ -251,7 +251,6 @@ const deleteProfileLink = async (req,res) => {
      res.status(200).json({message:'Decision-link data deleted successfully'});
 
    } catch (error) {
-    console.log('Error deleting decision-link data:',error);
     if (conn) {
         await conn.rollback();
     }
@@ -279,7 +278,6 @@ const deleteSkillLink = async (req,res) => {
      res.status(200).json({message:'Decision-link data deleted successfully'});
 
    } catch (error) {
-    console.log('Error deleting decision-link data:',error);
     if (conn) {
         await conn.rollback();
     }

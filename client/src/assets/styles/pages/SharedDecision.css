@@ -1,0 +1,557 @@
+.sharedDecision-page {
+  min-height: 100vh;
+  padding: 1.5rem;
+  background: var(--surface-canvas);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  box-sizing: border-box;
+}
+
+.sharedDecision-page *,
+.sharedDecision-page *::before,
+.sharedDecision-page *::after {
+  box-sizing: border-box;
+}
+
+.sharedDecision-heading {
+  margin: 0 0 1.25rem;
+  color: var(--text-main);
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  font-weight: 750;
+  line-height: 1.3;
+  letter-spacing: -0.035em;
+}
+
+.sharedDecision-subheading {
+  margin: -0.75rem 0 1.5rem;
+  color: var(--text-muted);
+  font-size: var(--font-size-base);
+  line-height: 1.7;
+}
+
+.sharedDecision-button {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: var(--surface-canvas);
+}
+
+.sharedDecision-button button {
+  min-height: 42px;
+  padding: 0.65rem 1.15rem;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.sharedDecision-button .sharedDecision-inner {
+  border-color: var(--brand-primary);
+  background: var(--brand-primary);
+  color: var(--text-inverse);
+}
+
+.sharedDecision-button .sharedDecision-inner:hover {
+  background: var(--brand-primary-hover);
+  border-color: var(--brand-primary-hover);
+}
+
+.sharedDecision-button .sharedDecision-decision:hover {
+  border-color: var(--brand-primary);
+  background: var(--brand-primary-light);
+}
+
+.sharedDecision-button .sharedDecision-inner,
+.sharedDecision-button .sharedDecision-decision {
+  border-color: var(--brand-primary);
+  background: var(--brand-primary);
+  color: var(--text-inverse);
+}
+
+.sharedDecision-button .sharedDecision-inner:hover,
+.sharedDecision-button .sharedDecision-decision:hover {
+  background: var(--brand-primary-hover);
+  border-color: var(--brand-primary-hover);
+}
+
+.sharedDecision-button button:focus-visible {
+  outline: 3px solid var(--brand-primary-ring);
+  outline-offset: 3px;
+}
+
+.sharedDecision-page .MuiCard-root.sharedDecision-card {
+  overflow: hidden;
+  margin: 1.25rem 0;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-sm);
+  transition:
+    box-shadow 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.sharedDecision-page .MuiCard-root.sharedDecision-card:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  box-shadow: var(--shadow-md);
+}
+
+.sharedDecision-card .MuiCardContent-root {
+  padding: 1.5rem;
+}
+
+.sharedDecision-card .MuiCardContent-root + .MuiCardContent-root {
+  padding-top: 0.5rem;
+}
+
+.sharedDecision-card .MuiCardContent-root:last-child {
+  padding-bottom: 1.5rem;
+}
+
+.sharedDecision-card .MuiTypography-h6 {
+  color: var(--text-main);
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.sharedDecision-card .MuiTypography-body1 {
+  color: var(--text-main);
+  font-size: 0.9rem;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+
+.sharedDecision-card .MuiTypography-body2,
+.sharedDecision-card .MuiTypography-caption {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+.sharedDecision-card .MuiTypography-colorTextSecondary {
+  color: var(--text-muted);
+}
+
+.sharedDecision-card .MuiAvatar-root {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  background: var(--brand-primary-light);
+  color: var(--brand-primary);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.sharedDecision-card .sharedDecision-reasons {
+  margin: 0.5rem 0 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.sharedDecision-card .sharedDecision-reason {
+  position: relative;
+  margin: 0.5rem 0;
+  padding: 0.65rem 0.85rem 0.65rem 1.8rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface-canvas);
+  color: var(--text-main);
+  font-size: 0.9rem;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+.sharedDecision-card .sharedDecision-reason::before {
+  position: absolute;
+  top: 0.65rem;
+  left: 0.8rem;
+  color: var(--brand-primary);
+  content: "•";
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.sharedDecision-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin: 0 0 1.25rem;
+}
+
+.sharedDecision-toolbar .MuiToggleButton-root {
+  min-height: 42px;
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 0.825rem;
+  font-weight: 600;
+  line-height: 1.4;
+  text-transform: none;
+  transition: var(--transition);
+}
+
+.sharedDecision-toolbar .MuiToggleButton-root.Mui-selected {
+  border-color: var(--brand-primary);
+  background: var(--brand-primary);
+  color: #fff;
+}
+
+.sharedDecision-toolbar .MuiToggleButton-root.Mui-selected:hover {
+  border-color: var(--brand-primary-hover);
+  background: var(--brand-primary-hover);
+}
+
+.sharedDecision-toolbar .MuiToggleButton-root:not(.Mui-selected):hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.sharedDecision-toolbar .MuiIconButton-root {
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+}
+
+.sharedDecision-toolbar .MuiIconButton-root:hover {
+  border-color: var(--brand-primary);
+  background: var(--brand-primary-light);
+  color: var(--brand-primary);
+}
+
+.sharedDecision-toolbar .sharedDecision-user-select {
+  width: 100%;
+  max-width: 290px;
+  min-height: 42px;
+  padding: 0.65rem 2rem 0.65rem 0.8rem;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  outline: none;
+  background: var(--surface-card);
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.sharedDecision-toolbar .sharedDecision-user-select:focus {
+  border-color: var(--surface-border-focus);
+  box-shadow: 0 0 0 3px var(--brand-primary-ring);
+}
+
+.sharedDecision-comments-title {
+  margin: 1rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.sharedDecision-comment {
+  margin: 0.85rem 0;
+  padding: 1rem;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-md);
+  background: var(--surface-card);
+  transition: var(--transition);
+}
+
+.sharedDecision-comment:hover {
+  border-color: var(--surface-border-hover);
+}
+
+.sharedDecision-comment-text {
+  margin: 0 0 0.35rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.sharedDecision-comment-meta {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+
+.sharedDecision-comment .MuiIconButton-root {
+  width: 38px;
+  height: 38px;
+  color: var(--text-muted);
+}
+
+.sharedDecision-comment .MuiIconButton-root:hover {
+  background: var(--brand-primary-light);
+  color: var(--brand-primary);
+}
+
+.sharedDecision-replies {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin: 0.85rem 0 0 1.5rem;
+  padding-left: 1rem;
+  border-left: 2px solid var(--surface-border);
+}
+
+.sharedDecision-reply {
+  padding: 0.9rem;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-md);
+  background: var(--surface-canvas);
+  overflow-wrap: anywhere;
+}
+
+.sharedDecision-reply .MuiAvatar-root {
+  width: 34px;
+  height: 34px;
+  font-size: 0.8rem;
+}
+
+.sharedDecision-comment-form {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--surface-border);
+}
+
+.sharedDecision-page .sharedDecision-comment-input,
+.sharedDecision-edit-input {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-md);
+  outline: none;
+  background: var(--surface-card);
+  color: var(--text-main);
+  font-family: inherit;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  box-sizing: border-box;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.sharedDecision-page .sharedDecision-comment-input {
+  resize: vertical;
+}
+
+.sharedDecision-page .sharedDecision-comment-input::placeholder,
+.sharedDecision-edit-input::placeholder {
+  color: var(--text-subtle);
+}
+
+.sharedDecision-page .sharedDecision-comment-input:focus,
+.sharedDecision-edit-input:focus {
+  border-color: var(--surface-border-focus);
+  box-shadow: 0 0 0 3px var(--brand-primary-ring);
+}
+
+.sharedDecision-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  margin-top: 0.85rem;
+}
+
+.sharedDecision-page .sharedDecision-actions .MuiButton-root,
+.sharedDecision-edit-popover .MuiButton-root {
+  min-height: 40px;
+  padding: 0.6rem 1.1rem;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 650;
+  text-transform: none;
+  box-shadow: none;
+  transition: var(--transition);
+}
+
+.sharedDecision-page .sharedDecision-actions .MuiButton-containedPrimary,
+.sharedDecision-edit-popover .MuiButton-containedPrimary {
+  background: var(--brand-primary);
+  color: #fff;
+}
+
+.sharedDecision-page .sharedDecision-actions .MuiButton-containedPrimary:hover,
+.sharedDecision-edit-popover .MuiButton-containedPrimary:hover {
+  background: var(--brand-primary-hover);
+  box-shadow: var(--shadow-sm);
+}
+
+.sharedDecision-page .sharedDecision-actions .MuiButton-root.Mui-disabled {
+  background: var(--surface-card-hover);
+  color: var(--text-subtle);
+}
+
+.sharedDecision-edit-popover .MuiPopover-paper {
+  width: min(440px, calc(100vw - 32px));
+  padding: 1.25rem;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-lg);
+}
+
+.sharedDecision-edit-popover .sharedDecision-edit-input {
+  margin-top: 0.85rem;
+  resize: vertical;
+}
+
+.sharedDecision-edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.sharedDecision-empty {
+  margin: 1.5rem 0;
+  padding: 2.5rem 1.25rem;
+  border: 1px dashed var(--surface-border-hover);
+  border-radius: var(--radius-lg);
+  background: var(--surface-card);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.sharedDecision-empty .MuiTypography-root {
+  color: inherit;
+}
+
+.sharedDecision-loading {
+  display: flex;
+  min-height: 260px;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .sharedDecision-page {
+    padding: 1rem;
+  }
+
+  .sharedDecision-button {
+    padding: 0.85rem 1rem;
+  }
+
+  .sharedDecision-toolbar {
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 0.65rem;
+    padding: 0.85rem;
+  }
+
+  .sharedDecision-toolbar .MuiButtonGroup-root {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .sharedDecision-toolbar .MuiButtonGroup-root .MuiToggleButton-root {
+    width: 100%;
+    border-radius: var(--radius-sm);
+  }
+
+  .sharedDecision-toolbar .sharedDecision-user-select {
+    max-width: none;
+    flex: 1 1 100%;
+  }
+
+  .sharedDecision-page .MuiCard-root.sharedDecision-card {
+    margin: 1rem 0;
+    border-radius: var(--radius-md);
+  }
+
+  .sharedDecision-card .MuiCardContent-root {
+    padding: 1rem;
+  }
+
+  .sharedDecision-card .MuiCardContent-root:last-child {
+    padding-bottom: 1rem;
+  }
+
+  .sharedDecision-actions {
+    justify-content: stretch;
+  }
+
+  .sharedDecision-page .sharedDecision-actions .MuiButton-root {
+    flex: 1 1 150px;
+  }
+
+  .sharedDecision-replies {
+    margin-left: 0.5rem;
+    padding-left: 0.65rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .sharedDecision-page {
+    padding: 0.75rem;
+  }
+
+  .sharedDecision-button {
+    gap: 0.5rem;
+  }
+
+  .sharedDecision-button button {
+    width: 100%;
+  }
+
+  .sharedDecision-heading {
+    font-size: 1.5rem;
+  }
+
+  .sharedDecision-card .MuiGrid-container {
+    min-width: 0;
+  }
+
+  .sharedDecision-card .MuiGrid-item {
+    min-width: 0;
+  }
+
+  .sharedDecision-comment {
+    padding: 0.75rem;
+  }
+
+  .sharedDecision-actions {
+    flex-direction: column;
+  }
+
+  .sharedDecision-page .sharedDecision-actions .MuiButton-root {
+    width: 100%;
+    flex: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sharedDecision-page *,
+  .sharedDecision-page *::before,
+  .sharedDecision-page *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}

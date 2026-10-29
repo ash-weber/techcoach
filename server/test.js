@@ -1,4 +1,4 @@
-const getConnection = require('./Models/database');
+const getConnection = require('./models/database');
 
 const runUpdate = async () => {
   let conn;

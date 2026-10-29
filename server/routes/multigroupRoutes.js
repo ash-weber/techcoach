@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const multigroupController = require("../Controllers/multigroupController");
-const authMiddleware = require("../Utility/AuthMiddleware");
-const createUserKey = require("../Utility/CreateUserKey");
+const multigroupController = require("../controllers/multigroupController");
+const authMiddleware = require("../utils/AuthMiddleware");
+const createUserKey = require("../utils/CreateUserKey");
 
 router.use(authMiddleware);
 router.use(createUserKey);

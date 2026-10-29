@@ -1,13 +1,9 @@
-const getConnection = require('../Models/database');
+const getConnection = require('../models/database');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-const { sendOtpEmail } = require('../Utility/mail');
+const { sendOtpEmail } = require('../utils/mail');
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
-
-/* =========================
-   Password Helper Functions
-========================= */
 
 function hashPassword(password) {
     const salt = crypto.randomBytes(16).toString("hex");
@@ -20,10 +16,6 @@ function verifyPassword(password, storedHash) {
     const hashVerify = crypto.scryptSync(password, salt, 64).toString("hex");
     return hash === hashVerify;
 }
-
-/* =========================
-   Register User
-========================= */
 
 const registerUser = async (req, res) => {
     const { username, email, password } = req.body;
@@ -74,9 +66,6 @@ const registerUser = async (req, res) => {
     }
 };
 
-/* =========================
-   Verify OTP
-========================= */
 
 const verifyOtp = async (req, res) => {
     const { email, otp } = req.body;
@@ -129,9 +118,6 @@ const verifyOtp = async (req, res) => {
     }
 };
 
-/* =========================
-   Login User
-========================= */
 
 const loginUser = async (req, res) => {
     const { email, password } = req.body;

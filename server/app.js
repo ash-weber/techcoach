@@ -3,7 +3,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 const jwt = require('jsonwebtoken');
 const session = require('express-session');
-const passport = require('./Middleware/passportConfig');
+const passport = require('./middleware/passportConfig');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const decisionRoutes = require('./routes/decisionRoutes');
@@ -16,6 +16,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const advancedProfileRoutes = require('./routes/advancedProfileRoutes');
 const advancedLinkRoutes = require('./routes/advancedLinkRoutes');
 const subscriptionRoutes = require('./routes/subscriptionRoutes');
+const teamsNotificationRoutes = require('./routes/teamsNotificationRoutes');
 
 require('dotenv').config();
 
@@ -25,6 +26,7 @@ const PORT = process.env.PORT;
 app.use(express.json({ limit: "10mb" }));
 app.use(cors({ origin: "*" }));
 app.use(morgan('tiny'));
+
 app.use(session({
     secret: 'cats',
     resave: false,
@@ -45,7 +47,7 @@ app.use('/api/admin',adminRoutes);
 app.use('/api',advancedProfileRoutes);
 app.use('/link',advancedLinkRoutes); 
 app.use('/api/subscription', subscriptionRoutes);
-
+app.use('/api/teams',teamsNotificationRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);

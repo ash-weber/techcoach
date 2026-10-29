@@ -1,7 +1,7 @@
 const express = require('express');
-const authMiddleware = require('../Utility/AuthMiddleware');
-const createUserKey = require('../Utility/CreateUserKey');
-const { postSkillLink,postProfileLink,getAllProfileLink, getAllSkillLink, deleteProfileLink, deleteSkillLink } = require('../Controllers/linkController');
+const authMiddleware = require('../utils/AuthMiddleware');
+const createUserKey = require('../utils/CreateUserKey');
+const { postSkillLink,postProfileLink,getAllProfileLink, getAllSkillLink, deleteProfileLink, deleteSkillLink } = require('../controllers/linkController');
 
 const router = express.Router();
 
