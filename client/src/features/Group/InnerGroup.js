@@ -40,7 +40,7 @@ const InnerGroup = () => {
 
         const response = await innerCircleCreation(groupData);
         if(response.status === 200) {
-            navigate('/innerCircleDisplay');
+            navigate('/inner-circle');
         }
     };
 

@@ -1,8 +1,8 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const passport = require('../middleware/passportConfig');
+const passport = require('../Middleware/passportConfig.js');
 const router = express.Router();
-const authController = require('../controllers/authController.js');
+const authController = require('../Controllers/authController.js');
 
 const { insertLoginHistory } = require("../utils/gift.helpers.utils")
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;

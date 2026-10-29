@@ -1,4 +1,4 @@
-const getConnection = require('../models/database');
+const getConnection = require('../Models/database');
 const crypto = require('crypto');
 
 const postSkillLink = async (req, res) => {

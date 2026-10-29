@@ -768,7 +768,7 @@ const ShareByMe = () => {
           <Typography variant="h6" gutterBottom>
             To share a decision, open one of your decisions and share with your Inner Circle
           </Typography>
-          <Link to="/innerCircleDisplay" style={{ textDecoration: "none" }}>
+          <Link to="/inner-circle" style={{ textDecoration: "none" }}>
             <Button
               variant="contained"
               color="primary"

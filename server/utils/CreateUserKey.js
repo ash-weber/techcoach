@@ -1,4 +1,4 @@
-const getConnection = require('../models/database');
+const getConnection = require('../Models/database');
 
 const createUserKey = async (req, res, next) => {
     try {

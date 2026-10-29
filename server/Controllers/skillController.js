@@ -1,4 +1,4 @@
-const getConnection = require('../models/database');
+const getConnection = require('../Models/database');
 
 const postSkill = async (req, res) => {
   const { skill_name, rating, comments } = req.body;

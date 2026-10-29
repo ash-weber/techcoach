@@ -176,7 +176,7 @@ const Header = () => {
                 </li>
                 <li>
                   <NavLink
-                    to="/innerCircleDisplay"
+                    to="/inner-circle"
                     className={({ isActive }) =>
                       `nav-item-link ${isActive ? "active" : ""}`
                     }

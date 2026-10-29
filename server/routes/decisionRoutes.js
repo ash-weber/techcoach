@@ -1,5 +1,5 @@
 const express = require('express');
-const { postInfo, getallInfo, getInfo, putInfo, deleteInfo, getall, getInfo_Referred, getMonthlyDecisionCount } = require('../controllers/decisionControllers');
+const { postInfo, getallInfo, getInfo, putInfo, deleteInfo, getall, getInfo_Referred, getMonthlyDecisionCount } = require('../Controllers/decisionControllers');
 const authMiddleware = require('../utils/AuthMiddleware');
 const createUserKey = require('../utils/CreateUserKey');
 
