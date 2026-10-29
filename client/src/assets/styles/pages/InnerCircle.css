@@ -1,0 +1,281 @@
+.inner-circle-container {
+  margin: var(--space-lg);
+}
+
+.inner-circle-card {
+  max-width: 85rem;
+  margin: var(--space-2xl) auto;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+
+.inner-circle-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: #cbd5e1;
+}
+
+.inner-circle-card .card-body {
+  padding: var(--space-xl);
+}
+
+.inner-circle-card .card-title {
+  color: var(--text-main);
+  font-weight: 600;
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--space-lg);
+}
+
+.inner-circle-loading {
+  text-align: center;
+  padding: var(--space-2xl) 0;
+  color: var(--text-muted);
+}
+
+.inner-circle-loading p {
+  margin-top: var(--space-md);
+  font-size: var(--font-size-base);
+}
+
+.inner-circle-alert {
+  background: var(--danger-light);
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  border-radius: var(--radius-sm);
+  padding: var(--space-md);
+  margin-bottom: var(--space-lg);
+  font-size: var(--font-size-base);
+}
+
+.inner-circle-create-btn {
+  background-color: var(--primary);
+  color: var(--text-inverse);
+  padding: var(--space-sm) var(--space-md);
+  border: none;
+  border-radius: var(--radius-sm);
+  width: 100%;
+  margin-top: var(--space-lg);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.inner-circle-create-btn:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.inner-circle-section-title {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: var(--space-md);
+}
+
+.inner-circle-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.inner-circle-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  font-size: var(--font-size-base);
+  color: var(--text-main);
+  transition: var(--transition);
+}
+
+.inner-circle-list-item:hover {
+  background: var(--bg-surface-hover);
+}
+
+.inner-circle-list-item.is-accepted {
+  background: var(--success-light);
+  border-color: var(--success);
+  color: var(--text-main);
+}
+
+.inner-circle-list-item.is-accepted:hover {
+  background: #d1fae5;
+}
+
+.inner-circle-list-item.is-pending {
+  background: var(--warning-light);
+  border-color: var(--warning);
+  color: var(--text-main);
+}
+
+.inner-circle-list-item.is-pending:hover {
+  background: #fef3c7;
+}
+
+.inner-circle-list-item .member-info {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.inner-circle-list-item .member-name {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.inner-circle-list-item .member-email {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.inner-circle-list-item .member-status {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.inner-circle-list-empty {
+  padding: var(--space-lg);
+  text-align: center;
+  color: var(--text-muted);
+  font-size: var(--font-size-base);
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-sm);
+}
+
+.inner-circle-btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  margin: var(--space-lg);
+  padding: var(--space-sm) var(--space-md);
+  background-color: var(--danger);
+  color: var(--text-inverse);
+  border: 1px solid var(--danger);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.inner-circle-btn-danger:hover:not(:disabled) {
+  background-color: #dc2626;
+  border-color: #dc2626;
+  transform: translateY(-1px);
+}
+
+.inner-circle-btn-danger:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.inner-circle-search {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-main);
+  font-size: var(--font-size-base);
+  box-sizing: border-box;
+  margin-bottom: var(--space-lg);
+  transition: var(--transition);
+}
+
+.inner-circle-search:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--brand-primary-ring);
+}
+
+.inner-circle-search::placeholder {
+  color: var(--text-subtle);
+}
+
+.inner-circle-invite-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  background-color: var(--danger);
+  color: var(--text-inverse);
+  border: 1px solid var(--danger);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  margin-top: var(--space-md);
+  width: 100%;
+}
+
+.inner-circle-invite-btn:hover:not(:disabled) {
+  background-color: #dc2626;
+  border-color: #dc2626;
+  transform: translateY(-1px);
+}
+
+.inner-circle-invite-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+@media (min-width: 768px) {
+  .inner-circle-invite-btn {
+    width: 30%;
+  }
+}
+
+.inner-circle-warning {
+  margin-top: var(--space-md);
+  padding: var(--space-md);
+  background: var(--warning-light);
+  color: var(--warning);
+  border: 1px solid var(--warning);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  font-weight: 500;
+}
+
+.inner-circle-btn-danger .spinner-border,
+.inner-circle-invite-btn .spinner-border {
+  width: 0.9rem;
+  height: 0.9rem;
+  border-width: 0.15em;
+}
+
+@media (max-width: 767px) {
+  .inner-circle-container {
+    margin: var(--space-md);
+  }
+
+  .inner-circle-card {
+    margin: var(--space-lg) auto;
+  }
+
+  .inner-circle-card .card-body {
+    padding: var(--space-lg);
+  }
+
+  .inner-circle-list-item {
+    flex-wrap: wrap;
+    padding: var(--space-md);
+  }
+
+  .inner-circle-btn-danger {
+    margin: var(--space-sm) 0 0 0;
+    width: 100%;
+  }
+}

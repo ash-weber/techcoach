@@ -81,7 +81,7 @@
 
 
 
-const getConnection = require('../models/database');
+const getConnection = require('../Models/database');
 
 const postComment = async (req, res) => {
     const { groupId, commentText, decisionId } = req.body;

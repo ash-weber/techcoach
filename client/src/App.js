@@ -112,6 +112,9 @@ function App() {
         <Route path="/profile/soft-skill/edit/:id" element={<EditSkill />} />
 
 
+        <Route path="/inner-circle" element={<DisplayInnerCircle />} />
+
+
         <Route path="/decision-circle" element={<DecisionCircle />} />
         <Route path="/innerCircle" element={<InnerCircle />} />
         
@@ -132,7 +135,7 @@ function App() {
         <Route path="/paypal/success" element={<PaypalSuccess />} />
         <Route path="/paypal/cancel" element={<PaypalCancel />} />
         <Route path="/group" element={<MultipleMemberGroup />} />
-        <Route path="/innerCircleDisplay" element={<DisplayInnerCircle />} />
+        
         <Route path="/shareAcceptOrNot" element={<AcceptOrNot />} />
         
       </Route>

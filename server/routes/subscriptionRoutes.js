@@ -6,8 +6,8 @@ const {
   createOneTimeOrder,
   captureOneTimeOrder,
   getClientToken,
-} = require("../services/paypalService");
-const getConnection = require("../models/database");
+} = require("../Services/paypalService");
+const getConnection = require("../Models/database");
 
 const ensureAuth = (req, res, next) => {
   if (!req.user) {

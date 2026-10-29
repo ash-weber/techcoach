@@ -4,7 +4,7 @@ const GoogleStrategy = require('passport-google-oauth2').Strategy;
 const mariadb = require('mariadb');
 const jwt = require('jsonwebtoken');
 const { sendWelcomeEmail } = require('../utils/mail');
-const getConnection = require('../models/database');
+const getConnection = require('../Models/database');
 
 
 const MicrosoftStrategy = require('passport-microsoft').Strategy;
