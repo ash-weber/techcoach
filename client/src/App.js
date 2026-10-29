@@ -9,20 +9,20 @@ import Layout from "./components/layout/Layout.js";
 import Login from "./features/Login/Login.js";
 import Admin from "./features/Admin/Admin.js";
 import AdminView from "./features/Admin/AdminView.js";
-import Decision from "./features/pages/Decision/Decision.js";
-import Readd from "./features/pages/Decision/Readd.js";
-import View from "./features/pages/Decision/View.js";
-import Profile from "./features/pages/Profile_Table/Profile.js";
+import Decision from "./features/Decision/Form/index.js";
+import Readd from "./features/Decision/Table/index.js";
+import View from "./features/Decision/Views/index.js";
+import Profile from "./features/Profile/index.js";
 import InnerCircle from "./features/Group/InnerGroup.js";
 import MultipleMemberGroup from "./features/Group/MultipleMemberGroup.js";
 import DisplayInnerCircle from "./features/Group/DisplayInnerCircle.js";
-import AcceptOrNot from "./features/Group/AcceptOrNot.js";
+import AcceptOrNot from "./features/Decision/ShareDecision/View/AcceptOrNot.js";
 import Notification from "./features/Notification/Notification.js";
 import ProfileTab from "./features/pages/Profile_Table/ProfileTab.js";
-import SharedDecision from "./features/Group/SharedWithMe/SharedDecisions.js";
+import SharedDecision from "./features/DashBoard/sharedWithMe/SharedDecisions.js";
 import DashboardRedirect from "./features/DashBoard/DashboardRedirect.js";
-import ReceivedDecisionsTab from "./features/DashBoard/ReceivedDecisionsTab.js";
-import ShareWithMe from "./features/DashBoard/ShareWithMe.js";
+import ReceivedDecisionsTab from "./features/DashBoard/sharedWithMe/ReceivedDecisions.js";
+import ShareWithMe from "./features/DashBoard/sharedByMe/ShareByMe.js";
 import SoftSkill from "./features/pages/Soft_Skill/Soft_Skill.js";
 import Skillget from "./features/pages/Soft_Skill/Skillget.js";
 import EditSkill from "./features/pages/Soft_Skill/EditSkill.js";
@@ -30,12 +30,11 @@ import AddLink from "./features/pages/Decision-Link/AddLink.js";
 import GetLink from "./features/pages/Decision-Link/GetLink.js";
 import DecisionCircle from "./features/Decision_Circle/DecisionCircle.js";
 import GetGroup from "./features/Decision_Circle/GetGroup.js";
-import ShareCircle from "./features/Decision_Circle/ShareCircle.js";
+import ShareCircle from "./features/Decision/ShareDecision/Share/ShareCircle.js";
 import DecisionGroup from "./features/Decision_Circle/DecisionGroup.js";
 import ShowUsers from "./features/Decision_Circle/ShowUsers.js";
-import ShareCircleGroup from "./features/Decision_Circle/ShareCircleGroup.js";
+import ShareCircleGroup from "./features/Decision/ShareDecision/Share/ShareCircleGroup.js";
 import MemberSharedDecisions from "./features/Decision_Circle/MemberSharedDecisions.js";
-import SharedDecisionCircle from "./features/Decision_Circle/SharedDecisionCircle.js";
 import AdvancedProfile from "./features/pages/Profile_Table/AdvancedProfile.js";
 import AdvancedProfileTable from "./features/pages/Profile_Table/AdvancedProfileTable.js";
 import PaypalSuccess from "./features/pages/paypal/PaypalSuccess.js";
@@ -79,63 +78,63 @@ function App() {
       <Route element={<Layout />}>
         <Route path="/admin" element={<Admin />} />
         <Route path="/adminView/:id" element={<AdminView />} />
-        <Route path="/dashboard" element={<DashboardRedirect />} />
-        <Route path="/decision" element={<Decision />} />
-        <Route path="/decision-circle" element={<DecisionCircle />} />
-        <Route path="/innerCircle" element={<InnerCircle />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/softskill" element={<SoftSkill />} />
 
-        <Route path="/profiletab" element={<ProfileTab />} />
-        <Route path="/advancedProfile" element={<AdvancedProfile />} />
+
+        <Route path="/dashboard" element={<DashboardRedirect />} />
+        <Route path="/shared-decisions" element={<SharedDecision />} />
+        <Route path="/shared-by-me" element={<ShareWithMe />} />
         <Route
-          path="/advancedProfileTable"
+          path="/receivedDecisions"
+          element={<ReceivedDecisionsTab />}
+        /> {/* UI Not Done */}
+
+
+
+        <Route path="/decision" element={<Readd />} />
+        <Route path="/decision/add" element={<Decision />} />
+        <Route path="/decision/edit/:id" element={<Decision />} />
+        <Route path="/decision/view/:id" element={<View />} />
+        <Route path="/decision/decision-circle/view/:id" element={<ShareCircle />} />
+        <Route path="/decision/decision-circle/share/:id" element={<ShareCircleGroup />} />
+
+        <Route path="/notification" element={<Notification />} />
+
+
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/profile/edit" element={<ProfileTab />} />
+        <Route path="/profile/advanced-profile" element={<AdvancedProfile />} />
+        <Route
+          path="/profile/advanced-profile/add"
           element={<AdvancedProfileTable />}
         />
+        <Route path="/profile/soft-skill" element={<Skillget />} />
+        <Route path="/profile/soft-skill/add" element={<SoftSkill />} />
+        <Route path="/profile/soft-skill/edit/:id" element={<EditSkill />} />
 
-        <Route path="/skillget" element={<Skillget />} />
-        <Route path="/editskill/:id" element={<EditSkill />} />
 
+        <Route path="/decision-circle" element={<DecisionCircle />} />
+        <Route path="/innerCircle" element={<InnerCircle />} />
+        
+        
         <Route path="/link/:id" element={<AddLink />} />
         <Route path="/getall" element={<GetLink />} />
-
-        <Route path="/softskill" element={<SoftSkill />} />
-        <Route path="/skillget" element={<Skillget />} />
-        <Route path="/editskill/:id" element={<EditSkill />} />
         <Route path="/getall" element={<GetLink />} />
-
-        <Route path="/decision" element={<Decision />} />
-        <Route path="/decision/:id" element={<Decision />} />
-        <Route path="/readd" element={<Readd />} />
-        <Route path="/views/:id" element={<View />} />
-
         <Route path="/decision-circle/:id" element={<DecisionCircle />} />
         <Route path="/getdecisioncircle" element={<GetGroup />} />
         <Route path="/decisiongroup" element={<DecisionGroup />} />
         <Route path="/decisiongroup/:id" element={<DecisionGroup />} />
         <Route path="/getdecisioncircle/:groupId" element={<ShowUsers />} />
-        <Route path="/sharecircle/:id" element={<ShareCircle />} />
-        <Route path="/shareCircleDisplay/:id" element={<ShareCircleGroup />} />
+       
         <Route
           path="/getmembershareddecisions/:groupId"
           element={<MemberSharedDecisions />}
         />
-
-        <Route path="/shared-decisions" element={<SharedDecision />} />
-        <Route path="/sharedByMe" element={<ShareWithMe />} />
-        <Route path="/receivedDecisions" element={<ReceivedDecisionsTab />} />
-        <Route
-          path="/sharedDecisionCircle"
-          element={<SharedDecisionCircle />}
-        />
         <Route path="/paypal/success" element={<PaypalSuccess />} />
         <Route path="/paypal/cancel" element={<PaypalCancel />} />
-
         <Route path="/group" element={<MultipleMemberGroup />} />
         <Route path="/innerCircleDisplay" element={<DisplayInnerCircle />} />
         <Route path="/shareAcceptOrNot" element={<AcceptOrNot />} />
-
-        <Route path="/notification" element={<Notification />} />
+        
       </Route>
     </Routes>
   );

@@ -1,0 +1,175 @@
+.notification-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--space-2xl) var(--space-xl);
+  font-family: var(--font-sans);
+}
+
+.notification-title {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0 0 var(--space-xl);
+  letter-spacing: -0.01em;
+}
+
+.notification-empty {
+  text-align: center;
+  margin-top: var(--space-lg);
+  padding: var(--space-2xl);
+  background: var(--bg-surface);
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-size: var(--font-size-md);
+  font-weight: 500;
+}
+
+.notification-card {
+  margin: 0 0 var(--space-xl) !important;
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-sm) !important;
+  transition: var(--transition);
+}
+
+.notification-card:hover {
+  box-shadow: var(--shadow-md) !important;
+  border-color: var(--surface-border-hover) !important;
+  transform: translateY(-1px);
+}
+
+.notification-card .MuiCardContent-root {
+  padding: var(--space-xl) !important;
+}
+
+.notification-requester {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg) !important;
+}
+
+.notification-avatar {
+  width: 40px;
+  height: 40px;
+  background: var(--primary) !important;
+  color: var(--text-inverse) !important;
+  font-weight: 600 !important;
+  font-size: var(--font-size-base) !important;
+}
+
+.notification-requester-name {
+  font-weight: 600 !important;
+  color: var(--text-main) !important;
+  font-size: var(--font-size-base) !important;
+}
+
+.notification-requester-text {
+  color: var(--text-muted) !important;
+  font-size: var(--font-size-sm) !important;
+}
+
+.notification-members {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg) !important;
+  padding: var(--space-md) var(--space-lg);
+  background: var(--bg-primary);
+  border-radius: var(--radius-md);
+}
+
+.notification-members-label {
+  color: var(--text-muted) !important;
+  font-size: var(--font-size-sm) !important;
+  font-weight: 500 !important;
+  margin-right: var(--space-sm) !important;
+}
+
+.notification-member-avatar {
+  width: 32px !important;
+  height: 32px !important;
+  margin: 0 4px !important;
+  background: var(--primary) !important;
+  color: var(--text-inverse) !important;
+  font-size: var(--font-size-sm) !important;
+  border: 2px solid var(--bg-surface);
+  transition: var(--transition-fast);
+}
+
+.notification-member-avatar:hover {
+  transform: scale(1.1);
+  box-shadow: var(--shadow-md);
+}
+
+.notification-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--border-color);
+}
+
+.notification-actions .btn-accept {
+  background: var(--primary) !important;
+  color: var(--text-inverse) !important;
+  padding: 0.5rem 1.25rem !important;
+  font-size: var(--font-size-base) !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: none !important;
+  transition: var(--transition);
+}
+
+.notification-actions .btn-accept:hover {
+  background: var(--primary-hover) !important;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md) !important;
+}
+
+.notification-actions .btn-reject {
+  background: transparent !important;
+  color: var(--danger) !important;
+  border: 1px solid var(--danger) !important;
+  padding: 0.5rem 1.25rem !important;
+  font-size: var(--font-size-base) !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: none !important;
+  transition: var(--transition);
+}
+
+.notification-actions .btn-reject:hover {
+  background: var(--danger-light) !important;
+  border-color: var(--danger) !important;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 600px) {
+  .notification-page {
+    padding: var(--space-lg) var(--space-md);
+  }
+
+  .notification-card .MuiCardContent-root {
+    padding: var(--space-lg) !important;
+  }
+
+  .notification-requester {
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+  }
+
+  .notification-actions {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .notification-actions .btn-accept,
+  .notification-actions .btn-reject {
+    width: 100%;
+  }
+}

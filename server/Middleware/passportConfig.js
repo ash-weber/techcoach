@@ -47,7 +47,7 @@ passport.use(new GoogleStrategy({
         if (connection) {
             connection.release();
           }
-        return done(null, { id: existingUser.user_id, email: profile.email }); /
+        return done(null, { id: existingUser.user_id, email: profile.email }); 
 
     } catch (error) {
         if (connection) {

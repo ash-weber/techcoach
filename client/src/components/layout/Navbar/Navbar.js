@@ -3,7 +3,7 @@ import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 import tech from "../../../assets/images/logo.png";
-import { getInnerCircleAcceptNotification } from "../../../features/Group/Network_Call";
+import { getInnerCircleAcceptNotification } from "../../../api/InnerCircle/Network_Call";
 import "../../../assets/styles/components/Navbar.css";
 
 const Header = () => {
@@ -156,7 +156,7 @@ const Header = () => {
                 </li>
                 <li>
                   <NavLink
-                    to="/readd"
+                    to="/decision"
                     className={({ isActive }) =>
                       `nav-item-link ${isActive ? "active" : ""}`
                     }
@@ -252,12 +252,12 @@ const Header = () => {
                       </Link>
                     </li>
                     <li>
-                      <Link to="/advancedProfile" className="dropdown-link">
+                      <Link to="/profile/advanced-profile" className="dropdown-link">
                         Advanced Profile
                       </Link>
                     </li>
                     <li>
-                      <Link to="/skillget" className="dropdown-link">
+                      <Link to="/profile/soft-skill" className="dropdown-link">
                         Soft Skills
                       </Link>
                     </li>

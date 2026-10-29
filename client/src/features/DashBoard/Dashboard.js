@@ -10,7 +10,7 @@ import {
 } from "@mui/icons-material";
 import ModelTrainingIcon from "@mui/icons-material/ModelTraining";
 import { MdFormatListBulletedAdd } from "react-icons/md";
-import { getSharedDecisionDetails } from "../Group/Network_Call";
+import { getSharedDecisionDetails } from "../../api/InnerCircle/Network_Call";
 import withAuth from "../../utils/withAuth";
 import "../../assets/styles/pages/Dashboard.css";
 
@@ -187,7 +187,7 @@ const Dashboard = () => {
 
       <Grid container spacing={3}>
         <Grid item xs={12} sm={6} md={4}>
-          <div className="metric-card" onClick={() => navigate("/readd")}>
+          <div className="metric-card" onClick={() => navigate("/decision")}>
             <div className="metric-card-left">
               <div className="metric-icon-box">
                 <AssignmentTurnedIn />
@@ -226,7 +226,7 @@ const Dashboard = () => {
         </Grid>
 
         <Grid item xs={12} sm={6} md={4}>
-          <div className="metric-card" onClick={() => navigate("/sharedByMe")}>
+          <div className="metric-card" onClick={() => navigate("/shared-by-me")}>
             <div className="metric-card-left">
               <div className="metric-icon-box">
                 <Share />
@@ -303,7 +303,7 @@ const Dashboard = () => {
                         <button
                           className="edit-action-btn"
                           onClick={() =>
-                            navigate(`/decision/${decision.decision_id}`)
+                            navigate(`/decision/edit/${decision.decision_id}`)
                           }
                         >
                           Edit

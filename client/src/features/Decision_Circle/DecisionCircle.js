@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import './DecisionCircle.css';
 import withAuth from '../../utils/withAuth';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { postdecisionGroup, putDecisionGroup,getDecisionGroup } from './Networkk_Call';
+import { postdecisionGroup, putDecisionGroup,getDecisionGroup } from '../../api/DecisionCircle/Network_Call';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 

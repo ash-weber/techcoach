@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { getInnerCircleDetails, removeMemberFromInner, getAddMemberNameListFetch, addMemberToInnerCircle, innerCircleInvitation, innerCircleAddInvitation } from './Network_Call';
+import { getInnerCircleDetails, removeMemberFromInner, getAddMemberNameListFetch, addMemberToInnerCircle, innerCircleInvitation, innerCircleAddInvitation } from '../../api/InnerCircle/Network_Call';
 import { Container, ListGroup, Button, Spinner, Card, Alert } from 'react-bootstrap';
 import { ToastContainer, toast } from 'react-toastify';
-import ShareModal from './ShareModel';
+import ShareModal from '../Decision/ShareDecision/View/ShareModel';
 import withAuth from '../../utils/withAuth';
 // import { decomposeColor } from '@mui/material';
 

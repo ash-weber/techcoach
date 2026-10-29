@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios';
-import './Admin.css';
 import { useParams } from 'react-router-dom';
 
 const AdminView = () => {

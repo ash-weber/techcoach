@@ -1,12 +1,12 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import "./Skillget.css";
 import { Link } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { MdDescription } from "react-icons/md";
 import withAuth from "../../../utils/withAuth";
+import "../../../assets/styles/pages/Profile.css"
 
 const Skillget = () => {
   const [skills, setSkills] = useState([]);
@@ -92,7 +92,7 @@ const Skillget = () => {
       </div>
 
       <div>
-        <Link to="/softskill">
+        <Link to="/profile/soft-skill/add">
           <button className="softskill-head">Add Skills</button>
         </Link>
       </div>
@@ -125,7 +125,7 @@ const Skillget = () => {
                 <td>{skill.rating}</td>
                 <td>{skill.comments}</td>
                 <td className="action">
-                  <Link to={`/editskill/${skill.id}`}>
+                  <Link to={`/profile/soft-skill/edit/${skill.id}`}>
                     <button className="edit">Edit</button>
                   </Link>
                   <button

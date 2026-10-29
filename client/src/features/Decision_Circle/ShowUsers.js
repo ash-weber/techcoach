@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import './ShowUsers.css';
-import { removeUsersFromGroup, getdecisionSharedDecisionCircle, getComments, replyToComment, mailToDecisionCircleReplyComment, updateComment, deleteComment } from './Networkk_Call';
+import { removeUsersFromGroup, getdecisionSharedDecisionCircle, getComments, replyToComment, mailToDecisionCircleReplyComment, updateComment, deleteComment } from '../../api/DecisionCircle/Network_Call';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import { IoPersonAdd } from "react-icons/io5";

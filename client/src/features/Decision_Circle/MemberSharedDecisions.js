@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
-import { getMemberSharedDecisions, mailToDecisionCirclePostComment, postComment, getComments, deleteComment, updateComment } from './Networkk_Call';
+import { getMemberSharedDecisions, mailToDecisionCirclePostComment, postComment, getComments, deleteComment, updateComment } from '../../api/DecisionCircle/Network_Call';
 import { Card, CardContent, Typography, Grid, Avatar, CircularProgress, Box, TextField, Button, Modal } from '@mui/material';
 import { AiFillEdit } from "react-icons/ai";
 import { MdOutlineDeleteForever } from "react-icons/md";
-import './MemberSharedDecisions.css';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import axios from 'axios';
 

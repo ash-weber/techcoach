@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getAlldecisionGroup, deleteDecisionGroup, getUserDecisionCircles } from './Networkk_Call';
-import './GetGroup.css';
+import { getAlldecisionGroup, deleteDecisionGroup, getUserDecisionCircles } from '../../api/DecisionCircle/Network_Call';
 import { MdEdit, MdDeleteForever, MdGroupAdd, MdGroupRemove } from "react-icons/md";
 import { FaUsersViewfinder } from "react-icons/fa6";
 import { useNavigate, Link, useParams } from 'react-router-dom';

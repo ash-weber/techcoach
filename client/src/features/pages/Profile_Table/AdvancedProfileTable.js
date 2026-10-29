@@ -179,14 +179,13 @@
 
 
 import React, { useEffect, useState } from 'react';
-import './AdvancedProfileTable.css';
 import { IoIosAddCircleOutline, IoIosRemoveCircleOutline } from "react-icons/io";
 import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 import withAuth from '../../../utils/withAuth';
-
+import "../../../assets/styles/pages/Profile.css";
 
 const AdvancedProfileTable = () => {
     const [formsData, setFormsData] = useState({
@@ -354,7 +353,7 @@ const AdvancedProfileTable = () => {
                 otherFactors: ['']
             });
             toast.success('Data submitted successfully!');
-            navigate('/advancedProfile');
+            navigate('/profile/advanced-profile');
         } catch (error) {
             console.error('Error submitting data:', error);
             toast.error('An error occurred. Please try again.');

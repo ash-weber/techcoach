@@ -227,7 +227,7 @@ import withAuth from "../../utils/withAuth";
 import {
   getUserListForDecisionCircle,
   sendDecisionCircleInvitation,
-} from "./Networkk_Call";
+} from "../../api/DecisionCircle/Network_Call";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";

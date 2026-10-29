@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import "./ProfileTab.css";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import withAuth from "../../../utils/withAuth";
 import { CircularProgress } from "@mui/material";
-   
+import "../../../assets/styles/pages/Profile.css";
+
 const ProfileTab = () => {
   const [formData, setFormData] = useState({
     attitude: [""],

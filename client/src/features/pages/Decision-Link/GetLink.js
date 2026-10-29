@@ -143,7 +143,7 @@
 //       </div>
 
 //       <div>
-//         <Link to='/readd'>
+//         <Link to='/decision'>
 //           <button className='goback'>Go back Add Decisions</button>
 //         </Link>
 //       </div>
@@ -158,12 +158,11 @@
 
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import './GetLink.css';
 import { Link } from 'react-router-dom';
 import { TiDelete } from "react-icons/ti";
 import { toast, ToastContainer } from 'react-toastify';
 import withAuth from '../../../utils/withAuth';
-import BubbleChart from '../Decision/Views/BubbleChart';
+import BubbleChart from '../../Decision/Table/BubbleChart';
 
 const GetLink = () => {
   const [profiles, setProfiles] = useState([]);
@@ -302,7 +301,7 @@ const GetLink = () => {
       </div>
 
       <div>
-        <Link to='/readd'>
+        <Link to='/decision'>
           <button className='goback'>Go back Add Decisions</button>
         </Link>
       </div>
