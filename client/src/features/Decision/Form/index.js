@@ -22,7 +22,7 @@ const ADVANCED_TAGS = [
 ];
 const DRIVER_TAGS = ['Fully Data Driven', 'Not Data Driven', 'Partially Data Driven'];
 
-const Decision = () => {
+const DecisionForm = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTags, setSelectedTags] = useState([]);
   const [showAdvancedTags, setShowAdvancedTags] = useState(false);
@@ -332,4 +332,4 @@ const Decision = () => {
   );
 };
 
-export default withAuth(Decision);
+export default withAuth(DecisionForm);

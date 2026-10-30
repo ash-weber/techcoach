@@ -1,408 +1,233 @@
-// import React, { useState, useEffect } from 'react';
-// import { Avatar, Checkbox, List, ListItem, ListItemAvatar, ListItemText, ListItemSecondaryAction, Paper, Typography, Box, Grid, Button } from '@mui/material';
-// import { useNavigate, useParams, useLocation } from 'react-router-dom';
-// import withAuth from '../withAuth';
-// import { getUserListForDecisionCircle, sendDecisionCircleInvitation } from './Networkk_Call';
-// import axios from 'axios';
-// import { ToastContainer, toast } from 'react-toastify';
-// import 'react-toastify/dist/ReactToastify.css';
-
-// const DecisionGroup = () => {
-//   const [users, setUsers] = useState([]);
-//   const [selectedUsers, setSelectedUsers] = useState([]);
-//   const [searchQuery, setSearchQuery] = useState('');
-
-//   const { id } = useParams();
-//   const navigate = useNavigate();
-
-//   useEffect(() => {
-//     const fetchNames = async () => {
-//       try {
-//         const users = await getUserListForDecisionCircle();
-//         setUsers(users);
-//       } catch (error) {
-//         console.error('Error fetching user list:', error);
-//       }
-//     };
-//     fetchNames();
-//   }, []);
-
-//   const handleCheckboxChange = (event, user) => {
-//     if (event.target.checked) {
-//       setSelectedUsers((prev) => [...prev, user]);
-//     } else {
-//       setSelectedUsers((prev) =>
-//         prev.filter((selectedUser) => selectedUser.user_id !== user.user_id)
-//       );
-//     }
-//   };
-
-//   const handleSubmit = async () => {
-//     if (!id) {
-//       toast.error('Group ID is not specified.');
-//       return;
-//     }
-
-//     if (selectedUsers.length === 0) {
-//       toast.error('No users selected.');
-//       return;
-//     }
-
-//     const members = selectedUsers.map(user => (user.user_id ));
-
-//     try {
-//       const token = localStorage.getItem('token');
-//       const userId = localStorage.getItem('user_id');
-
-//     if (!userId) {
-//       toast.error('User ID is not available.');
-//       return;
-//     }
-//       const response = await axios.post(
-//         `${process.env.REACT_APP_API_URL}/group/decisionCircleCreation`,
-//         {
-//           created_by: userId,
-//         type_of_group: 'decision_circle',
-//         group_name: id,
-//         members:members
-//         },
-//         {
-//           headers: {
-//             Authorization: `Bearer ${token}`,
-//           },
-//         }
-//       );
-
-//       toast.success('Decision circle created successfully!');
-
-//       // Send individual invitations
-//       for (const user of selectedUsers) {
-//         try {
-//           await sendDecisionCircleInvitation(user.email);
-//           toast.success(`Invitation sent to ${user.email} successfully`);
-//         } catch (invitationError) {
-//           toast.error(`Failed to invite ${user.email}`);
-//           console.error(`Error sending invitation to ${user.email}:`, invitationError);
-//         }
-//       }
-
-//       navigate('/getdecisioncircle');
-//     } catch (error) {
-//       toast.error('Error creating decision circle');
-//       console.error('Error creating decision circle:', error.response ? error.response.data : error.message);
-//     }
-//   };
-
-//   const handleSearchInputChange = (e) => {
-//     setSearchQuery(e.target.value.toLowerCase());
-//   };
-
-//   return (
-//     <div>
-//       <center>
-//         <div style={{ maxWidth: '500px' }}>
-//           <input type="text" id="group_id" value={id || ''} readOnly />
-//         </div>
-//       </center>
-//       <Box sx={{ margin: '1rem', display: 'flex', justifyContent: 'center' }}>
-//         <Grid container spacing={2} sx={{ maxWidth: '1000px' }}>
-//           <Grid item xs={12} md={6}>
-//             <Typography variant="h6">List of Members</Typography>
-//             <input
-//               placeholder="Search by email"
-//               fullWidth
-//               value={searchQuery}
-//               onChange={handleSearchInputChange}
-//               style={{
-//                 width: "100%",
-//                 borderRadius: "0.5rem",
-//                 padding: "1rem"
-//               }}
-//             />
-//             <List>
-//               {users
-//                 .filter(user => user.email===searchQuery)
-//                 .map((user) => (
-//                   <ListItem key={user.user_id} button>
-//                     <ListItemAvatar>
-//                       <Avatar sx={{ backgroundColor: "#526D82", border: "0.2rem solid white" }}>
-//                         {user.displayname.charAt(0)}
-//                       </Avatar>
-//                     </ListItemAvatar>
-//                     <ListItemText primary={user.displayname} secondary={user.email} />
-//                     <ListItemSecondaryAction>
-//                       <Checkbox
-//                         edge="end"
-//                         onChange={(event) => handleCheckboxChange(event, user)}
-//                         checked={selectedUsers.some(selectedUser => selectedUser.user_id === user.user_id)}
-//                       />
-//                     </ListItemSecondaryAction>
-//                   </ListItem>
-//               ))}
-//             </List>
-//           </Grid>
-//           <Grid item xs={12} md={6}>
-//             <Typography variant="h6">Selected Members:</Typography>
-//             <Paper elevation={3} sx={{ padding: 2, mt: 2 }}>
-//               {selectedUsers.length > 0 ? (
-//                 <>
-//                   <Box
-//                     display="flex"
-//                     justifyContent="center"
-//                     alignItems="center"
-//                     flexWrap="wrap"
-//                     sx={{ marginTop: '2rem' }}
-//                   >
-//                     {selectedUsers.slice(0, 5).map((user, index) => (
-//                       <Avatar
-//                         key={index}
-//                         sx={{
-//                           backgroundColor: '#526D82',
-//                           width: 40,
-//                           height: 40,
-//                           marginLeft: index === 0 ? 0 : '-10px',
-//                           zIndex: selectedUsers.length - index,
-//                           border: '0.2rem solid white',
-//                         }}
-//                       >
-//                         {user.displayname.charAt(0)}
-//                       </Avatar>
-//                     ))}
-//                     {selectedUsers.length > 5 && (
-//                       <Typography sx={{ marginLeft: '10px' }}>
-//                         +{selectedUsers.length - 5}
-//                       </Typography>
-//                     )}
-//                   </Box>
-//                   <Box mt={2}>
-//                     {selectedUsers.map((user, index) => (
-//                       <Typography key={index}>{user.displayname}</Typography>
-//                     ))}
-//                   </Box>
-//                   <Box mt={2} display="flex" justifyContent="flex-end">
-//                     <Button
-//                       variant="contained"
-//                       sx={{
-//                         backgroundColor: '#526D82',
-//                         borderRadius: '0.5rem',
-//                         color: 'white',
-//                       }}
-//                       onClick={handleSubmit}
-//                     >
-//                       Submit
-//                     </Button>
-//                   </Box>
-//                 </>
-//               ) : (
-//                 <Typography>No members selected</Typography>
-//               )}
-//             </Paper>
-//           </Grid>
-//         </Grid>
-//       </Box>
-//       <ToastContainer />
-//     </div>
-//   );
-// };
-
-// export default withAuth(DecisionGroup);
-
-import React, { useState, useEffect } from "react";
-import {
-  Avatar,
-  Checkbox,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  ListItemSecondaryAction,
-  Paper,
-  Typography,
-  Box,
-  Grid,
-  Button,
-} from "@mui/material";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
-import withAuth from "../../utils/withAuth";
+import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import withAuth from '../../utils/withAuth';
 import {
   getUserListForDecisionCircle,
   sendDecisionCircleInvitation,
-} from "../../api/DecisionCircle/Network_Call";
-import axios from "axios";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+} from '../../api/DecisionCircle/Network_Call';
+import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import {
+  MdOutlineGroups,
+  MdOutlinePersonAdd,
+  MdOutlinePersonRemove,
+  MdOutlineSearch,
+  MdOutlinePublic,
+  MdOutlineCheckCircle,
+  MdOutlineArrowBack,
+  MdOutlinePeople,
+} from 'react-icons/md';
+import { CircularProgress } from '@mui/material';
+import '../../assets/styles/pages/Decision.css';
+import '../../assets/styles/pages/DecisionCircle.css';
+
 const MIN_LOCAL_PART_CHARS = 3;
 const MIN_LOCAL_PART_RATIO = 0.6;
 
 const DecisionGroup = () => {
   const [users, setUsers] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDomain, setSelectedDomain] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedDomain, setSelectedDomain] = useState('');
   const [availableDomains, setAvailableDomains] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   const { id } = useParams();
   const navigate = useNavigate();
 
+  /* ---------------- Fetch users ---------------- */
   useEffect(() => {
-  const fetchNames = async () => {
-    try {
-      const users = await getUserListForDecisionCircle();
-      setUsers(users);
+    const fetchNames = async () => {
+      try {
+        const data = await getUserListForDecisionCircle();
+        const list = Array.isArray(data) ? data : [];
+        setUsers(list);
 
-      const domains = [
-        ...new Set(
-          users
-            .map((u) => u.email?.split("@")[1]?.toLowerCase())
-            .filter(Boolean)
-        ),
-      ].sort();
-
-      setAvailableDomains(domains);
-    } catch (error) {
-      console.error("Error fetching user list:", error);
-    }
-  };
-
-  fetchNames();
-}, []);
-
-  const handleCheckboxChange = (event, user) => {
-    if (event.target.checked) {
-      setSelectedUsers((prev) => [...prev, user]);
-    } else {
-      setSelectedUsers((prev) =>
-        prev.filter((selectedUser) => selectedUser.user_id !== user.user_id),
-      );
-    }
-  };
-
-  const handleSubmit = async () => {
-    if (!id) {
-      toast.error("Group ID is not specified.");
-      return;
-    }
-
-    if (selectedUsers.length === 0) {
-      toast.error("No users selected.");
-      return;
-    }
-
-    const members = selectedUsers.map((user) => user.user_id);
-
-    try {
-      const token = localStorage.getItem("token");
-      const userId = localStorage.getItem("user_id");
-
-      if (!userId) {
-        toast.error("User ID is not available.");
-        return;
+        const domains = [
+          ...new Set(
+            list
+              .map((u) => u.email?.split('@')[1]?.toLowerCase())
+              .filter(Boolean)
+          ),
+        ].sort();
+        setAvailableDomains(domains);
+      } catch (error) {
+        console.error('Error fetching user list:', error);
+        toast.error('Failed to load users');
+      } finally {
+        setLoadingUsers(false);
       }
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/group/decisionCircleCreation`,
-        {
-          created_by: userId,
-          type_of_group: "decision_circle",
-          group_name: id,
-          members: members,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
+    };
+    fetchNames();
+  }, []);
 
-      toast.success("Decision circle created successfully!");
+  /* ---------------- Selection ---------------- */
+  const isSelected = (userId) =>
+    selectedUsers.some((u) => u.user_id === userId);
 
-      for (const user of selectedUsers) {
-        try {
-          await sendDecisionCircleInvitation(user.email);
-          toast.success(`Invitation sent to ${user.email} successfully`);
-        } catch (invitationError) {
-          toast.error(`Failed to invite ${user.email}`);
-          console.error(
-            `Error sending invitation to ${user.email}:`,
-            invitationError,
-          );
-        }
-      }
-
-      navigate("/getdecisioncircle");
-    } catch (error) {
-      toast.error("Error creating decision circle");
-      console.error(
-        "Error creating decision circle:",
-        error.response ? error.response.data : error.message,
-      );
-    }
+  const toggleUser = (user) => {
+    setSelectedUsers((prev) =>
+      prev.some((u) => u.user_id === user.user_id)
+        ? prev.filter((u) => u.user_id !== user.user_id)
+        : [...prev, user]
+    );
   };
 
+  /* ---------------- Filtering ---------------- */
   const handleSearchInputChange = (e) => {
     const raw = e.target.value;
     const lower = raw.toLowerCase();
 
-    if (lower.includes("@")) {
-      const domainPart = lower.split("@")[1]?.trim();
+    if (lower.includes('@')) {
+      const domainPart = lower.split('@')[1]?.trim();
       if (domainPart && availableDomains.includes(domainPart)) {
         setSelectedDomain(domainPart);
       }
     }
-
     setSearchQuery(lower);
   };
 
-  const getFilteredUsers = () => {
+  const filteredUsers = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return [];
 
-    const [typedLocal, typedDomain] = q.split("@");
+    const [typedLocal, typedDomain] = q.split('@');
     const domainFilter = typedDomain || selectedDomain;
 
-    const matched = users.filter((u) => {
+    return users.filter((u) => {
       if (!u.email) return false;
       const email = u.email.toLowerCase();
-      const [localPart, emailDomain] = email.split("@");
+      const [localPart, emailDomain] = email.split('@');
 
       if (domainFilter && emailDomain !== domainFilter) return false;
 
       const required = Math.max(
         MIN_LOCAL_PART_CHARS,
-        Math.ceil(localPart.length * MIN_LOCAL_PART_RATIO),
+        Math.ceil(localPart.length * MIN_LOCAL_PART_RATIO)
       );
-      const typed = typedLocal || "";
+      const typed = typedLocal || '';
       return typed.length >= required && localPart.startsWith(typed);
     });
+  }, [searchQuery, selectedDomain, users]);
 
-    return matched;
+  /* ---------------- Submit ---------------- */
+  const handleSubmit = async () => {
+    if (!id) return toast.error('Group ID is not specified.');
+    if (selectedUsers.length === 0) return toast.error('No users selected.');
+
+    const members = selectedUsers.map((u) => u.user_id);
+    setSubmitting(true);
+
+    try {
+      const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('user_id');
+
+      if (!userId) {
+        setSubmitting(false);
+        return toast.error('User ID is not available.');
+      }
+
+      await axios.post(
+        `${process.env.REACT_APP_API_URL}/group/decisionCircleCreation`,
+        {
+          created_by: userId,
+          type_of_group: 'decision_circle',
+          group_name: id,
+          members,
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      toast.success('Decision circle created successfully!');
+
+      for (const user of selectedUsers) {
+        try {
+          await sendDecisionCircleInvitation(user.email);
+          toast.success(`Invitation sent to ${user.email} successfully`);
+        } catch (err) {
+          toast.error(`Failed to invite ${user.email}`);
+          console.error(err);
+        }
+      }
+
+      navigate('/decision-circle');
+    } catch (error) {
+      toast.error('Error creating decision circle');
+      console.error(
+        'Error creating decision circle:',
+        error.response ? error.response.data : error.message
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
+  /* ---------------- Render ---------------- */
   return (
-    <div>
-      <center>
-        <div style={{ maxWidth: "500px" }}>
-          <input type="text" id="group_id" value={id || ""} readOnly />
+    <div className="dc-page">
+      {/* Back */}
+      <button
+        className="dc-back-link"
+        onClick={() => navigate(-1)}
+        style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}
+      >
+        <MdOutlineArrowBack /> Back
+      </button>
+
+      {/* ---------- Header ---------- */}
+      <header className="dc-group-header">
+        <div className="dc-group-header__main">
+          <div className="dc-group-header__avatar">
+            {id?.charAt(0)?.toUpperCase() || 'G'}
+          </div>
+          <div>
+            <h1 className="dc-group-header__title">{id || 'New Decision Circle'}</h1>
+            <p className="dc-group-header__subtitle">
+              <MdOutlineGroups /> Select members to invite
+            </p>
+          </div>
         </div>
-      </center>
-      <Box sx={{ margin: "1rem", display: "flex", justifyContent: "center" }}>
-        <Grid container spacing={2} sx={{ maxWidth: "1000px" }}>
-          <Grid item xs={12} md={6}>
-            <Typography variant="subtitle2" sx={{ mt: 1, mb: 0.5 }}>
-              Select Domain
-            </Typography>
+        {selectedUsers.length > 0 && (
+          <span className="decision-tag dc-tag-success">
+            <MdOutlineCheckCircle /> {selectedUsers.length} selected
+          </span>
+        )}
+      </header>
+
+      {/* ---------- Two-column layout ---------- */}
+      <div className="dc-two-col">
+        {/* ------- Left: Available users ------- */}
+        <section className="dc-section dc-panel">
+          <h2 className="dc-section__title">
+            <MdOutlinePeople className="dc-section__icon" />
+            Available Members
+            {filteredUsers.length > 0 && (
+              <span className="dc-section__count">{filteredUsers.length}</span>
+            )}
+          </h2>
+
+          {/* Domain picker */}
+          <div className="form-group">
+            <label htmlFor="domain-select">
+              <MdOutlinePublic style={{ verticalAlign: 'middle' }} /> Filter by domain
+            </label>
             <select
+              id="domain-select"
               value={selectedDomain}
-              onChange={(e) => {
-                setSelectedDomain(e.target.value);
-                // optional: clear search so the 60% rule re-applies fresh
-                // setSearchQuery("");
-              }}
+              onChange={(e) => setSelectedDomain(e.target.value)}
+              className="dc-form .form-group input"
               style={{
-                width: "100%",
-                borderRadius: "0.5rem",
-                padding: "0.9rem",
-                marginBottom: "0.75rem",
-                border: "1px solid #ccc",
+                width: '100%',
+                padding: '0.65rem 0.875rem',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--surface-border)',
+                background: 'var(--surface-card)',
+                color: 'var(--text-main)',
+                fontFamily: 'var(--font-sans)',
+                fontSize: 'var(--font-size-base)',
+                boxSizing: 'border-box',
               }}
             >
               <option value="">All domains</option>
@@ -412,115 +237,157 @@ const DecisionGroup = () => {
                 </option>
               ))}
             </select>
+          </div>
 
-            <Typography variant="h6">List of Members</Typography>
+          {/* Search box */}
+          <div className="dc-search">
+            <MdOutlineSearch className="dc-search__icon" />
             <input
-              placeholder="Search by email"
-              fullWidth
+              className="dc-search__input"
+              type="text"
+              placeholder="Search by email…"
               value={searchQuery}
               onChange={handleSearchInputChange}
-              style={{
-                width: "100%",
-                borderRadius: "0.5rem",
-                padding: "1rem",
-              }}
             />
-            <List>
-              {getFilteredUsers().map((user) => (
-                <ListItem key={user.user_id} button>
-                  <ListItemAvatar>
-                    <Avatar
-                      sx={{
-                        backgroundColor: "#526D82",
-                        border: "0.2rem solid white",
-                      }}
-                    >
-                      {user.displayname.charAt(0)}
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={user.displayname}
-                    secondary={user.email}
-                  />
-                  <ListItemSecondaryAction>
-                    <Checkbox
-                      edge="end"
-                      onChange={(event) => handleCheckboxChange(event, user)}
-                      checked={selectedUsers.some(
-                        (selectedUser) => selectedUser.user_id === user.user_id,
-                      )}
-                    />
-                  </ListItemSecondaryAction>
-                </ListItem>
-              ))}
-              {getFilteredUsers().length === 0 && searchQuery.trim() && (
-                <Typography sx={{ p: 2, color: "gray" }}>
-                  Type at least 60% of the name to see matches
-                  {selectedDomain ? ` in @${selectedDomain}` : ""}.
-                </Typography>
-              )}
-            </List>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Typography variant="h6">Selected Members:</Typography>
-            <Paper elevation={3} sx={{ padding: 2, mt: 2 }}>
-              {selectedUsers.length > 0 ? (
-                <>
-                  <Box
-                    display="flex"
-                    justifyContent="center"
-                    alignItems="center"
-                    flexWrap="wrap"
-                    sx={{ marginTop: "2rem" }}
+          </div>
+
+          {/* User list */}
+          {loadingUsers ? (
+            <div className="dc-loading">
+              <CircularProgress size={28} />
+              <p>Loading users…</p>
+            </div>
+          ) : filteredUsers.length === 0 ? (
+            <div className="dc-empty">
+              <MdOutlineSearch className="dc-empty__icon" />
+              <p>
+                {searchQuery.trim()
+                  ? `Type at least 60% of the name to see matches${
+                      selectedDomain ? ` in @${selectedDomain}` : ''
+                    }.`
+                  : 'Start typing to find members.'}
+              </p>
+            </div>
+          ) : (
+            <ul className="dc-user-list">
+              {filteredUsers.map((user) => {
+                const selected = isSelected(user.user_id);
+                return (
+                  <li
+                    key={user.user_id}
+                    className={`dc-user-row ${selected ? 'dc-user-row--selected' : ''}`}
+                    onClick={() => toggleUser(user)}
                   >
-                    {selectedUsers.slice(0, 5).map((user, index) => (
-                      <Avatar
-                        key={index}
-                        sx={{
-                          backgroundColor: "#526D82",
-                          width: 40,
-                          height: 40,
-                          marginLeft: index === 0 ? 0 : "-10px",
-                          zIndex: selectedUsers.length - index,
-                          border: "0.2rem solid white",
-                        }}
-                      >
-                        {user.displayname.charAt(0)}
-                      </Avatar>
-                    ))}
-                    {selectedUsers.length > 5 && (
-                      <Typography sx={{ marginLeft: "10px" }}>
-                        +{selectedUsers.length - 5}
-                      </Typography>
-                    )}
-                  </Box>
-                  <Box mt={2}>
-                    {selectedUsers.map((user, index) => (
-                      <Typography key={index}>{user.displayname}</Typography>
-                    ))}
-                  </Box>
-                  <Box mt={2} display="flex" justifyContent="flex-end">
-                    <Button
-                      variant="contained"
-                      sx={{
-                        backgroundColor: "#526D82",
-                        borderRadius: "0.5rem",
-                        color: "white",
+                    <div className="dc-member-chip__avatar">
+                      {user.displayname?.charAt(0)?.toUpperCase() || 'U'}
+                    </div>
+                    <div className="dc-user-row__info">
+                      <span className="dc-user-row__name">{user.displayname}</span>
+                      <span className="dc-user-row__email">{user.email}</span>
+                    </div>
+                    <button
+                      type="button"
+                      className={`dc-user-row__btn ${
+                        selected ? 'dc-user-row__btn--selected' : ''
+                      }`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleUser(user);
                       }}
-                      onClick={handleSubmit}
+                      aria-label={selected ? 'Remove member' : 'Add member'}
                     >
-                      Submit
-                    </Button>
-                  </Box>
-                </>
-              ) : (
-                <Typography>No members selected</Typography>
-              )}
-            </Paper>
-          </Grid>
-        </Grid>
-      </Box>
-      <ToastContainer />
+                      {selected ? (
+                        <MdOutlinePersonRemove />
+                      ) : (
+                        <MdOutlinePersonAdd />
+                      )}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
+
+        {/* ------- Right: Selected users ------- */}
+        <aside className="dc-section dc-panel">
+          <h2 className="dc-section__title">
+            <MdOutlineGroups className="dc-section__icon" />
+            Selected
+            <span className="dc-section__count">{selectedUsers.length}</span>
+          </h2>
+
+          {selectedUsers.length === 0 ? (
+            <div className="dc-empty">
+              <MdOutlineGroups className="dc-empty__icon" />
+              <p>No members selected yet.</p>
+            </div>
+          ) : (
+            <>
+              {/* Avatar stack */}
+              <div className="dc-avatar-stack">
+                {selectedUsers.slice(0, 5).map((user, index) => (
+                  <div
+                    key={user.user_id}
+                    className="dc-avatar-stack__item"
+                    style={{ zIndex: selectedUsers.length - index }}
+                    title={user.displayname}
+                  >
+                    {user.displayname?.charAt(0)?.toUpperCase() || 'U'}
+                  </div>
+                ))}
+                {selectedUsers.length > 5 && (
+                  <div className="dc-avatar-stack__more">
+                    +{selectedUsers.length - 5}
+                  </div>
+                )}
+              </div>
+
+              {/* Selected list */}
+              <ul className="dc-selected-list">
+                {selectedUsers.map((user) => (
+                  <li key={user.user_id} className="dc-selected-item">
+                    <div className="dc-member-chip__avatar">
+                      {user.displayname?.charAt(0)?.toUpperCase() || 'U'}
+                    </div>
+                    <div className="dc-user-row__info">
+                      <span className="dc-user-row__name">{user.displayname}</span>
+                      <span className="dc-user-row__email">{user.email}</span>
+                    </div>
+                    <button
+                      type="button"
+                      className="dc-selected-item__remove"
+                      onClick={() => toggleUser(user)}
+                      title={`Remove ${user.displayname}`}
+                    >
+                      <MdOutlinePersonRemove />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="dc-panel__footer">
+                <button
+                  type="button"
+                  className="decision-btn decision-btn--primary"
+                  onClick={handleSubmit}
+                  disabled={submitting}
+                >
+                  {submitting ? (
+                    <CircularProgress size={16} style={{ color: '#fff' }} />
+                  ) : (
+                    <>
+                      <MdOutlineCheckCircle /> Create & Invite
+                    </>
+                  )}
+                </button>
+              </div>
+            </>
+          )}
+        </aside>
+      </div>
+
+      <ToastContainer position="top-right" theme="colored" />
     </div>
   );
 };

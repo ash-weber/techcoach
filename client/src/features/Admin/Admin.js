@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { toast,ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; 
 import withAuth from '../../utils/withAuth';
+import "../../assets/styles/pages/Admin.css";
 
 const Admin = () => {
     const [userdatas, setUserDatas] = useState([]);
@@ -75,7 +76,7 @@ const Admin = () => {
                                     />
                                 </td>
                                 <td className='admin-button'>
-                                    <Link to={`/adminView/${userdata.user_id}`}>
+                                    <Link to={`/admin/view/${userdata.user_id}`}>
                                         <button className='view'>View</button>
                                     </Link>
                                     <button className='delete' onClick={() => handleDeleteAccount(userdata.user_id)}>Delete</button>

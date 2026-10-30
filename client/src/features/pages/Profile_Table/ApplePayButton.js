@@ -12,68 +12,12 @@ const ApplePayButton = ({ amount = "12.00", onSuccess, onError }) => {
 
     const initApplePay = async () => {
       try {
-        /*   if (
-          !window.ApplePaySession  || !ApplePaySession.canMakePayments() 
-        ) {
+        if (!window.ApplePaySession || !window.ApplePaySession.canMakePayments()) {
           if (isMounted) {
             setIsSupported(false);
             setLoading(false);
           }
           return;
-        } */
-
-        if (!window.ApplePaySession) {
-          window.ApplePaySession = class MockApplePaySession {
-            static canMakePayments() {
-              return true;
-            }
-            static STATUS_SUCCESS = 1;
-            static STATUS_FAILURE = 0;
-
-            constructor(version, paymentRequest) {
-              this.paymentRequest = paymentRequest;
-            }
-
-            begin() {
-              if (this.onvalidatemerchant) {
-                this.onvalidatemerchant({
-                  validationURL:
-                    "https://apple-pay-gateway-cert.apple.com/paymentSession",
-                });
-              }
-            }
-
-            completeMerchantValidation(merchantSession) {
-              setTimeout(() => {
-                if (
-                  window.confirm(
-                    "Simulate approving Apple Pay with fingerprint/FaceID?",
-                  )
-                ) {
-                  if (this.onpaymentauthorized) {
-                    this.onpaymentauthorized({
-                      payment: {
-                        token: { paymentData: {} },
-                        billingContact: {
-                          givenName: "Test",
-                          familyName: "User",
-                          emailAddress: "test@example.com",
-                        },
-                      },
-                    });
-                  }
-                }
-              }, 800);
-            }
-
-            completePayment(status) {
-              console.log(status);
-            }
-
-            abort() {
-              console.log("Apple Pay aborted");
-            }
-          };
         }
 
         if (!window.paypal) {
@@ -85,7 +29,7 @@ const ApplePayButton = ({ amount = "12.00", onSuccess, onError }) => {
 
         const tokenRes = await axios.get(
           `${process.env.REACT_APP_API_URL}/api/subscription/client-token`,
-          { headers: { Authorization: `Bearer ${token}` } },
+          { headers: { Authorization: `Bearer ${token}` } }
         );
         const clientToken = tokenRes.data.clientToken;
 
@@ -95,10 +39,8 @@ const ApplePayButton = ({ amount = "12.00", onSuccess, onError }) => {
           pageType: "checkout",
         });
 
-        const applePaySession =
-          await sdkInstance.createApplePayOneTimePaymentSession();
-        const { merchantCapabilities, supportedNetworks } =
-          await applePaySession.config();
+        const applePaySession = await sdkInstance.createApplePayOneTimePaymentSession();
+        const { merchantCapabilities, supportedNetworks } = await applePaySession.config();
 
         if (isMounted && containerRef.current) {
           containerRef.current.innerHTML = `
@@ -163,7 +105,7 @@ const ApplePayButton = ({ amount = "12.00", onSuccess, onError }) => {
                 const createRes = await axios.post(
                   `${process.env.REACT_APP_API_URL}/api/subscription/orders/create`,
                   orderPayload,
-                  { headers: { Authorization: `Bearer ${token}` } },
+                  { headers: { Authorization: `Bearer ${token}` } }
                 );
 
                 const orderId = createRes.data.id;
@@ -177,7 +119,7 @@ const ApplePayButton = ({ amount = "12.00", onSuccess, onError }) => {
                 const captureRes = await axios.post(
                   `${process.env.REACT_APP_API_URL}/api/subscription/orders/${orderId}/capture`,
                   {},
-                  { headers: { Authorization: `Bearer ${token}` } },
+                  { headers: { Authorization: `Bearer ${token}` } }
                 );
 
                 session.completePayment({

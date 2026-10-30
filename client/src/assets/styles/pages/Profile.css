@@ -91,7 +91,6 @@
   font-size: var(--font-size-lg);
   font-weight: 700;
   color: var(--text-main);
-  margin: 0 0 var(--space-xs);
   text-transform: capitalize;
 }
 
@@ -1709,6 +1708,60 @@
   }
 
   .softskill-page .skill-addTable button.bg-success {
+    width: 100%;
+  }
+}
+
+.getlink .bubble-chart-container {
+  margin-bottom: var(--space-xl);
+}
+
+.getlink .swot-card svg.fs-4:hover {
+  color: var(--danger) !important;
+  transform: scale(1.15);
+  transition: var(--transition-fast);
+}
+
+.addlink-page {
+  padding-top: var(--space-xl);
+}
+
+.addlink-page ::-webkit-scrollbar {
+  width: 8px;
+}
+.addlink-page ::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+  border-radius: var(--radius-full);
+}
+.addlink-page ::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: var(--radius-full);
+}
+.addlink-page ::-webkit-scrollbar-thumb:hover {
+  background: var(--surface-border-hover);
+}
+
+.addlink-page .form-section {
+  padding-bottom: var(--space-md);
+}
+.addlink-page .form-section:last-of-type {
+  padding-bottom: 0;
+}
+
+.addlink-page .form-section-body label:hover {
+  background: var(--bg-surface-hover) !important;
+}
+
+@media (max-width: 768px) {
+  .addlink-page .swot-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .addlink-page .swot-link {
+    width: 100%;
+    text-align: center;
+  }
+  .addlink-page .save-AdvancedProfilebutton {
     width: 100%;
   }
 }

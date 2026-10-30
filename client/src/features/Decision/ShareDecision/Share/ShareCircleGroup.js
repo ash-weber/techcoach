@@ -9,7 +9,7 @@ import { notifyTeamsChannel } from '../../../../utils/teamsWebhook';
 import DecisionInfoCard from '../../Views/DecisionInfoCard';
 import '../../../../assets/styles/pages/Decision.css';
 
-const ShareCircleGroup = () => {
+const DecisionCircleShare = () => {
   const [loading, setLoading] = useState(false);
   const [groups, setGroups] = useState([]);
   const [selectedGroup, setSelectedGroup] = useState('');
@@ -185,4 +185,4 @@ const ShareCircleGroup = () => {
   );
 };
 
-export default ShareCircleGroup;
+export default DecisionCircleShare;
