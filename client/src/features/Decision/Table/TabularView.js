@@ -79,7 +79,7 @@ const TabularView = ({ data }) => {
   return (
     <div>
       <div className="tabular-toolbar">
-        <Link to="/getall">
+        <Link to="/profile/linked-decision">
           <button className="decision-btn decision-btn--primary">
             Decision Factors
           </button>

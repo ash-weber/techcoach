@@ -27,7 +27,7 @@ const GooglePayButton = ({ amount = "12.00", onSuccess, onError }) => {
         const googlePayConfig = await googlePaySession.getGooglePayConfig();
 
         const paymentsClient = new window.google.payments.api.PaymentsClient({
-          environment: "TEST",
+          environment: process.env.NODE_ENV === 'production' ? 'PRODUCTION' : 'TEST',
           paymentDataCallbacks: {
             onPaymentAuthorized: async (paymentData) => {
               try {

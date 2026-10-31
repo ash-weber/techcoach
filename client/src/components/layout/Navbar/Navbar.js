@@ -166,7 +166,7 @@ const Header = () => {
                 </li>
                 <li>
                   <NavLink
-                    to="/getdecisioncircle"
+                    to="/decision-circle"
                     className={({ isActive }) =>
                       `nav-item-link ${isActive ? "active" : ""}`
                     }

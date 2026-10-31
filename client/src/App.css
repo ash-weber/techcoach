@@ -1,0 +1,29 @@
+@supports (-webkit-appearance: -apple-pay-button) {
+  apple-pay-button {
+    display: inline-block;
+    -webkit-appearance: -apple-pay-button;
+    -apple-pay-button-type: buy;
+    -apple-pay-button-style: black;
+    width: 240px;
+    height: 44px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    cursor: pointer;
+  }
+}
+
+@supports not (-webkit-appearance: -apple-pay-button) {
+  apple-pay-button {
+    display: inline-block;
+    background-size: 100% 60%;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+    border-radius: 5px;
+    padding: 0px;
+    box-sizing: border-box;
+    min-width: 200px;
+    min-height: 32px;
+    max-height: 64px;
+    cursor: pointer;
+  }
+}

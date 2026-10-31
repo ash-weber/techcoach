@@ -97,7 +97,7 @@ const TableView = ({
                       <FaShareAlt />
                     </Link>
                     <Link
-                      to={`/link/${decision.decision_id}?name=${decision.decision_name}`}
+                      to={`/profile/linked-decision/add/${decision.decision_id}?name=${decision.decision_name}`}
                       className="decision-action-icon"
                     >
                       <MdLink />

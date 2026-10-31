@@ -335,6 +335,7 @@
   font-size: var(--font-size-sm);
   color: var(--status-success);
   margin-bottom: var(--space-sm);
+  margin-top: var(--space-lg);
 }
 
 .trend-chart-card {
@@ -1205,4 +1206,12 @@
   font-size: var(--font-size-sm);
   color: var(--text-muted);
   padding: var(--space-md) 0;
+}
+.dc-group-header__avatar svg {
+  font-size: 1.6rem;
+}
+
+.dc-panel__footer .decision-btn--primary {
+  min-width: 200px;
+  justify-content: center;
 }

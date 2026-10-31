@@ -345,7 +345,7 @@ const Profile = () => {
           </div>
 
           <div className="profile-action-container">
-            <Link to="/getall" className="linked-decisions-btn">
+            <Link to="/profile/linked-decision" className="linked-decisions-btn">
               View Linked Decisions
             </Link>
           </div>

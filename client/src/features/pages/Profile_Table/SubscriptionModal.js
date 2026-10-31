@@ -37,6 +37,7 @@ const SubscriptionModal = ({ open, onClose, onRecurringRedirect }) => {
     }
   };
 
+
   useEffect(() => {
     if (!open || !window.google || !window.paypal?.Googlepay) return;
 
@@ -44,6 +45,8 @@ const SubscriptionModal = ({ open, onClose, onRecurringRedirect }) => {
       try {
         const googlepay = window.paypal.Googlepay();
         const { allowedPaymentMethods } = await googlepay.config();
+
+        
 
         const paymentsClient = new window.google.payments.api.PaymentsClient({
           environment: process.env.NODE_ENV === 'production' ? 'PRODUCTION' : 'TEST'

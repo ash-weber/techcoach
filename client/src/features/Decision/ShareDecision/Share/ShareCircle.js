@@ -12,7 +12,7 @@ import ShareModal from '../../ShareDecision/View/ShareModel';
 import DecisionInfoCard from '../../Views/DecisionInfoCard';
 import '../../../../assets/styles/pages/Decision.css';
 
-const ShareCircle = () => {
+const DecisionCircleView = () => {
   const { id } = useParams();
 
   const [decision, setDecision] = useState({});
@@ -124,4 +124,4 @@ const ShareCircle = () => {
   );
 };
 
-export default ShareCircle;
+export default DecisionCircleView;
