@@ -27,7 +27,6 @@ import { formatDistanceToNow, parseISO } from "date-fns";
 import { Link } from "react-router-dom";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
 import withAuth from "../../../utils/withAuth";
-import "../../../assets/styles/pages/SharedDecision.css";
 
 const InnerCircleDecision = () => {
   const [sharedDecisions, setSharedDecisions] = useState([]);

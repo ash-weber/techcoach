@@ -10,9 +10,10 @@ import {
 } from "@mui/icons-material";
 import ModelTrainingIcon from "@mui/icons-material/ModelTraining";
 import { MdFormatListBulletedAdd } from "react-icons/md";
-import { getSharedDecisionDetails } from "../../api/InnerCircle/Network_Call";
+import { getSharedByDecisionsCount, getSharedDecisionDetails, getSharedWithDecisionsCount } from "../../api/InnerCircle/Network_Call";
 import withAuth from "../../utils/withAuth";
-import "../../assets/styles/pages/Dashboard.css";
+import { getUserList } from "../../api/User/Network_call";
+import { getUserDecisions } from "../../api/Decisions/Network_Call";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -48,16 +49,8 @@ const Dashboard = () => {
 
         const token = localStorage.getItem("token");
 
-        const userResp = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/user/profile`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-
-        setUserName(userResp.data.tasks[0].displayname);
+        const userResp = await getUserList();
+        setUserName(userResp.tasks[0].displayname);
         setSharedDecisionDetails(details);
         setLoading(false);
       } catch (error) {
@@ -71,14 +64,8 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchReceivedDecisionsCount = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/group/getSharedDecisionsCount`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
-        );
-        setReceivedDecisionsCount(response.data.decisionCount);
+        const response = await getSharedWithDecisionsCount();
+        setReceivedDecisionsCount(response.decisionCount);
       } catch (error) {
         console.error("Error fetching received decision count:", error);
       }
@@ -90,13 +77,8 @@ const Dashboard = () => {
     const fetchSharedByDecisionsCount = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/group/getSharedByDecisionsCount`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
-        );
-        setSharedByDecisionsCount(response.data.decisionCount);
+        const response = await getSharedByDecisionsCount();
+        setSharedByDecisionsCount(response.decisionCount);
       } catch (error) {
         console.error("Error fetching shared by decision count:", error);
       }
@@ -108,15 +90,8 @@ const Dashboard = () => {
     const loadData = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-        const responseData = response.data;
+        const response = await getUserDecisions()
+        const responseData = response;
         if (Array.isArray(responseData.decisionData)) {
           setData(responseData.decisionData);
         } else {

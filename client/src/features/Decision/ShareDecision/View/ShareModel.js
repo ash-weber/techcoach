@@ -3,7 +3,6 @@ import { Modal } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import AcceptOrNot from "./AcceptOrNot";
 import withAuth from "../../../../utils/withAuth";
-import "../../../../assets/styles/pages/Decision.css";
 
 const ShareModal = ({
   showModal,

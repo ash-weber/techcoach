@@ -22,7 +22,7 @@ import {
 import ShareModal from '../ShareDecision/View/ShareModel';
 import DecisionInfoCard from './DecisionInfoCard';
 import CommentsList from './CommentsList';
-import '../../../assets/styles/pages/Decision.css';
+import { getReferredDecisionById } from '../../../api/Decisions/Network_Call';
 
 const DecisionView = () => {
   const { id } = useParams();
@@ -56,11 +56,8 @@ const DecisionView = () => {
     (async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/getInfo_Referred/${id}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        const list = res.data?.decisionData;
+        const res = await getReferredDecisionById(id);
+        const list = res.decisionData;
         if (!list?.length) return;
         const d = list[0];
         const fmt = (s) =>

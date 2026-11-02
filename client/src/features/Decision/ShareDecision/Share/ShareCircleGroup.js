@@ -4,10 +4,10 @@ import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import { IoClose } from 'react-icons/io5';
 
-import { getdecisionCirclesByUserAndMember } from '../../../../api/DecisionCircle/Network_Call';
+import { decisionshareDecisionCircle, getdecisionCirclesByUserAndMember } from '../../../../api/DecisionCircle/Network_Call';
 import { notifyTeamsChannel } from '../../../../utils/teamsWebhook';
 import DecisionInfoCard from '../../Views/DecisionInfoCard';
-import '../../../../assets/styles/pages/Decision.css';
+import { getReferredDecisionById } from '../../../../api/Decisions/Network_Call';
 
 const DecisionCircleShare = () => {
   const [loading, setLoading] = useState(false);
@@ -25,10 +25,7 @@ const DecisionCircleShare = () => {
     (async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/getInfo_Referred/${id}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        const res = await getReferredDecisionById(id);
         const d = res.data?.decisionData?.[0];
         if (!d) return;
         const fmt = (s) => (s ? new Date(s).toISOString().split('T')[0] : '');
@@ -74,11 +71,7 @@ const DecisionCircleShare = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.post(
-        `${process.env.REACT_APP_API_URL}/group/decisionshareDecisionCircle`,
-        { group_id, decision_id: id },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await decisionshareDecisionCircle(group_id, id);
 
       toast.success('Decision shared successfully!');
 

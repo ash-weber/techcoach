@@ -14,7 +14,6 @@ import {
 } from "../../api/InnerCircle/Network_Call";
 import { ToastContainer, toast } from "react-toastify";
 import withAuth from "../../utils/withAuth";
-import "../../assets/styles/pages/Notification.css";
 
 const Notification = () => {
   const [notifications, setNotifications] = useState([]);

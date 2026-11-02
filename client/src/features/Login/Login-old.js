@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { FaEye } from "react-icons/fa";
 import { IoMdEyeOff } from "react-icons/io";
 import axios from 'axios';
-import './Login.css';
 import Test from './assets/testimonial.png';
 import Test1 from './assets/testimonial2.png';
 

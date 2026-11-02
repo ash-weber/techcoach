@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import "../../assets/styles/pages/Login.css";
 import Test from "../../assets/images/testimonial_IBT.png";
 import Test1 from "../../assets/images/testimonial_GS.png";
 import tech from "../../assets/images/logo.png";
