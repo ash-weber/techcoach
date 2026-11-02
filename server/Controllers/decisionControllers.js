@@ -574,9 +574,8 @@ const getall = async (req, res) => {
       [user.id]
     );
 
-    // Define decryptText function
     const decryptText = (text, key) => {
-      if (!text) return null; // Ensure text is defined
+      if (!text) return null;
       try {
         const decipher = crypto.createDecipher('aes-256-cbc', key);
         let decryptedText = decipher.update(text, 'hex', 'utf8');
@@ -593,6 +592,8 @@ const getall = async (req, res) => {
       const tags = Array.isArray(decision.tags) ? decision.tags : JSON.parse(decision.tags || '[]');
       const reasons = typeof decision.reasons === 'string' ? JSON.parse(decision.reasons) : decision.reasons;
 
+
+      console.log("aijsadsa", req.user.key)
 
       return {
         decision_id: decision.decision_id,

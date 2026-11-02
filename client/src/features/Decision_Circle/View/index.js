@@ -18,9 +18,8 @@ import { HiOutlineUsers } from 'react-icons/hi2';
 import { useNavigate, Link } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import '../../../assets/styles/pages/DecisionCircle.css';
 
-const GetGroup = () => {
+const DecisionCircleView = () => {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(false);
   const [userCircles, setUserCircles] = useState([]);
@@ -69,7 +68,6 @@ const GetGroup = () => {
 
   return (
     <div className="getGroup">
-      {/* ---------- Page Header ---------- */}
       <header className="page-header">
         <div className="page-header-text">
           <h1>Decision Circles</h1>
@@ -81,7 +79,6 @@ const GetGroup = () => {
         </Link>
       </header>
 
-      {/* ---------- My Circles ---------- */}
       <section className="circle-section">
         <div className="section-title">
           <MdGroups className="section-icon" />
@@ -170,7 +167,6 @@ const GetGroup = () => {
         )}
       </section>
 
-      {/* ---------- Others' Circles ---------- */}
       <section className="circle-section">
         <div className="section-title">
           <HiOutlineUsers className="section-icon" />
@@ -218,4 +214,4 @@ const GetGroup = () => {
   );
 };
 
-export default GetGroup;
+export default DecisionCircleView;

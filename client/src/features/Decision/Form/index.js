@@ -6,7 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import withAuth from '../../../utils/withAuth';
 import { notifyTeamsChannel } from '../../../utils/teamsWebhook';
 import TagPicker from './TagPicker';
-import '../../../assets/styles/pages/Decision.css';
+import { createDecision, getDecisionById, updateDecision } from '../../../api/Decisions/Network_Call';
 
 const TAGS = [
   'Personal', 'Career', 'Work', 'Family', 'Money', 'Health', 'Spiritual',
@@ -44,13 +44,9 @@ const DecisionForm = () => {
 
   useEffect(() => {
     if (!id) return;
-    const token = localStorage.getItem('token');
-    axios
-      .get(`${process.env.REACT_APP_API_URL}/api/details/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      getDecisionById(id)
       .then((resp) => {
-        const { decisionData } = resp.data;
+        const { decisionData } = resp;
         if (!decisionData?.length) return toast.error('Decision details not found');
         const d = decisionData[0];
         const fmt = (s) => (s ? s.split('T')[0] : '');
@@ -149,11 +145,11 @@ const DecisionForm = () => {
 
     try {
       if (!id) {
-        await axios.post(`${process.env.REACT_APP_API_URL}/api/details`, payload);
+        await createDecision(payload);
         await notifyTeamsChannel('CREATED', payload);
         toast.success('Decision added successfully');
       } else {
-        await axios.put(`${process.env.REACT_APP_API_URL}/api/details/${id}`, payload);
+        await updateDecision(id, payload);
         await notifyTeamsChannel('UPDATED', payload);
         toast.success('Decision updated successfully');
       }

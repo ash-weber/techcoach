@@ -12,7 +12,6 @@ import {
 } from '../../../../api/InnerCircle/Network_Call';
 import withAuth from '../../../../utils/withAuth';
 import { notifyTeamsChannel } from '../../../../utils/teamsWebhook';
-import '../../../../assets/styles/pages/Decision.css';
 
 const AcceptOrNot = ({ innerCircleDetails, decision, id }) => {
   const [selectedMember, setSelectedMember] = useState(null);

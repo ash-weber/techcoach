@@ -486,7 +486,6 @@ import {
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import SwapVertIcon from '@mui/icons-material/SwapVert';
-import "../../../assets/styles/pages/SharedDecision.css";
 
 const ShareByMe = () => {
   const [sharedDecisionDetails, setSharedDecisionDetails] = useState({

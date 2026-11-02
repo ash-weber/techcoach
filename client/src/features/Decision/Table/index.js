@@ -9,7 +9,8 @@ import TableView from './TableView';
 import TimelineView from './TimelineView';
 import TabularView from './TabularView';
 import 'react-toastify/dist/ReactToastify.css';
-import '../../../assets/styles/pages/Decision.css';
+import { deleteDecision, getUserDecisions } from '../../../api/Decisions/Network_Call';
+import { getDecisionComments } from '../../../api/DecisionCircle/Network_Call';
 
 const RECORDS_PER_PAGE = 10;
 
@@ -42,11 +43,8 @@ const Decision = () => {
 
   const loadData = async () => {
     try {
-      const res = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/`,
-        { headers: authHeader() }
-      );
-      const list = res.data.decisionData;
+      const res = await getUserDecisions();
+      const list = res.decisionData;
       if (!Array.isArray(list)) return;
       const sorted = [...list].sort(
         (a, b) => new Date(b.created_at) - new Date(a.created_at)
@@ -60,10 +58,7 @@ const Decision = () => {
 
   const fetchComments = async (decisionId) => {
     try {
-      const res = await axios.get(
-        `${process.env.REACT_APP_API_URL}/group/comments`,
-        { headers: authHeader(), params: { decisionId } }
-      );
+      const res = await getDecisionComments(decisionId);
       setComments((prev) => ({ ...prev, [decisionId]: res.data.comments }));
     } catch (err) {
       console.error('Error fetching comments:', err);
@@ -111,14 +106,11 @@ const Decision = () => {
     setSortDirection((d) => (d === 'asc' ? 'desc' : 'asc'));
   };
 
-  const deleteDecision = async (id) => {
+  const deleteDecisions = async (id) => {
     if (!window.confirm('Delete this decision?')) return;
     try {
       const toDelete = data.find((d) => d.decision_id === id);
-      await axios.delete(
-        `${process.env.REACT_APP_API_URL}/api/details/${id}`,
-        { headers: authHeader() }
-      );
+      await deleteDecision(id)
       await notifyTeamsChannel('DELETED', toDelete);
       toast.success('Decision deleted');
       setData((prev) => prev.filter((d) => d.decision_id !== id));
@@ -268,7 +260,7 @@ const Decision = () => {
           startIndex={startIdx}
           sortDirection={sortDirection}
           onSortByDueDate={handleSortByDueDate}
-          onDelete={deleteDecision}
+          onDelete={deleteDecisions}
         />
       )}
 

@@ -10,7 +10,7 @@ import {
 
 import ShareModal from '../../ShareDecision/View/ShareModel';
 import DecisionInfoCard from '../../Views/DecisionInfoCard';
-import '../../../../assets/styles/pages/Decision.css';
+import { getReferredDecisionById } from '../../../../api/Decisions/Network_Call';
 
 const DecisionCircleView = () => {
   const { id } = useParams();
@@ -25,10 +25,7 @@ const DecisionCircleView = () => {
     (async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/getInfo_Referred/${id}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        const res = await getReferredDecisionById(id);
         const d = res.data?.decisionData?.[0];
         if (!d) return;
         const fmt = (s) => (s ? new Date(s).toISOString().split('T')[0] : '');

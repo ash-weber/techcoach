@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { toast,ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; 
 import withAuth from '../../utils/withAuth';
-import "../../assets/styles/pages/Admin.css";
+import { getAdminUserList, deleteAdminAccount } from '../../api/Admin/Network_Call';
 
 const Admin = () => {
     const [userdatas, setUserDatas] = useState([]);
@@ -12,13 +12,12 @@ const Admin = () => {
 
     const fetchData = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/admin`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            setUserDatas(response.data)
+            const data = await getAdminUserList();
+        if (Array.isArray(data)) {
+            setUserDatas(data);
+        } else {
+            toast.error('Failed to load users');
+        }
         } catch (error) {
             console.log(error);
         }
@@ -30,19 +29,14 @@ const Admin = () => {
 
     const handleDeleteAccount = async (id) => {
         const confirmation = window.confirm("Are you sure you want to delete your account? ");
-        if (confirmation) {
-          try {
-            const token = localStorage.getItem('token');
-            await axios.delete(`${process.env.REACT_APP_API_URL}/api/admin/account/${id}`, {
-              headers: {
-                Authorization: `Bearer ${token}`
-              }
-            });
+        if (!confirmation) return;
+
+        const result = await deleteAdminAccount(id);
+        if (typeof result === 'string') {
+            toast.error(result);
+        } else {
             toast.success('Account deleted successfully');
-            navigate('/admin');
-          } catch (error) {
-            console.error('Error deleting account:', error.message);
-          }
+            fetchData();
         }
     };
 

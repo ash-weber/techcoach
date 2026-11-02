@@ -19,13 +19,14 @@ import {
   getdecisionSharedDecisionCirclebyuser,
   postShareWithComment,
   editComments,
+  getWithComments,
 } from "../../../api/DecisionCircle/Network_Call";
 import { ToastContainer, toast } from "react-toastify";
 import { AiFillEdit } from "react-icons/ai";
-import "../../../assets/styles/pages/SharedDecision.css";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import withAuth from "../../../utils/withAuth";
 import axios from "axios";
+import { getUserList } from "../../../api/User/Network_call";
 
 const SharedDecisionCircle = () => {
   const [sharedDecisionCircles, setSharedDecisionCircles] = useState([]);
@@ -67,17 +68,10 @@ const SharedDecisionCircle = () => {
   useEffect(() => {
     const fetchCurrentUserEmail = async () => {
       try {
-        const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/user/profile`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          },
-        );
+        const response = await getUserList();
 
-        if (response.status === 200 && response.data.tasks.length > 0) {
-          const email = response.data.tasks[0].email;
+        if (response.status === 200 && response.tasks.length > 0) {
+          const email = response.tasks[0].email;
           setCurrentUserEmail(email);
         } else {
           console.error("User details not found");
@@ -137,14 +131,7 @@ const SharedDecisionCircle = () => {
     try {
       const commentsData = await Promise.all(
         sharedDecisionCircles.map((item) =>
-          axios.get(
-            `${process.env.REACT_APP_API_URL}/group/comment?groupId=${item.id}&decisionId=${item.decision_id}`,
-            {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-              },
-            },
-          ),
+          getWithComments(item.id, item.decision_id)
         ),
       );
 

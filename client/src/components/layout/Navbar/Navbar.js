@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import tech from "../../../assets/images/logo.png";
 import { getInnerCircleAcceptNotification } from "../../../api/InnerCircle/Network_Call";
 import "../../../assets/styles/components/Navbar.css";
+import { getUserType } from "../../../api/Admin/Network_Call";
 
 const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -46,14 +47,7 @@ const Header = () => {
 
   const fetchUserType = async (token) => {
     try {
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/admin/type`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
+      const response = await getUserType(token);
       setIsAdmin(response.data.isAdmin || false);
     } catch (error) {
       console.error("Error fetching User type:", error);
@@ -252,7 +246,10 @@ const Header = () => {
                       </Link>
                     </li>
                     <li>
-                      <Link to="/profile/advanced-profile" className="dropdown-link">
+                      <Link
+                        to="/profile/advanced-profile"
+                        className="dropdown-link"
+                      >
                         Advanced Profile
                       </Link>
                     </li>

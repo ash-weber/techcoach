@@ -1,26 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import Chart from 'react-apexcharts';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import Chart from "react-apexcharts";
+import axios from "axios";
+import {
+  getAllProfileLink,
+  getAllSkillLink,
+} from "../../../api/Decision_Link/Network_Call";
 
 const BubbleChart = ({ onBubbleClick }) => {
   const [profiles, setProfiles] = useState([]);
   const [skills, setSkills] = useState([]);
   const [chartSeries, setChartSeries] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [isChartReady, setIsChartReady] = useState(false);
 
   const chartOptions = {
     chart: {
-      type: 'bubble',
-      height: '100%',
-      width: '100%',
+      type: "bubble",
+      height: "100%",
+      width: "100%",
       events: {
         dataPointSelection: (event, chartContext, config) => {
           const { seriesIndex, dataPointIndex } = config;
           const selectedData = chartSeries[seriesIndex]?.data[dataPointIndex];
           if (onBubbleClick && selectedData) {
-            onBubbleClick(selectedData); 
+            onBubbleClick(selectedData);
           }
         },
       },
@@ -32,14 +36,14 @@ const BubbleChart = ({ onBubbleClick }) => {
       opacity: 0.8,
     },
     title: {
-      text: 'Bubble Chart of Profiles and Skills',
-      align: 'center',
+      text: "Bubble Chart of Profiles and Skills",
+      align: "center",
     },
     xaxis: {
-      type: 'category',
-      tickPlacement: 'on',
+      type: "category",
+      tickPlacement: "on",
       title: {
-        text: 'Categories (Profiles and Skills)',
+        text: "Categories (Profiles and Skills)",
       },
       labels: {
         rotate: -45,
@@ -50,7 +54,7 @@ const BubbleChart = ({ onBubbleClick }) => {
       min: 0,
       tickAmount: 10,
       title: {
-        text: 'Category Count',
+        text: "Category Count",
       },
     },
     grid: {
@@ -75,24 +79,20 @@ const BubbleChart = ({ onBubbleClick }) => {
 
   const fetchData = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) {
-        throw new Error('Authentication token missing');
+        throw new Error("Authentication token missing");
       }
 
       const [profileResponse, skillResponse] = await Promise.all([
-        axios.get(`${process.env.REACT_APP_API_URL}/api/links`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        axios.get(`${process.env.REACT_APP_API_URL}/api/link`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
+        getAllProfileLink(),
+        getAllSkillLink(),
       ]);
 
       setProfiles(profileResponse.data.profiles || []);
       setSkills(skillResponse.data.skills || []);
     } catch (err) {
-      setError(err.message || 'Failed to fetch data');
+      setError(err.message || "Failed to fetch data");
     } finally {
       setLoading(false);
     }
@@ -101,7 +101,7 @@ const BubbleChart = ({ onBubbleClick }) => {
   const generateSeries = () => {
     const scaleFactor = 10;
     const profileSeries = {
-      name: 'Profiles',
+      name: "Profiles",
       data: profiles.map((profile, index) => ({
         x: `${profile.header_name} - ${profile.header_value}`,
         y: index * 10 + 10,
@@ -111,7 +111,7 @@ const BubbleChart = ({ onBubbleClick }) => {
     };
 
     const skillSeries = {
-      name: 'Skills',
+      name: "Skills",
       data: skills.map((skill, index) => ({
         x: skill.skill_name,
         y: index * 10 + 10,
@@ -143,9 +143,17 @@ const BubbleChart = ({ onBubbleClick }) => {
   if (error) return <p>{error}</p>;
 
   return (
-    <div className="chart-container" style={{ maxWidth: '70%', height: '500px', margin: 'auto' }}>
+    <div
+      className="chart-container"
+      style={{ maxWidth: "70%", height: "500px", margin: "auto" }}
+    >
       {isChartReady && chartSeries.length > 0 ? (
-        <Chart options={chartOptions} series={chartSeries} type="bubble" height="500px" />
+        <Chart
+          options={chartOptions}
+          series={chartSeries}
+          type="bubble"
+          height="500px"
+        />
       ) : (
         <p>Loading chart...</p>
       )}

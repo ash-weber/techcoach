@@ -10,6 +10,7 @@ import {
   CartesianGrid,
 } from 'recharts';
 import axios from 'axios';
+import { getUserDecisions } from '../../../api/Decisions/Network_Call';
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -58,12 +59,10 @@ const TrendChart = ({ data: externalData }) => {
     (async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!cancelled && Array.isArray(res.data.decisionData)) {
+        const res = await getUserDecisions();
+        if (!cancelled && Array.isArray(res.decisionData)) {
           setData(
-            [...res.data.decisionData].sort(
+            [...res.decisionData].sort(
               (a, b) => new Date(a.decision_due_date) - new Date(b.decision_due_date)
             )
           );

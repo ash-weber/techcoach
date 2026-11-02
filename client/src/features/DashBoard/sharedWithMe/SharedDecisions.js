@@ -4,7 +4,6 @@ import { Box, Button, Typography } from "@mui/material";
 import InnerCircleDecision from "./InnerCircleDecisions";
 import SharedDecisionCircle from "./DecisionCircleDecisions";
 
-import "../../../assets/styles/pages/SharedDecision.css";
 
 const SharedDecisions = () => {
   const [activeTab, setActiveTab] = useState("inner");
