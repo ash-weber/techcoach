@@ -99,7 +99,7 @@ const DecisionView = () => {
   const loadDecisionComments = async () => {
     try {
       const c = await getDecisionComments(id);
-      setDecisionComments(c || []);
+      setDecisionComments(c.comments || []);
     } catch (e) {
       console.error('Failed to fetch decision comments', e);
     }

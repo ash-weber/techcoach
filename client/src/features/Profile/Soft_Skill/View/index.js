@@ -6,22 +6,16 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { MdDescription } from "react-icons/md";
 import withAuth from "../../../../utils/withAuth";
+import { deleteAllSkill, deleteSkill, getAllSkill } from "../../../../api/Skill/Network_Call";
 
 const SoftSkill = () => {
   const [skills, setSkills] = useState([]);
 
   const fetchSkills = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}/skill/get`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      setSkills(response.data.skills);
+      
+      const response = await getAllSkill();
+      setSkills(response.skills);
     } catch (err) {
       toast.error("Error fetching skill data");
     }
@@ -29,12 +23,8 @@ const SoftSkill = () => {
 
   const handleDelete = async (id) => {
     try {
-      const token = localStorage.getItem("token");
-      await axios.delete(`${process.env.REACT_APP_API_URL}/skill/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      
+      await deleteSkill(id);
       fetchSkills();
       toast.success("Soft skill data deleted successfully");
     } catch (err) {
@@ -44,12 +34,8 @@ const SoftSkill = () => {
 
   const handleDeleteAll = async () => {
     try {
-      const token = localStorage.getItem("token");
-      await axios.delete(`${process.env.REACT_APP_API_URL}/skill`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      
+      await deleteAllSkill();
       fetchSkills();
       toast.success("All soft skills have been deleted successfully");
     } catch (err) {

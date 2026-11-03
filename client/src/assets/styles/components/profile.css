@@ -118,26 +118,6 @@
   flex-shrink: 0;
 }
 
-.linked-decisions-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-sm);
-  background: var(--primary);
-  color: var(--text-inverse);
-  padding: 0.625rem 1.25rem;
-  font-size: var(--font-size-base);
-  font-weight: 500;
-  border-radius: var(--radius-sm);
-  text-decoration: none;
-  transition: var(--transition);
-}
-
-.linked-decisions-btn:hover {
-  background: var(--primary-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-}
-
 .profile-header-container {
   margin-bottom: var(--space-xl);
 }
@@ -442,11 +422,6 @@
     gap: var(--space-lg);
   }
 
-  .profile-action-container,
-  .linked-decisions-btn {
-    width: 100%;
-    justify-content: center;
-  }
 
   .swot-header {
     flex-direction: column;

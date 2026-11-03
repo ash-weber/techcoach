@@ -5,6 +5,7 @@ import { MdDescription } from "react-icons/md";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import withAuth from "../../../../utils/withAuth";
+import { getSkill, putSkill } from "../../../../api/Skill/Network_Call";
 
 const EditSkill = () => {
   const [skill, setSkill] = useState(null);
@@ -16,16 +17,9 @@ const EditSkill = () => {
   useEffect(() => {
     const fetchSkill = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/skill/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-        setSkill(response.data.skill[0]);
+        
+        const response = await getSkill(id);
+        setSkill(response.skill[0]);
       } catch (err) {
         toast.error("Error fetching skill data");
       }
@@ -48,12 +42,8 @@ const EditSkill = () => {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem("token");
-      await axios.put(`${process.env.REACT_APP_API_URL}/skill/${id}`, skill, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      
+      await putSkill(id, skill);
       toast.success("Soft Skill Updated Successfully");
       setTimeout(() => {
         navigate("/profile/soft-skill");

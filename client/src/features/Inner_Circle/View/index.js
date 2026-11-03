@@ -128,8 +128,8 @@ const InnerCircleView = () => {
             }
         } catch (error) {
             console.error('Error in Inviting:', error);
-            if (error.response && error.response.data && error.response.data.error) {
-                toast.error(error.response.data.error);
+            if (error.response && error.response && error.response.error) {
+                toast.error(error.response.error);
             } else {
                 toast.error('An error occurred while sending the invite.');
             }

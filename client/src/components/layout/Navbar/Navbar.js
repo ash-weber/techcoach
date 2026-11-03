@@ -13,7 +13,7 @@ const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notAcceptedMembersCount, setNotAcceptedMembersCount] = useState(0);
-
+  const token = localStorage.getItem("token");
   const navigate = useNavigate();
   const location = useLocation();
   const dropdownRef = useRef(null);
@@ -34,8 +34,6 @@ const Header = () => {
   }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-
     if (token) {
       setIsLoggedIn(true);
       fetchUserType(token);
@@ -48,7 +46,7 @@ const Header = () => {
   const fetchUserType = async (token) => {
     try {
       const response = await getUserType(token);
-      setIsAdmin(response.data.isAdmin || false);
+      setIsAdmin(response.isAdmin || false);
     } catch (error) {
       console.error("Error fetching User type:", error);
       if (error.response && error.response.status === 401) {

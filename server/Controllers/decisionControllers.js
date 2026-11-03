@@ -592,9 +592,6 @@ const getall = async (req, res) => {
       const tags = Array.isArray(decision.tags) ? decision.tags : JSON.parse(decision.tags || '[]');
       const reasons = typeof decision.reasons === 'string' ? JSON.parse(decision.reasons) : decision.reasons;
 
-
-      console.log("aijsadsa", req.user.key)
-
       return {
         decision_id: decision.decision_id,
         decision_name: decryptText(decision.decision_name, req.user.key),

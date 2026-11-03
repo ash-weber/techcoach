@@ -4,7 +4,11 @@ import { ToastContainer, toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import withAuth from "../../../utils/withAuth";
 import { CircularProgress } from "@mui/material";
-import { getProfile, postGeneralProfile, putProfile } from "../../../api/User/Network_call";
+import {
+  getProfile,
+  postGeneralProfile,
+  putProfile,
+} from "../../../api/User/Network_call";
 
 const ProfileForm = () => {
   const [formData, setFormData] = useState({
@@ -16,17 +20,17 @@ const ProfileForm = () => {
   });
   const [loading, setLoading] = useState(true);
   const [isNewProfile, setIsNewProfile] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
     if (token) {
-      
-       getProfile()
+      getProfile()
         .then((response) => {
           const { attitude, strength, weakness, opportunity, threat } =
-            response.data;
-          if (response.data) {
+            response;
+          if (response) {
             setFormData({
               attitude: attitude
                 ? attitude.map((item) => ({ id: item.id, value: item.value }))
@@ -57,11 +61,11 @@ const ProfileForm = () => {
           if (err.response) {
             if (err.response.status === 404) {
               toast.info(
-                "No existing profile found. Please create a new profile."
+                "No existing profile found. Please create a new profile.",
               );
               setIsNewProfile(true);
             } else {
-              console.error("Error response:", err.response.data);
+              console.error("Error response:", err.response);
               toast.error(`Error: ${err.response.statusText}`);
             }
           } else {
@@ -113,6 +117,7 @@ const ProfileForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const data = {
       attitude: formData.attitude.map((item) => ({
         id: item.id,
@@ -137,14 +142,9 @@ const ProfileForm = () => {
     };
 
     try {
-      const token = localStorage.getItem("token");
       if (!token) throw new Error("No token found. Please log in.");
 
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
+      setIsSubmitting(true);
 
       if (isNewProfile) {
         await postGeneralProfile(data);
@@ -153,17 +153,13 @@ const ProfileForm = () => {
         await putProfile(data);
         toast.success("Profile Updated successfully");
       }
+
       navigate("/profile");
-      setFormData({
-        attitude: [""],
-        strength: [""],
-        weakness: [""],
-        opportunity: [""],
-        threat: [""],
-      });
     } catch (error) {
       console.error("Error submitting data:", error);
       toast.error("An error occurred. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -254,18 +250,43 @@ const ProfileForm = () => {
                   </button>
                 </div>
                 <br />
-                <input
+                <button
                   type="submit"
                   className="submit-button"
-                  value={isNewProfile ? "Save" : "Update"}
-                  disabled={loading}
-                />
+                  disabled={isSubmitting}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                    margin: "0 auto",
+                    opacity: isSubmitting ? 0.7 : 1,
+                    cursor: isSubmitting ? "not-allowed" : "pointer",
+                  }}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <CircularProgress size={18} color="inherit" />
+                      {isNewProfile ? "Saving..." : "Updating..."}
+                    </>
+                  ) : isNewProfile ? (
+                    "Save"
+                  ) : (
+                    "Update"
+                  )}
+                </button>
               </center>
             </form>
           </>
         ) : (
-          <div style={{display:"flex", justifyContent:"center", alignItems:"center"}}>
-          <CircularProgress />
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <CircularProgress />
           </div>
         )}
         <ToastContainer />

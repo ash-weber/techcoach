@@ -73,7 +73,9 @@ export const notifyTeamsChannel = async (action, decision = {}, targetEmail = nu
   }
 }; */
 
+import { sendTeamsDecisionCard } from "../api/DecisionCircle/Network_Call";
 
+/* 
 //Teams incoming webhook
 
 const TEAMS_CHANNEL_WEBHOOK_URL = process.env.REACT_APP_FREE_TEAMS_WEBHOOK_URL;
@@ -135,13 +137,12 @@ export const notifyTeamsChannel = async (action, decision = {}, targetEmail = nu
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-};
+}; */
 
 
 
-/* 
 
-Graph API
+// Graph API
 
 export const notifyTeamsChannel = async (action, decision = {}, targetEmail = null) => {
   const authUser = JSON.parse(localStorage.getItem("auth_user") || "{}");
@@ -195,16 +196,9 @@ export const notifyTeamsChannel = async (action, decision = {}, targetEmail = nu
   };
 
   try {
-    const token = localStorage.getItem("token");
+    
 
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/teams/notify`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {})
-      },
-      body: JSON.stringify(payload),
-    });
+    const response = await sendTeamsDecisionCard(payload);
 
     if (!response.ok) {
       const err = await response.text();
@@ -213,4 +207,4 @@ export const notifyTeamsChannel = async (action, decision = {}, targetEmail = nu
   } catch (err) {
     console.error("Teams notification error:", err);
   }
-}; */
+};

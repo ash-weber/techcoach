@@ -48,7 +48,8 @@ const SharedDecisionCircle = () => {
     try {
       setIsLoading(true);
       const response = await getdecisionSharedDecisionCirclebyuser();
-      setSharedDecisionCircles(response || []);
+      console.log("ssssss", response)
+      setSharedDecisionCircles(response.results || []);
       setComments({});
     } catch (error) {
       console.error("Error fetching shared decisions:", error);
@@ -130,14 +131,15 @@ const SharedDecisionCircle = () => {
   const fetchComments = async () => {
     try {
       const commentsData = await Promise.all(
-        sharedDecisionCircles.map((item) =>
-          getWithComments(item.id, item.decision_id)
-        ),
-      );
+      sharedDecisionCircles.map(async (item) => {
+        const response = await getWithComments(item.decision_id, item.id);
+        return response;
+      })
+    );
 
       const updatedComments = commentsData.reduce((acc, response, index) => {
         const decisionId = sharedDecisionCircles[index].decision_id;
-        acc[decisionId] = response.data.comments || [];
+        acc[decisionId] = response.comments || [];
         return acc;
       }, {});
       setComments(updatedComments);
@@ -495,6 +497,6 @@ const SharedDecisionCircle = () => {
       <ToastContainer />
     </Box>
   );
-};
+};  
 
 export default withAuth(SharedDecisionCircle);

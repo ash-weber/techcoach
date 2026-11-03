@@ -46,7 +46,7 @@ const InnerCircleDecision = () => {
     try {
       const response = await getSharedDecisions();
 
-      const sortedDecisions = [...response].sort((a, b) => {
+      const sortedDecisions = [...response.results].sort((a, b) => {
         const dateA = new Date(a.decisionDetails.creation_date).getTime();
 
         const dateB = new Date(b.decisionDetails.creation_date).getTime();
@@ -744,6 +744,6 @@ const InnerCircleDecision = () => {
       <ToastContainer />
     </Box>
   );
-};
+};   
 
 export default withAuth(InnerCircleDecision);

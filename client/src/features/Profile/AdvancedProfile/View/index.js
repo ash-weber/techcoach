@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import withAuth from '../../../../utils/withAuth';
+import { getAdvancedProfile } from '../../../../api/AdvancedProfile/Network_Call';
 
 const AdvancedProfile = () => {
   const [advancedProfileData, setAdvancedProfileData] = useState({});
@@ -10,12 +11,8 @@ const AdvancedProfile = () => {
     const fetchData = async () => {
       const token = localStorage.getItem('token');
       try {
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/data/advanced`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setAdvancedProfileData(response.data);
+        const response = await getAdvancedProfile();
+        setAdvancedProfileData(response);
       } catch (error) {
         console.error('Error fetching data:', error.message);
       }

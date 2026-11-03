@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { CircularProgress, Box, Typography } from "@mui/material";
+import { captureOneTimeOrder, createOneTimeOrder, getPayPalClientToken } from "../../../api/Subscription/Network_Call";
 
 const ApplePayButton = ({ amount = "12.00", onSuccess, onError }) => {
   const containerRef = useRef(null);
@@ -25,13 +26,10 @@ const ApplePayButton = ({ amount = "12.00", onSuccess, onError }) => {
           return;
         }
 
-        const token = localStorage.getItem("token");
+        
 
-        const tokenRes = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/subscription/client-token`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        const clientToken = tokenRes.data.clientToken;
+        const tokenRes = await getPayPalClientToken();
+        const clientToken = tokenRes.clientToken;
 
         const sdkInstance = await window.paypal.createInstance({
           clientToken,
@@ -102,13 +100,9 @@ const ApplePayButton = ({ amount = "12.00", onSuccess, onError }) => {
                   ],
                 };
 
-                const createRes = await axios.post(
-                  `${process.env.REACT_APP_API_URL}/api/subscription/orders/create`,
-                  orderPayload,
-                  { headers: { Authorization: `Bearer ${token}` } }
-                );
+                const createRes = await createOneTimeOrder(orderPayload);
 
-                const orderId = createRes.data.id;
+                const orderId = createRes.id;
 
                 await applePaySession.confirmOrder({
                   orderId,
@@ -116,17 +110,13 @@ const ApplePayButton = ({ amount = "12.00", onSuccess, onError }) => {
                   billingContact: event.payment.billingContact,
                 });
 
-                const captureRes = await axios.post(
-                  `${process.env.REACT_APP_API_URL}/api/subscription/orders/${orderId}/capture`,
-                  {},
-                  { headers: { Authorization: `Bearer ${token}` } }
-                );
+                const captureRes = await captureOneTimeOrder(orderId);
 
                 session.completePayment({
                   status: window.ApplePaySession.STATUS_SUCCESS,
                 });
 
-                if (onSuccess) onSuccess(captureRes.data);
+                if (onSuccess) onSuccess(captureRes);
               } catch (err) {
                 console.error("Apple Pay authorization error:", err);
                 session.completePayment({

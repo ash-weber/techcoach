@@ -60,11 +60,11 @@ const DecisionCircleDecisions = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await getUsersForGroup(groupId);
-      if (response.data.error) {
-        toast.error(response.data.error);
+      if (response.error) {
+        toast.error(response.error);
       } else {
-        setGroups(response.data.group);
-        setMembers(response.data.members);
+        setGroups(response.group);
+        setMembers(response.members);
       }
     } catch (err) {
       toast.error('An error occurred while fetching the group details.');
@@ -85,8 +85,10 @@ const DecisionCircleDecisions = () => {
   const fetchSharedDecisions = async () => {
     try {
       const data = await getMemberSharedDecisions(groupId);
-      setDecisions(data || []);
-      data.forEach((decision) => fetchComments(groupId, decision.decision_id));
+
+      console.log("sssss", data)
+      setDecisions(data.results || []);
+      data.results.forEach((decision) => fetchComments(groupId, decision.decision_id));
     } catch (error) {
       setError('Failed to fetch shared decisions.');
       console.error(error);
@@ -151,7 +153,7 @@ const DecisionCircleDecisions = () => {
       }));
       toast.success('Comment deleted successfully');
     } catch (error) {
-      console.error('Error deleting comment:', error.response?.data);
+      console.error('Error deleting comment:', error.response);
       toast.error('Error deleting comment');
     }
   };
@@ -456,7 +458,6 @@ const DecisionCircleDecisions = () => {
         )}
       </section>
 
-      {/* ---------- Edit Modal ---------- */}
       <Modal open={isEditModalOpen} onClose={() => setEditModalOpen(false)}>
         <Box className="modal-card" sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
           <h3>Edit Comment</h3>

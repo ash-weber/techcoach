@@ -3,7 +3,6 @@ import { getAuthHeaders } from "../api";
 
 
 const createDecision = async (decisionData) => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.post(
       `${process.env.REACT_APP_API_URL}/api/details`,
@@ -18,13 +17,12 @@ const createDecision = async (decisionData) => {
 };
 
 const getAllDecisionDetails = async () => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}/api/details`,
       getAuthHeaders(),
     );
-    return response.data.decisionData;
+    return response.data;
   } catch (error) {
     console.error("Error fetching all decision details", error);
     throw error;
@@ -32,13 +30,12 @@ const getAllDecisionDetails = async () => {
 };  
 
 const getDecisionById = async (id) => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}/api/details/${id}`,
       getAuthHeaders(),
     );
-    return response.data.decisionData;
+    return response.data;
   } catch (error) {
     console.error("Error fetching decision by id", error);
     throw error;
@@ -46,13 +43,12 @@ const getDecisionById = async (id) => {
 };
 
 const getReferredDecisionById = async (id) => {
-  const token = localStorage.getItem("token");
   try {  
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}/api/getInfo_Referred/${id}`,
       getAuthHeaders(),
     );
-    return response.data.decisionData;
+    return response.data;
   } catch (error) {
     console.error("Error fetching referred decision by id", error);
     throw error;
@@ -60,7 +56,6 @@ const getReferredDecisionById = async (id) => {
 };
 
 const updateDecision = async (id, decisionData) => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.put(
       `${process.env.REACT_APP_API_URL}/api/details/${id}`,
@@ -75,7 +70,6 @@ const updateDecision = async (id, decisionData) => {
 };
 
 const deleteDecision = async (id) => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.delete(
       `${process.env.REACT_APP_API_URL}/api/details/${id}`,
@@ -89,7 +83,6 @@ const deleteDecision = async (id) => {
 };
 
 const getUserDecisions = async () => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}/api/`,
@@ -103,7 +96,6 @@ const getUserDecisions = async () => {
 };
 
 const getMonthlyDecisionCount = async () => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}/api/decisions/monthly-count`,

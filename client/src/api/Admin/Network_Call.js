@@ -3,7 +3,6 @@ import axios from "axios";
 import { getAuthHeaders } from "../api";
 
 const getAdminUserList = async () => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}/api/admin`,
@@ -17,7 +16,6 @@ const getAdminUserList = async () => {
 };
 
 const deleteAdminAccount = async (id) => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.delete(
       `${process.env.REACT_APP_API_URL}/api/admin/account/${id}`,
@@ -43,7 +41,6 @@ const getUserType = async (token) => {
   }
 };
 const getAdminUserDetails = async (id) => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}/api/admin/${id}`,
@@ -57,7 +54,6 @@ const getAdminUserDetails = async (id) => {
 };
 
 const getAdminDecisionCount = async (id) => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}/api/admin/decision/count/${id}`,
@@ -71,7 +67,6 @@ const getAdminDecisionCount = async (id) => {
 };
 
 const getAdminLastLogin = async (id) => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}/api/admin/login/last/${id}`,

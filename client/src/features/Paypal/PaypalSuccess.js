@@ -37,15 +37,7 @@ const PaypalSuccess = () => {
     try {
       const token = localStorage.getItem('token');
 
-      await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/subscription/confirm`,
-        { subscriptionId },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
+      await confirmSubscription(subscriptionId);
 
       setStatus('success');
       setMessage('Your subscription has been activated successfully.');

@@ -9,8 +9,9 @@ import TableView from './TableView';
 import TimelineView from './TimelineView';
 import TabularView from './TabularView';
 import 'react-toastify/dist/ReactToastify.css';
-import { deleteDecision, getUserDecisions } from '../../../api/Decisions/Network_Call';
+import { deleteDecision, getMonthlyDecisionCount, getUserDecisions } from '../../../api/Decisions/Network_Call';
 import { getDecisionComments } from '../../../api/DecisionCircle/Network_Call';
+import { createSubscription } from '../../../api/Subscription/Network_Call';
 
 const RECORDS_PER_PAGE = 10;
 
@@ -59,7 +60,7 @@ const Decision = () => {
   const fetchComments = async (decisionId) => {
     try {
       const res = await getDecisionComments(decisionId);
-      setComments((prev) => ({ ...prev, [decisionId]: res.data.comments }));
+      setComments((prev) => ({ ...prev, [decisionId]: res.comments }));
     } catch (err) {
       console.error('Error fetching comments:', err);
     }
@@ -67,11 +68,8 @@ const Decision = () => {
 
   const loadSubscription = async () => {
     try {
-      const res = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/decisions/monthly-count`,
-        { headers: authHeader() }
-      );
-      setSubscription(res.data);
+      const res = await getMonthlyDecisionCount();
+      setSubscription(res);
     } catch (err) {
       console.error('Subscription info error', err);
     }
@@ -81,12 +79,8 @@ const Decision = () => {
   const startSubscription = async () => {
     try {
       setSubLoading(true);
-      const res = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/subscription/create`,
-        {},
-        { headers: authHeader() }
-      );
-      window.location.href = res.data.approvalUrl;
+      const res = await createSubscription();
+      window.location.href = res.approvalUrl;
     } catch (err) {
       console.error(err);
       toast.error('Failed to start subscription');

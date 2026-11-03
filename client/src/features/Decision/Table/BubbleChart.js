@@ -13,6 +13,7 @@ const BubbleChart = ({ onBubbleClick }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isChartReady, setIsChartReady] = useState(false);
+  const token = localStorage.getItem("token");
 
   const chartOptions = {
     chart: {
@@ -79,7 +80,7 @@ const BubbleChart = ({ onBubbleClick }) => {
 
   const fetchData = async () => {
     try {
-      const token = localStorage.getItem("token");
+      
       if (!token) {
         throw new Error("Authentication token missing");
       }
@@ -89,8 +90,8 @@ const BubbleChart = ({ onBubbleClick }) => {
         getAllSkillLink(),
       ]);
 
-      setProfiles(profileResponse.data.profiles || []);
-      setSkills(skillResponse.data.skills || []);
+      setProfiles(profileResponse.profiles || []);
+      setSkills(skillResponse.skills || []);
     } catch (err) {
       setError(err.message || "Failed to fetch data");
     } finally {

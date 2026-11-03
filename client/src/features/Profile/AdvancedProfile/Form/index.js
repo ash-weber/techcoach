@@ -185,6 +185,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 import withAuth from '../../../../utils/withAuth';
+import { getAdvancedProfile, postAdvancedProfile, putAdvancedProfile } from '../../../../api/AdvancedProfile/Network_Call';
 
 const AdvancedProfileForm = () => {
     const [formsData, setFormsData] = useState({
@@ -210,14 +211,10 @@ const AdvancedProfileForm = () => {
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (token) {
-            axios.get(`${process.env.REACT_APP_API_URL}/api/data/advanced`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            })
+            getAdvancedProfile()
                 .then((response) => {
-                    const { goals, values, resolutions, constraints, otherfactors } = response.data;
-                    if (response.data) {
+                    const { goals, values, resolutions, constraints, otherfactors } = response;
+                    if (response) {
                         setFormsData({
                             goals: goals ? goals.map(item => item.value) : [''],
                             values: values ? values.map(item => item.value) : [''],
@@ -236,7 +233,7 @@ const AdvancedProfileForm = () => {
                             toast.info('No existing Advanced Profile found. Please create a new Advanced Profile.');
                             setIsNewAdvancedProfile(true);
                         } else {
-                            console.error('Error response:', err.response.data);
+                            console.error('Error response:', err.response);
                             toast.error(`Error: ${err.response.statusText}`);
                         }
                     } else {
@@ -332,17 +329,9 @@ const AdvancedProfileForm = () => {
 
         try {
             if (isNewAdvancedProfile) {
-                await axios.post(`${process.env.REACT_APP_API_URL}/api/data/advanced`, data, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
+                await postAdvancedProfile(data);
             } else {
-                await axios.put(`${process.env.REACT_APP_API_URL}/api/data/advanced`, data, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
+                await putAdvancedProfile(data)
             }
             setFormsData({
                 goals: [''],

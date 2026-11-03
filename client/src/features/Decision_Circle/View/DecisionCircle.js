@@ -60,19 +60,17 @@ const DecisionCircle = () => {
       fetchDecisions();
       fetchGroupExtra();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [groupId]);
 
   const fetchGroupDetails = async () => {
     try {
-      const token = localStorage.getItem('token');
       const response = getUsersForGroup(groupId);
 
-      if (response.data.error) {
-        toast.error(response.data.error);
+      if (response.error) {
+        toast.error(response.error);
       } else {
-        setGroups(response.data.group);
-        setMembers(response.data.members || []);
+        setGroups(response.group);
+        setMembers(response.members || []);
       }
     } catch (err) {
       toast.error('An error occurred while fetching the details');
@@ -94,8 +92,10 @@ const DecisionCircle = () => {
   try {
     const data = await getdecisionSharedDecisionCircle(groupId);
 
+    console.log("sihdsaas", data)
+
     // Guard: API may return null / undefined / non-array
-    const list = Array.isArray(data) ? data : [];
+    const list = Array.isArray(data.results) ? data.results : [];
     setDecisions(list);
 
     list.forEach((decision) => fetchComments(groupId, decision.decision_id));
@@ -118,7 +118,6 @@ const DecisionCircle = () => {
   }
 };
 
-  /* ------------ Member Actions ------------ */
   const handleRemoveUser = async (userId, e) => {
     e.preventDefault();
     try {
@@ -139,7 +138,6 @@ const DecisionCircle = () => {
     }
   };
 
-  /* ------------ Reply Actions ------------ */
   const handleReplyInputChange = (decisionId, parentCommentId, value) => {
     setReplyComment((prev) => ({
       ...prev,
@@ -190,7 +188,6 @@ const DecisionCircle = () => {
     }
   };
 
-  /* ------------ Comment Actions ------------ */
   const handleDeleteComment = async (commentId, decisionId) => {
     try {
       await deleteComment(commentId);
@@ -200,7 +197,7 @@ const DecisionCircle = () => {
       }));
       toast.success('Comment deleted successfully');
     } catch (error) {
-      console.error('Error deleting comment:', error.response?.data);
+      console.error('Error deleting comment:', error.response);
       toast.error('Error deleting comment');
     }
   };
@@ -238,10 +235,8 @@ const DecisionCircle = () => {
     }
   };
 
-  /* ------------ Render ------------ */
   return (
     <div className="dc-page">
-      {/* Back */}
       <button
         className="dc-back-link"
         onClick={() => navigate(-1)}
@@ -250,7 +245,6 @@ const DecisionCircle = () => {
         <MdOutlineArrowBack /> Back
       </button>
 
-      {/* ---------- Group Header ---------- */}
       {groups && (
         <header className="dc-group-header">
           <div className="dc-group-header__main">
@@ -278,7 +272,6 @@ const DecisionCircle = () => {
         </header>
       )}
 
-      {/* ---------- Admin ---------- */}
       {user?.created_by && (
         <div className="dc-admin-card dc-admin-card--block">
           <MdOutlineAdminPanelSettings className="dc-admin-card__icon" />
@@ -292,7 +285,6 @@ const DecisionCircle = () => {
         </div>
       )}
 
-      {/* ---------- Members ---------- */}
       {groups && (
         <section className="dc-section">
           <h2 className="dc-section__title">
@@ -328,7 +320,6 @@ const DecisionCircle = () => {
         </section>
       )}
 
-      {/* ---------- Decisions ---------- */}
       <section className="dc-section">
         <h2 className="dc-section__title">
           <MdOutlineInfo className="dc-section__icon" />
@@ -392,7 +383,6 @@ const DecisionCircle = () => {
                   </div>
                 )}
 
-                {/* ---------- Comments ---------- */}
                 <div className="dc-comments">
                   <h4 className="dc-comments__title">
                     <MdOutlineForum className="dc-comments__icon" />
@@ -464,7 +454,6 @@ const DecisionCircle = () => {
                               </div>
                             </div>
 
-                            {/* Reply composer */}
                             <div className="dc-reply-box">
                               <input
                                 className="dc-reply-box__input"
@@ -533,7 +522,6 @@ const DecisionCircle = () => {
         )}
       </section>
 
-      {/* ---------- Edit Modal ---------- */}
       <Modal open={isEditModalOpen} onClose={() => setEditModalOpen(false)}>
         <Box
           className="modal-card"

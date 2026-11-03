@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { MdDescription } from "react-icons/md";
 import { ToastContainer, toast } from "react-toastify";
 import withAuth from "../../../../utils/withAuth";
+import { getAllSkill, getMasterSkills, postSkill } from "../../../../api/Skill/Network_Call";
 
 const SoftSkillForm = () => {
   const [skills, setSkills] = useState([]);
@@ -14,17 +15,10 @@ const SoftSkillForm = () => {
 
   const fetchSkills = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}/skill/master-skills`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
+      
+      const response = await getMasterSkills();
       setSkills(
-        response.data.skills.map((skill) => ({
+        response.skills.map((skill) => ({
           ...skill,
           showDescription: false,
           rating: "",
@@ -38,16 +32,9 @@ const SoftSkillForm = () => {
 
   const fetchgetSkills = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}/skill/get`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-      const filteredSkills = response.data.skills.filter(
+      
+      const response = await getAllSkill();
+      const filteredSkills = response.skills.filter(
         (skill) => skill.rating === null && skill.comments === null,
       );
       setSkills(filteredSkills);
@@ -87,11 +74,11 @@ const SoftSkillForm = () => {
     setIsSaveButtonDisabled(true); // Disable the Save button
 
     try {
-      await axios.post(`${process.env.REACT_APP_API_URL}/skill`, {
+      await postSkill({
         skill_name: selectedSkill.skill_name,
         rating: selectedSkill.rating,
         comments: selectedSkill.comments,
-      });
+    });
       toast("Soft Skill Added Successfully");
       setTimeout(() => {
         navigate("/profile/soft-skill");
