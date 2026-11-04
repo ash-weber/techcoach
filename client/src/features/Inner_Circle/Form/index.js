@@ -93,8 +93,6 @@ const InnerCircleForm = () => {
 
   const filteredUsers = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-
-    // Don't display all users initially
     if (!q) return [];
 
     const [typedLocal, typedDomain] = q.split("@");

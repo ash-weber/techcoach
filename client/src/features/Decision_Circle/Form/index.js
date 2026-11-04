@@ -72,7 +72,6 @@ const DecisionCircle = () => {
 
   useEffect(() => {
     fetchDecisionGroup();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   return (

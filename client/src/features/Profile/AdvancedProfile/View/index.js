@@ -36,7 +36,6 @@ const AdvancedProfile = () => {
     );
   };
 
-  // Check if data exists
   const hasData = () => {
     return Object.values(advancedProfileData).some(
       (data) => Array.isArray(data) && data.length > 0

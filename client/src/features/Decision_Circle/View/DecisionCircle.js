@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   removeUsersFromGroup,
   getdecisionSharedDecisionCircle,
@@ -10,14 +10,12 @@ import {
   deleteComment,
   getUsersForGroup,
   getGroupDetails,
-} from '../../../api/DecisionCircle/Network_Call';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { ToastContainer, toast } from 'react-toastify';
-import {
-  IoPersonAdd,
-  
-} from 'react-icons/io5';
-import { AiFillEdit } from 'react-icons/ai';
+  sendTeamsCommentNotification,
+} from "../../../api/DecisionCircle/Network_Call";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import { IoPersonAdd } from "react-icons/io5";
+import { AiFillEdit } from "react-icons/ai";
 import {
   MdOutlineDeleteForever,
   MdOutlineGroups,
@@ -32,9 +30,9 @@ import {
   MdOutlineMail,
   MdOutlineSend,
   MdOutlineArrowBack,
-} from 'react-icons/md';
-import { Modal, Box, CircularProgress } from '@mui/material';
-import { formatDistanceToNow, parseISO } from 'date-fns';
+} from "react-icons/md";
+import { Modal, Box, CircularProgress } from "@mui/material";
+import { formatDistanceToNow, parseISO } from "date-fns";
 
 const DecisionCircle = () => {
   const [groups, setGroups] = useState(null);
@@ -45,14 +43,14 @@ const DecisionCircle = () => {
   const [replyComment, setReplyComment] = useState({});
   const [editComment, setEditComment] = useState(null);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
-  const [editContent, setEditContent] = useState('');
+  const [editContent, setEditContent] = useState("");
   const [replyLoading, setReplyLoading] = useState({});
   const { groupId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
 
   const params = new URLSearchParams(location.search);
-  const groupName = params.get('group_name');
+  const groupName = params.get("group_name");
 
   useEffect(() => {
     if (groupId) {
@@ -62,9 +60,39 @@ const DecisionCircle = () => {
     }
   }, [groupId]);
 
+const notifyCircleMembers = (decision, commentText, isReply = false) => {
+  const authUser = JSON.parse(localStorage.getItem("auth_user") || "{}");
+
+  const memberEmails = members.map((m) => m.email).filter(Boolean);
+  const adminEmail = user?.creator_email; 
+  const recipientEmails = [
+    ...new Set(
+      [...memberEmails, adminEmail]
+        .filter(Boolean)
+        .map((e) => e.trim().toLowerCase()),
+    ),
+  ];
+
+  if (!recipientEmails.length) return;
+
+  sendTeamsCommentNotification({
+    recipientEmails,
+    commenterEmail: authUser.email,
+    circleType: "DECISION_CIRCLE",
+    circleName: groupName || groups?.group_name,
+    decisionName: decision.decision_name,
+    decisionId: decision.decision_id,
+    commentText,
+    isReply,
+    actionUrl: `${window.location.origin}/decision-circle/${groupId}?group_name=${encodeURIComponent(groupName || "")}`,
+  }).catch((err) => console.error("Teams notify failed", err));
+};
+
   const fetchGroupDetails = async () => {
     try {
-      const response = getUsersForGroup(groupId);
+      const response = await getUsersForGroup(groupId);
+
+      console.log("aaaaaaaaaa", response);
 
       if (response.error) {
         toast.error(response.error);
@@ -73,14 +101,14 @@ const DecisionCircle = () => {
         setMembers(response.members || []);
       }
     } catch (err) {
-      toast.error('An error occurred while fetching the details');
+      toast.error("An error occurred while fetching the details");
       console.error(err);
     }
   };
 
   const fetchGroupExtra = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const response = await getGroupDetails(groupId);
       setUser(response);
     } catch (err) {
@@ -89,34 +117,30 @@ const DecisionCircle = () => {
   };
 
   const fetchDecisions = async () => {
-  try {
-    const data = await getdecisionSharedDecisionCircle(groupId);
+    try {
+      const data = await getdecisionSharedDecisionCircle(groupId);
+      const list = Array.isArray(data.results) ? data.results : [];
+      setDecisions(list);
 
-    console.log("sihdsaas", data)
-
-    // Guard: API may return null / undefined / non-array
-    const list = Array.isArray(data.results) ? data.results : [];
-    setDecisions(list);
-
-    list.forEach((decision) => fetchComments(groupId, decision.decision_id));
-  } catch (error) {
-    console.error('Error fetching decisions:', error);
-    setDecisions([]); // still array so .length / .map won't crash
-  }
-};
+      list.forEach((decision) => fetchComments(groupId, decision.decision_id));
+    } catch (error) {
+      console.error("Error fetching decisions:", error);
+      setDecisions([]);
+    }
+  };
 
   const fetchComments = async (groupId, decisionId) => {
-  try {
-    const response = await getComments(groupId, decisionId);
-    setComments((prev) => ({
-      ...prev,
-      [decisionId]: Array.isArray(response) ? response : [],
-    }));
-  } catch (error) {
-    console.error('Error fetching comments:', error);
-    setComments((prev) => ({ ...prev, [decisionId]: [] }));
-  }
-};
+    try {
+      const response = await getComments(groupId, decisionId);
+      setComments((prev) => ({
+        ...prev,
+        [decisionId]: Array.isArray(response.comments) ? response.comments : [],
+      }));
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+      setComments((prev) => ({ ...prev, [decisionId]: [] }));
+    }
+  };
 
   const handleRemoveUser = async (userId, e) => {
     e.preventDefault();
@@ -124,17 +148,19 @@ const DecisionCircle = () => {
       setMembers((prev) => prev.filter((m) => m.user_id !== userId));
       await removeUsersFromGroup(groupId, userId);
       fetchGroupDetails();
-      toast.success('User removed successfully');
+      toast.success("User removed successfully");
     } catch (error) {
-      toast.error('Error removing user from group');
+      toast.error("Error removing user from group");
     }
   };
 
   const handleAddPersonClick = () => {
     if (groups && groups.length > 0 && groups[0].group_name && groups[0].id) {
-      navigate(`/decision-circle/add/member/${groups[0].group_name}?id=${groups[0].id}`);
+      navigate(
+        `/decision-circle/add/member/${groups[0].group_name}?id=${groups[0].id}`,
+      );
     } else {
-      toast.error('Group details are not available.');
+      toast.error("Group details are not available.");
     }
   };
 
@@ -147,20 +173,29 @@ const DecisionCircle = () => {
 
   const handleReplyComment = async (decisionId, parentCommentId) => {
     const commentText = replyComment[decisionId]?.[parentCommentId]?.trim();
-    if (!commentText) return toast.error('Comment cannot be empty');
+    if (!commentText) return toast.error("Comment cannot be empty");
 
     const key = `${decisionId}_${parentCommentId}`;
     setReplyLoading((prev) => ({ ...prev, [key]: true }));
     try {
-      await replyToComment({ groupId, commentText, decisionId, parentCommentId });
+      await replyToComment({
+        groupId,
+        commentText,
+        decisionId,
+        parentCommentId,
+      });
+
+      const decision = decisions.find((d) => d.decision_id === decisionId);
+    if (decision) notifyCircleMembers(decision, commentText, true); 
+
       setReplyComment((prev) => ({
         ...prev,
-        [decisionId]: { ...prev[decisionId], [parentCommentId]: '' },
+        [decisionId]: { ...prev[decisionId], [parentCommentId]: "" },
       }));
-      toast.success('Reply comment successfully posted');
+      toast.success("Reply comment successfully posted");
       fetchComments(groupId, decisionId);
     } catch (error) {
-      toast.error('Error posting reply comment');
+      toast.error("Error posting reply comment");
       console.error(error);
     } finally {
       setReplyLoading((prev) => ({ ...prev, [key]: false }));
@@ -169,19 +204,33 @@ const DecisionCircle = () => {
 
   const handleMailToReplyComment = async (decisionId, parentCommentId) => {
     const comment = replyComment[decisionId]?.[parentCommentId]?.trim();
-    if (!comment) return toast.error('Comment cannot be empty');
+    if (!comment) return toast.error("Comment cannot be empty");
 
     const key = `${decisionId}_${parentCommentId}_email`;
     setReplyLoading((prev) => ({ ...prev, [key]: true }));
     try {
-      await replyToComment({ groupId, parentCommentId, commentText: comment, decisionId });
-      const decisionDetails = decisions.find((d) => d.decision_id === decisionId);
-      if (!decisionDetails) throw new Error('Decision details not found');
-      await mailToDecisionCircleReplyComment(decisionDetails, parentCommentId, true, groupId);
-      toast.success('Comment posted and email sent successfully');
+      await replyToComment({
+        groupId,
+        parentCommentId,
+        commentText: comment,
+        decisionId,
+      });
+      const decisionDetails = decisions.find(
+        (d) => d.decision_id === decisionId,
+      );
+      if (!decisionDetails) throw new Error("Decision details not found");
+      await mailToDecisionCircleReplyComment(
+        decisionDetails,
+        parentCommentId,
+        true,
+        groupId,
+      );
+
+      notifyCircleMembers(decisionDetails, comment, true);
+      toast.success("Comment posted and email sent successfully");
       fetchComments(groupId, decisionId);
     } catch (error) {
-      toast.error('Error sending email');
+      toast.error("Error sending email");
       console.error(error);
     } finally {
       setReplyLoading((prev) => ({ ...prev, [key]: false }));
@@ -195,10 +244,10 @@ const DecisionCircle = () => {
         ...prev,
         [decisionId]: prev[decisionId].filter((c) => c.id !== commentId),
       }));
-      toast.success('Comment deleted successfully');
+      toast.success("Comment deleted successfully");
     } catch (error) {
-      console.error('Error deleting comment:', error.response);
-      toast.error('Error deleting comment');
+      console.error("Error deleting comment:", error.response);
+      toast.error("Error deleting comment");
     }
   };
 
@@ -209,13 +258,13 @@ const DecisionCircle = () => {
   };
 
   const handleSaveEditComment = async () => {
-    if (!editContent.trim()) return toast.error('Comment cannot be empty');
+    if (!editContent.trim()) return toast.error("Comment cannot be empty");
 
     setComments((prev) => {
       const updated = { ...prev };
       Object.keys(updated).forEach((decisionId) => {
         updated[decisionId] = updated[decisionId].map((c) =>
-          c.id === editComment ? { ...c, comment: editContent } : c
+          c.id === editComment ? { ...c, comment: editContent } : c,
         );
       });
       return updated;
@@ -223,15 +272,15 @@ const DecisionCircle = () => {
 
     setEditModalOpen(false);
     setEditComment(null);
-    setEditContent('');
+    setEditContent("");
 
     try {
       await updateComment(editComment, { comment: editContent });
-      toast.success('Comment updated successfully');
+      toast.success("Comment updated successfully");
     } catch (error) {
       fetchComments();
-      console.error('Failed to update comment:', error);
-      toast.error('Failed to update comment');
+      console.error("Failed to update comment:", error);
+      toast.error("Failed to update comment");
     }
   };
 
@@ -240,7 +289,7 @@ const DecisionCircle = () => {
       <button
         className="dc-back-link"
         onClick={() => navigate(-1)}
-        style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}
+        style={{ background: "transparent", border: "none", cursor: "pointer" }}
       >
         <MdOutlineArrowBack /> Back
       </button>
@@ -249,14 +298,16 @@ const DecisionCircle = () => {
         <header className="dc-group-header">
           <div className="dc-group-header__main">
             <div className="dc-group-header__avatar">
-              {(groupName || groups.group_name)?.charAt(0)?.toUpperCase() || 'G'}
+              {(groupName || groups.group_name)?.charAt(0)?.toUpperCase() ||
+                "G"}
             </div>
             <div>
               <h1 className="dc-group-header__title">
                 {groupName || groups.group_name}
               </h1>
               <p className="dc-group-header__subtitle">
-                <MdOutlineGroups /> {members.length} member{members.length !== 1 && 's'}
+                <MdOutlineGroups /> {members.length} member
+                {members.length !== 1 && "s"}
               </p>
             </div>
           </div>
@@ -279,7 +330,10 @@ const DecisionCircle = () => {
             <span className="dc-admin-card__label">Admin</span>
             <p className="dc-admin-card__name">
               {user.created_by}
-              <span className="dc-admin-card__email"> · {user.creator_email}</span>
+              <span className="dc-admin-card__email">
+                {" "}
+                · {user.creator_email}
+              </span>
             </p>
           </div>
         </div>
@@ -296,20 +350,28 @@ const DecisionCircle = () => {
           {Array.isArray(members) && members.length > 0 ? (
             <div className="dc-members">
               {members.map((member) => (
-                <div key={member.user_id} className="dc-member-chip dc-member-chip--removable">
+                <div
+                  key={member.user_id}
+                  className="dc-member-chip dc-member-chip--removable"
+                >
                   <div className="dc-member-chip__avatar">
-                    {member.displayname?.charAt(0)?.toUpperCase() || 'U'}
+                    {member.displayname?.charAt(0)?.toUpperCase() || "U"}
                   </div>
                   <div className="dc-member-chip__info">
-                    <span className="dc-member-chip__name">{member.displayname}</span>
-                    <span className="dc-member-chip__email">{member.email}</span>
+                    <span className="dc-member-chip__name">
+                      {member.displayname}
+                    </span>
+                    <span className="dc-member-chip__email">
+                      {member.email}
+                    </span>
                   </div>
                   <button
                     className="dc-member-chip__remove"
                     onClick={(e) => handleRemoveUser(member.user_id, e)}
                     title={`Remove ${member.displayname}`}
                     aria-label={`Remove ${member.displayname}`}
-                  >-
+                  >
+                    -
                   </button>
                 </div>
               ))}
@@ -332,7 +394,9 @@ const DecisionCircle = () => {
             {decisions.map((decision) => (
               <article key={decision.decision_id} className="dc-decision-card">
                 <header className="dc-decision-card__head">
-                  <h3 className="dc-decision-card__title">{decision.decision_name}</h3>
+                  <h3 className="dc-decision-card__title">
+                    {decision.decision_name}
+                  </h3>
                   <span className="decision-tag">
                     <MdOutlinePerson /> Shared by {decision.shared_by}
                   </span>
@@ -341,14 +405,22 @@ const DecisionCircle = () => {
                 <div className="dc-decision-card__meta">
                   {decision.decision_due_date && (
                     <span className="dc-meta-pill dc-meta-pill--warning">
-                      <MdOutlineEvent /> Due{' '}
-                      {new Date(decision.decision_due_date).toISOString().split('T')[0]}
+                      <MdOutlineEvent /> Due{" "}
+                      {
+                        new Date(decision.decision_due_date)
+                          .toISOString()
+                          .split("T")[0]
+                      }
                     </span>
                   )}
                   {decision.decision_taken_date && (
                     <span className="dc-meta-pill dc-meta-pill--success">
-                      <MdOutlineCalendarToday /> Taken{' '}
-                      {new Date(decision.decision_taken_date).toISOString().split('T')[0]}
+                      <MdOutlineCalendarToday /> Taken{" "}
+                      {
+                        new Date(decision.decision_taken_date)
+                          .toISOString()
+                          .split("T")[0]
+                      }
                     </span>
                   )}
                 </div>
@@ -396,14 +468,14 @@ const DecisionCircle = () => {
                     <div className="dc-comments__list">
                       {comments[decision.decision_id].map((comment) => {
                         const isReply = Boolean(comment.parentCommentId);
-                        const isAuthor = comment.type_of_member === 'author';
+                        const isAuthor = comment.type_of_member === "author";
                         const key = `${decision.decision_id}_${comment.id}`;
 
                         return (
                           <div
                             key={comment.id}
-                            className={`comment ${isAuthor ? 'comment--author' : ''} ${
-                              isReply ? 'comment--reply' : ''
+                            className={`comment ${isAuthor ? "comment--author" : ""} ${
+                              isReply ? "comment--reply" : ""
                             }`}
                           >
                             <div className="comment__header">
@@ -420,7 +492,10 @@ const DecisionCircle = () => {
                                   <button
                                     className="comment__edit-btn dc-btn-danger"
                                     onClick={() =>
-                                      handleDeleteComment(comment.id, decision.decision_id)
+                                      handleDeleteComment(
+                                        comment.id,
+                                        decision.decision_id,
+                                      )
                                     }
                                     title="Delete"
                                   >
@@ -440,15 +515,21 @@ const DecisionCircle = () => {
                                 {comment.email}
                                 <span className="comment__meta-sep"> · </span>
                                 {comment.created_at === comment.updated_at ? (
-                                  formatDistanceToNow(parseISO(comment.created_at), {
-                                    addSuffix: true,
-                                  })
+                                  formatDistanceToNow(
+                                    parseISO(comment.created_at),
+                                    {
+                                      addSuffix: true,
+                                    },
+                                  )
                                 ) : (
                                   <em>
-                                    Edited{' '}
-                                    {formatDistanceToNow(parseISO(comment.updated_at), {
-                                      addSuffix: true,
-                                    })}
+                                    Edited{" "}
+                                    {formatDistanceToNow(
+                                      parseISO(comment.updated_at),
+                                      {
+                                        addSuffix: true,
+                                      },
+                                    )}
                                   </em>
                                 )}
                               </div>
@@ -460,13 +541,15 @@ const DecisionCircle = () => {
                                 type="text"
                                 placeholder="Reply to this comment…"
                                 value={
-                                  replyComment[decision.decision_id]?.[comment.id] || ''
+                                  replyComment[decision.decision_id]?.[
+                                    comment.id
+                                  ] || ""
                                 }
                                 onChange={(e) =>
                                   handleReplyInputChange(
                                     decision.decision_id,
                                     comment.id,
-                                    e.target.value
+                                    e.target.value,
                                   )
                                 }
                               />
@@ -474,12 +557,18 @@ const DecisionCircle = () => {
                                 <button
                                   className="decision-btn decision-btn--primary"
                                   onClick={() =>
-                                    handleReplyComment(decision.decision_id, comment.id)
+                                    handleReplyComment(
+                                      decision.decision_id,
+                                      comment.id,
+                                    )
                                   }
                                   disabled={replyLoading[key]}
                                 >
                                   {replyLoading[key] ? (
-                                    <CircularProgress size={14} style={{ color: '#fff' }} />
+                                    <CircularProgress
+                                      size={14}
+                                      style={{ color: "#fff" }}
+                                    />
                                   ) : (
                                     <>
                                       <MdOutlineReply /> Reply
@@ -489,12 +578,18 @@ const DecisionCircle = () => {
                                 <button
                                   className="decision-btn decision-btn--success"
                                   onClick={() =>
-                                    handleMailToReplyComment(decision.decision_id, comment.id)
+                                    handleMailToReplyComment(
+                                      decision.decision_id,
+                                      comment.id,
+                                    )
                                   }
                                   disabled={replyLoading[`${key}_email`]}
                                 >
                                   {replyLoading[`${key}_email`] ? (
-                                    <CircularProgress size={14} style={{ color: '#fff' }} />
+                                    <CircularProgress
+                                      size={14}
+                                      style={{ color: "#fff" }}
+                                    />
                                   ) : (
                                     <>
                                       <MdOutlineMail /> Reply & Email
@@ -526,10 +621,10 @@ const DecisionCircle = () => {
         <Box
           className="modal-card"
           sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
           }}
         >
           <h3>Edit Comment</h3>
@@ -539,7 +634,10 @@ const DecisionCircle = () => {
             rows={4}
           />
           <div className="modal-card__actions">
-            <button className="decision-btn" onClick={() => setEditModalOpen(false)}>
+            <button
+              className="decision-btn"
+              onClick={() => setEditModalOpen(false)}
+            >
               Cancel
             </button>
             <button

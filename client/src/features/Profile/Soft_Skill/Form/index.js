@@ -71,7 +71,7 @@ const SoftSkillForm = () => {
 
     const selectedSkill = skills[selectedSkillIndex];
     setLoading(true);
-    setIsSaveButtonDisabled(true); // Disable the Save button
+    setIsSaveButtonDisabled(true); 
 
     try {
       await postSkill({

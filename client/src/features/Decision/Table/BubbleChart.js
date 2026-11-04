@@ -107,7 +107,7 @@ const BubbleChart = ({ onBubbleClick }) => {
         x: `${profile.header_name} - ${profile.header_value}`,
         y: index * 10 + 10,
         z: Math.min(profile.v_id || 20, 50) * scaleFactor,
-        metadata: profile, // Add metadata for filtering
+        metadata: profile, 
       })),
     };
 
@@ -117,7 +117,7 @@ const BubbleChart = ({ onBubbleClick }) => {
         x: skill.skill_name,
         y: index * 10 + 10,
         z: Math.min(skill.skill_id || 10, 50) * scaleFactor,
-        metadata: skill, // Add metadata for filtering
+        metadata: skill,  
       })),
     };
 

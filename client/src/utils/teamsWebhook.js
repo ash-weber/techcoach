@@ -144,7 +144,7 @@ export const notifyTeamsChannel = async (action, decision = {}, targetEmail = nu
 
 // Graph API
 
-export const notifyTeamsChannel = async (action, decision = {}, targetEmail = null) => {
+export const notifyTeamsChannel = async (action, decision = {}, targetEmail = null, commentText = null) => {
   const authUser = JSON.parse(localStorage.getItem("auth_user") || "{}");
 
   const senderEmail = authUser.email || "";
@@ -175,6 +175,7 @@ export const notifyTeamsChannel = async (action, decision = {}, targetEmail = nu
     UPDATED: "Accent",
     DELETED: "Attention",
     SHARED: "Accent",
+    COMMENTED: "Accent",
   };
 
   const payload = {
@@ -197,7 +198,6 @@ export const notifyTeamsChannel = async (action, decision = {}, targetEmail = nu
 
   try {
     
-
     const response = await sendTeamsDecisionCard(payload);
 
     if (!response.ok) {

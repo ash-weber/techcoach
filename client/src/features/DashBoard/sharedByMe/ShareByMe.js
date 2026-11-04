@@ -561,7 +561,7 @@ const ShareByMe = () => {
   };
 
   const handleCardClick = (decisionId) => {
-    navigate(`/views/${decisionId}`);
+    navigate(`/decision/view/${decisionId}`);
   };
 
   const decisionMap = new Map(

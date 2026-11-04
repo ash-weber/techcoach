@@ -10,6 +10,7 @@ import {
   updateComment,
   getUsersForGroup,
   getGroupDetails,
+  sendTeamsCommentNotification 
 } from '../../../api/DecisionCircle/Network_Call';
 import { Modal, Box, CircularProgress } from '@mui/material';
 import {
@@ -56,6 +57,34 @@ const DecisionCircleDecisions = () => {
     }
   }, [groupId]);
 
+  const notifyCircleMembers = (decision, commentText, isReply = false) => {
+  const authUser = JSON.parse(localStorage.getItem("auth_user") || "{}");
+
+  const memberEmails = members.map((m) => m.email).filter(Boolean);
+  const adminEmail = user?.creator_email;
+  const recipientEmails = [
+    ...new Set(
+      [...memberEmails, adminEmail]
+        .filter(Boolean)
+        .map((e) => e.trim().toLowerCase()),
+    ),
+  ];
+
+  if (!recipientEmails.length) return;
+
+  sendTeamsCommentNotification({
+    recipientEmails,
+    commenterEmail: authUser.email,
+    circleType: "DECISION_CIRCLE",
+    circleName: groupName || groups?.group_name,
+    decisionName: decision.decision_name,
+    decisionId: decision.decision_id,
+    commentText,
+    isReply,
+    actionUrl: `${window.location.origin}/decision-circle/${groupId}?group_name=${encodeURIComponent(groupName || "")}`,
+  }).catch((err) => console.error("Teams notify failed", err));
+};
+
   const fetchGroupDetails = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -100,7 +129,7 @@ const DecisionCircleDecisions = () => {
   const fetchComments = async (groupId, decisionId) => {
     try {
       const response = await getComments(groupId, decisionId);
-      setComments((prev) => ({ ...prev, [decisionId]: response || [] }));
+      setComments((prev) => ({ ...prev, [decisionId]: response.comments || [] }));
     } catch (error) {
       console.error('Error fetching comments:', error);
     }
@@ -114,6 +143,10 @@ const DecisionCircleDecisions = () => {
     setButtonLoading((prev) => ({ ...prev, [decisionId]: true }));
     try {
       await postComment(groupId, comment, decisionId);
+
+      const decision = decisions.find((d) => d.decision_id === decisionId);
+    if (decision) notifyCircleMembers(decision, comment, false);
+    
       setNewComments((prev) => ({ ...prev, [decisionId]: '' }));
       toast.success('Comment posted successfully');
       fetchComments(groupId, decisionId);
@@ -133,6 +166,9 @@ const DecisionCircleDecisions = () => {
       await postComment(groupId, comment, decisionId);
       const decision = decisions.find((d) => d.decision_id === decisionId);
       if (!decision) throw new Error(`Decision with ID ${decisionId} not found`);
+
+      notifyCircleMembers(decision, comment, false);
+      
       await mailToDecisionCirclePostComment(decision, groupId, comment, email);
       toast.success('Comment posted and email sent successfully');
       fetchComments(groupId, decisionId);

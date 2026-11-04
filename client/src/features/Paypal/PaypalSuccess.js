@@ -16,7 +16,7 @@ const PaypalSuccess = () => {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
-  const [status, setStatus] = useState('processing'); // processing | success | error
+  const [status, setStatus] = useState('processing'); 
   const [message, setMessage] = useState('');
 
   useEffect(() => {

@@ -17,13 +17,13 @@ const getUserListForDecisionCircle = async () => {
 const decisionCircleCreation = async (
   created_by,
   type_of_group = "decision_circle",
-  group_id,
+  group_name,
   members,
 ) => {
   try {
     const response = await axios.post(
       `${process.env.REACT_APP_API_URL}/group/decisionCircleCreation`,
-      { created_by, type_of_group, group_id, members },
+      { created_by, type_of_group, group_name, members },
       getAuthHeaders(),
     );
     return response.data;
@@ -576,6 +576,21 @@ const sendTeamsDecisionCard = async (payload) => {
   }
 };
 
+const sendTeamsCommentNotification = async (payload) => {
+  const token = localStorage.getItem("token");
+  try {
+    const response = await axios.post(
+      `${process.env.REACT_APP_API_URL}/api/teams/notify-comment`,
+      payload,
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error sending Teams comment notification", error);
+    throw error;
+  }
+};
+
 export {
   getUserListForDecisionCircle,
   decisionCircleCreation,
@@ -613,4 +628,5 @@ export {
   editComments,
   getGroupDetails,
   sendTeamsDecisionCard,
+  sendTeamsCommentNotification
 };
