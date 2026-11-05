@@ -4,7 +4,7 @@ import axios from "axios";
 import {
   getAllProfileLink,
   getAllSkillLink,
-} from "../../../api/Decision_Link/Network_Call";
+} from "../../../../api/Decision_Link/Network_Call";
 
 const BubbleChart = ({ onBubbleClick }) => {
   const [profiles, setProfiles] = useState([]);

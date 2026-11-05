@@ -1,7 +1,7 @@
 import axios from "axios";
 import { getAuthHeaders } from "../api";
 
-const postSkillLink = async ({ decision_id, skill_ids, skill_names }) => {
+const postSkillLink = async (decision_id, skill_ids, skill_names) => {
   try {
     const response = await axios.post(
       `${process.env.REACT_APP_API_URL}/api/link`,
@@ -15,7 +15,7 @@ const postSkillLink = async ({ decision_id, skill_ids, skill_names }) => {
   }
 };
 
-const postProfileLink = async ({ decision_id, v_ids }) => {
+const postProfileLink = async (decision_id, v_ids) => {
   try {
     const response = await axios.post(
       `${process.env.REACT_APP_API_URL}/api/links`,
@@ -81,7 +81,7 @@ const deleteProfileLink = async (id) => {
   }
 };
 
-const postAdvancedProfileLink = async ({ decision_id, v_ids }) => {
+const postAdvancedProfileLink = async ( decision_id, v_ids ) => {
   try {
     const response = await axios.post(
       `${process.env.REACT_APP_API_URL}/link/advancedLink`,
