@@ -86,7 +86,6 @@ const getAllAdvancedProfileLink = async (req, res) => {
             return res.status(404).json({ message: 'No Profile records found' });
         }
 
-        // Decryption function
         const decryptText = (text, key) => {
             if (!text) return null;
             try {

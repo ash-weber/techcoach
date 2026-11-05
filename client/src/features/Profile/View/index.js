@@ -24,7 +24,8 @@ import {
 import GooglePayButton from "../Subscription/GooglePayButton";
 import ApplePayButton from "../Subscription/ApplePayButton";
 import { getUserDecisions } from "../../../api/Decisions/Network_Call";
-import { getProfile } from "../../../api/User/Network_call";
+import { deleteProfile, getProfile, getUserList } from "../../../api/User/Network_call";
+import { createSubscription, getSubscriptionStatus } from "../../../api/Subscription/Network_Call";
 
 
 const Profile = () => {
@@ -53,15 +54,15 @@ const Profile = () => {
 
   const handlePaymentError = (err) => {
     toast.error(
-      err.response?.data?.error || "Payment failed. Please try again.",
+      err.response?.error || "Payment failed. Please try again.",
     );
   };
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const userResp = await getProfile()
+        
+        const userResp = await getUserList()
         const user =
           userResp.tasks && userResp.tasks.length
             ? userResp.tasks[0]
@@ -72,20 +73,13 @@ const Profile = () => {
         setFormData(formResp);
         const decisionsResp = await getUserDecisions();
 
-        const subResp = await axios.get(
-          `${process.env.REACT_APP_API_URL}/api/subscription/status`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
+        const subResp = await getSubscriptionStatus();
 
-        setSubscription(subResp.data);
+        setSubscription(subResp);
         if (Array.isArray(decisionsResp.decisionData)) {
           setDecisions(decisionsResp.decisionData);
         } else {
-          console.error("Invalid response format:", decisionsResp.data);
+          console.error("Invalid response format:", decisionsResp);
         }
         setLoading(false);
       } catch (error) {
@@ -101,19 +95,11 @@ const Profile = () => {
     try {
       setSubscriptionLoading(true);
 
-      const token = localStorage.getItem("token");
+      
 
-      const res = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/subscription/create`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
+      const res = await createSubscription();
 
-      window.location.href = res.data.approvalUrl;
+      window.location.href = res.approvalUrl;
     } catch {
       toast.error("Failed to start subscription");
 
@@ -138,12 +124,8 @@ const Profile = () => {
     );
     if (confirmation) {
       try {
-        const token = localStorage.getItem("token");
-        await axios.delete(`${process.env.REACT_APP_API_URL}/api/user/data`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        
+        await deleteProfile();
         localStorage.removeItem("token");
         window.location.reload();
         navigate("/");
@@ -325,10 +307,13 @@ const Profile = () => {
           </div>
 
           <div className="profile-action-container">
-            <Link to="/profile/linked-decision" className="linked-decisions-btn">
-              View Linked Decisions
-            </Link>
-          </div>
+          <button
+            className="subscribe-btn"
+            onClick={() => navigate("/profile/linked-decision")}
+          >
+            View linked decisions →
+          </button>
+        </div>
         </div>
         <div className="profile-header-container">
           <div className="subscription-card">

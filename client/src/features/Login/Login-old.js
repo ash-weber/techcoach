@@ -38,7 +38,7 @@ const Home = () => {
         try {
             await apiCall();
         } catch (error) {
-            alert('Operation Failed: ' + (error.response?.data?.message || 'Server error'));
+            alert('Operation Failed: ' + (error.response?.message || 'Server error'));
         } finally {
             setIsLoading(false);
         }
@@ -48,7 +48,7 @@ const Home = () => {
         e.preventDefault();
         handleApiCall(async () => {
             const response = await axios.post(`${process.env.REACT_APP_API_URL}/login`, { email, password });
-            localStorage.setItem('token', response.data.token);
+            localStorage.setItem('token', response.token);
             alert('Login Successful!');
             window.location.href = '/dashboard';
         });
@@ -67,7 +67,7 @@ const Home = () => {
         e.preventDefault();
         handleApiCall(async () => {
             const response = await axios.post(`${process.env.REACT_APP_API_URL}/verify-otp`, { email, otp });
-            localStorage.setItem('token', response.data.token);
+            localStorage.setItem('token', response.token);
             alert('Account verified successfully!');
             window.location.href = '/dashboard';
         });

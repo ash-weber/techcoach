@@ -10,6 +10,7 @@ import {
   updateComment,
   getUsersForGroup,
   getGroupDetails,
+  sendTeamsCommentNotification 
 } from '../../../api/DecisionCircle/Network_Call';
 import { Modal, Box, CircularProgress } from '@mui/material';
 import {
@@ -56,15 +57,43 @@ const DecisionCircleDecisions = () => {
     }
   }, [groupId]);
 
+  const notifyCircleMembers = (decision, commentText, isReply = false) => {
+  const authUser = JSON.parse(localStorage.getItem("auth_user") || "{}");
+
+  const memberEmails = members.map((m) => m.email).filter(Boolean);
+  const adminEmail = user?.creator_email;
+  const recipientEmails = [
+    ...new Set(
+      [...memberEmails, adminEmail]
+        .filter(Boolean)
+        .map((e) => e.trim().toLowerCase()),
+    ),
+  ];
+
+  if (!recipientEmails.length) return;
+
+  sendTeamsCommentNotification({
+    recipientEmails,
+    commenterEmail: authUser.email,
+    circleType: "DECISION_CIRCLE",
+    circleName: groupName || groups?.group_name,
+    decisionName: decision.decision_name,
+    decisionId: decision.decision_id,
+    commentText,
+    isReply,
+    actionUrl: `${window.location.origin}/decision-circle/${groupId}?group_name=${encodeURIComponent(groupName || "")}`,
+  }).catch((err) => console.error("Teams notify failed", err));
+};
+
   const fetchGroupDetails = async () => {
     try {
       const token = localStorage.getItem('token');
       const response = await getUsersForGroup(groupId);
-      if (response.data.error) {
-        toast.error(response.data.error);
+      if (response.error) {
+        toast.error(response.error);
       } else {
-        setGroups(response.data.group);
-        setMembers(response.data.members);
+        setGroups(response.group);
+        setMembers(response.members);
       }
     } catch (err) {
       toast.error('An error occurred while fetching the group details.');
@@ -85,8 +114,10 @@ const DecisionCircleDecisions = () => {
   const fetchSharedDecisions = async () => {
     try {
       const data = await getMemberSharedDecisions(groupId);
-      setDecisions(data || []);
-      data.forEach((decision) => fetchComments(groupId, decision.decision_id));
+
+      console.log("sssss", data)
+      setDecisions(data.results || []);
+      data.results.forEach((decision) => fetchComments(groupId, decision.decision_id));
     } catch (error) {
       setError('Failed to fetch shared decisions.');
       console.error(error);
@@ -98,7 +129,7 @@ const DecisionCircleDecisions = () => {
   const fetchComments = async (groupId, decisionId) => {
     try {
       const response = await getComments(groupId, decisionId);
-      setComments((prev) => ({ ...prev, [decisionId]: response || [] }));
+      setComments((prev) => ({ ...prev, [decisionId]: response.comments || [] }));
     } catch (error) {
       console.error('Error fetching comments:', error);
     }
@@ -112,6 +143,10 @@ const DecisionCircleDecisions = () => {
     setButtonLoading((prev) => ({ ...prev, [decisionId]: true }));
     try {
       await postComment(groupId, comment, decisionId);
+
+      const decision = decisions.find((d) => d.decision_id === decisionId);
+    if (decision) notifyCircleMembers(decision, comment, false);
+    
       setNewComments((prev) => ({ ...prev, [decisionId]: '' }));
       toast.success('Comment posted successfully');
       fetchComments(groupId, decisionId);
@@ -131,6 +166,9 @@ const DecisionCircleDecisions = () => {
       await postComment(groupId, comment, decisionId);
       const decision = decisions.find((d) => d.decision_id === decisionId);
       if (!decision) throw new Error(`Decision with ID ${decisionId} not found`);
+
+      notifyCircleMembers(decision, comment, false);
+      
       await mailToDecisionCirclePostComment(decision, groupId, comment, email);
       toast.success('Comment posted and email sent successfully');
       fetchComments(groupId, decisionId);
@@ -151,7 +189,7 @@ const DecisionCircleDecisions = () => {
       }));
       toast.success('Comment deleted successfully');
     } catch (error) {
-      console.error('Error deleting comment:', error.response?.data);
+      console.error('Error deleting comment:', error.response);
       toast.error('Error deleting comment');
     }
   };
@@ -456,7 +494,6 @@ const DecisionCircleDecisions = () => {
         )}
       </section>
 
-      {/* ---------- Edit Modal ---------- */}
       <Modal open={isEditModalOpen} onClose={() => setEditModalOpen(false)}>
         <Box className="modal-card" sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
           <h3>Edit Comment</h3>

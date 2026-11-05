@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { CircularProgress, Box } from "@mui/material";
+import { captureOneTimeOrder, createOneTimeOrder } from "../../../api/Subscription/Network_Call";
 
 const loadScript = (src) => {
   return new Promise((resolve, reject) => {
@@ -61,7 +62,7 @@ const GooglePayButton = ({ amount = "12.00", onSuccess, onError }) => {
           paymentDataCallbacks: {
             onPaymentAuthorized: async (paymentData) => {
               try {
-                const token = localStorage.getItem("token");
+                
 
                 const orderPayload = {
                   intent: "CAPTURE",
@@ -90,13 +91,9 @@ const GooglePayButton = ({ amount = "12.00", onSuccess, onError }) => {
                   },
                 };
 
-                const createRes = await axios.post(
-                  `${process.env.REACT_APP_API_URL}/api/subscription/orders/create`,
-                  orderPayload,
-                  { headers: { Authorization: `Bearer ${token}` } }
-                );
+                const createRes = await createOneTimeOrder(orderPayload);
 
-                const orderId = createRes.data.id;
+                const orderId = createRes.id;
 
                 const { status } = await googlePaySession.confirmOrder({
                   orderId,
@@ -104,13 +101,9 @@ const GooglePayButton = ({ amount = "12.00", onSuccess, onError }) => {
                 });
 
                 if (status !== "PAYER_ACTION_REQUIRED") {
-                  const captureRes = await axios.post(
-                    `${process.env.REACT_APP_API_URL}/api/subscription/orders/${orderId}/capture`,
-                    {},
-                    { headers: { Authorization: `Bearer ${token}` } }
-                  );
+                  const captureRes = await captureOneTimeOrder(orderId);
 
-                  if (onSuccess) onSuccess(captureRes.data);
+                  if (onSuccess) onSuccess(captureRes);
                 }
 
                 return { transactionState: "SUCCESS" };

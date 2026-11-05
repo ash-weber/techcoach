@@ -20,6 +20,9 @@ import {
   postShareWithComment,
   editComments,
   getWithComments,
+  sendTeamsCommentNotification,
+  getUsersForGroup,
+  getGroupDetails,
 } from "../../../api/DecisionCircle/Network_Call";
 import { ToastContainer, toast } from "react-toastify";
 import { AiFillEdit } from "react-icons/ai";
@@ -48,7 +51,8 @@ const SharedDecisionCircle = () => {
     try {
       setIsLoading(true);
       const response = await getdecisionSharedDecisionCirclebyuser();
-      setSharedDecisionCircles(response || []);
+      console.log("ssssss", response);
+      setSharedDecisionCircles(response.results || []);
       setComments({});
     } catch (error) {
       console.error("Error fetching shared decisions:", error);
@@ -84,6 +88,50 @@ const SharedDecisionCircle = () => {
     fetchCurrentUserEmail();
   }, []);
 
+  const notifyDecisionCircleMembers = async (item, commentText) => {
+    const authUser = JSON.parse(localStorage.getItem("auth_user") || "{}");
+    const groupId = item.id; 
+
+    if (!groupId) return;
+
+    try {
+      const [membersRes, groupRes] = await Promise.all([
+        getUsersForGroup(groupId),
+        getGroupDetails(groupId),
+      ]);
+
+      const memberEmails = (membersRes.members || [])
+        .map((m) => m.email)
+        .filter(Boolean);
+      const adminEmail = groupRes?.creator_email || null;
+
+      const recipientEmails = [
+        ...new Set(
+          [...memberEmails, adminEmail]
+            .filter(Boolean)
+            .map((e) => e.trim().toLowerCase()),
+        ),
+      ];
+
+      if (!recipientEmails.length) return;
+
+      await sendTeamsCommentNotification({
+        recipientEmails,
+        commenterEmail: authUser.email,
+        commenterName: authUser.name || "Circle Member",
+        circleType: "DECISION_CIRCLE",
+        circleName: item.group_name,
+        decisionName: item.decision_name,
+        decisionId: item.decision_id,
+        commentText,
+        isReply: false,
+        actionUrl: `${window.location.origin}/decision-circle/${groupId}?group_name=${encodeURIComponent(item.group_name || "")}`,
+      });
+    } catch (error) {
+      console.error("Teams notification failed:", error);
+    }
+  };
+
   const handlePostComment = async (decisionId, id) => {
     const comment = newComment[decisionId]?.trim();
     if (!comment) {
@@ -95,6 +143,12 @@ const SharedDecisionCircle = () => {
     setButtonLoading((prevState) => ({ ...prevState, [decisionId]: true }));
     try {
       const dataToSend = await postShareWithComment(id, comment, decisionId);
+
+      const item = sharedDecisionCircles.find(
+        (d) => d.decision_id === decisionId,
+      );
+      if (item) notifyDecisionCircleMembers(item, comment);
+
       setComments((prevState) => ({ ...prevState, [decisionId]: "" }));
       toast.success("Comment posted successfully");
       fetchComments(id, decisionId);
@@ -130,14 +184,15 @@ const SharedDecisionCircle = () => {
   const fetchComments = async () => {
     try {
       const commentsData = await Promise.all(
-        sharedDecisionCircles.map((item) =>
-          getWithComments(item.id, item.decision_id)
-        ),
+        sharedDecisionCircles.map(async (item) => {
+          const response = await getWithComments(item.decision_id, item.id);
+          return response;
+        }),
       );
 
       const updatedComments = commentsData.reduce((acc, response, index) => {
         const decisionId = sharedDecisionCircles[index].decision_id;
-        acc[decisionId] = response.data.comments || [];
+        acc[decisionId] = response.comments || [];
         return acc;
       }, {});
       setComments(updatedComments);

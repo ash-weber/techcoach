@@ -47,7 +47,7 @@ const Dashboard = () => {
       try {
         const details = await getSharedDecisionDetails();
 
-        const token = localStorage.getItem("token");
+        
 
         const userResp = await getUserList();
         setUserName(userResp.tasks[0].displayname);
@@ -76,7 +76,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchSharedByDecisionsCount = async () => {
       try {
-        const token = localStorage.getItem("token");
+        
         const response = await getSharedByDecisionsCount();
         setSharedByDecisionsCount(response.decisionCount);
       } catch (error) {
@@ -89,7 +89,7 @@ const Dashboard = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const token = localStorage.getItem("token");
+        
         const response = await getUserDecisions()
         const responseData = response;
         if (Array.isArray(responseData.decisionData)) {

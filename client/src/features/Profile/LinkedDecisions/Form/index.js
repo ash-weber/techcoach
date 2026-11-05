@@ -1,40 +1,72 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import withAuth from '../../../../utils/withAuth';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import withAuth from "../../../../utils/withAuth";
 import { IoIosInformationCircle } from "react-icons/io";
 import { FiChevronDown, FiChevronUp } from "react-icons/fi";
-import { useNavigate, Link, useParams, useLocation } from 'react-router-dom';
-import { postProfileLink, postSkillLink } from '../../../../api/Decision_Link/Network_Call';
-import { getProfile } from '../../../../api/User/Network_call';
+import { useNavigate, useParams, useLocation } from "react-router-dom";
+import {
+  postProfileLink,
+  postSkillLink,
+} from "../../../../api/Decision_Link/Network_Call";
+import { getProfile } from "../../../../api/User/Network_call";
+import { getAllSkill } from "../../../../api/Skill/Network_Call";
+import {
+  getAdvancedProfile,
+  postAdvancedProfile,
+} from "../../../../api/AdvancedProfile/Network_Call";
 
-const CheckboxGroup = ({ title, items = [], prefix, onChange, selected = [] }) => {
+const CheckboxGroup = ({
+  title,
+  items = [],
+  prefix,
+  onChange,
+  selected = [],
+}) => {
   const [open, setOpen] = useState(true);
   if (!items || items.length === 0) return null;
 
   return (
-    <div className="AdvancedTable form-section" style={{ borderBottom: '1px dashed var(--border-color)' }}>
-      <div className="section-header" style={{ cursor: 'pointer' }} onClick={() => setOpen(!open)}>
-        <h6 style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+    <div
+      className="AdvancedTable form-section"
+      style={{ borderBottom: "1px dashed var(--border-color)" }}
+    >
+      <div
+        className="section-header"
+        style={{ cursor: "pointer" }}
+        onClick={() => setOpen(!open)}
+      >
+        <h6
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "var(--space-sm)",
+          }}
+        >
           {title}
-          <span style={{
-            fontSize: 'var(--font-size-sm)',
-            color: 'var(--text-muted)',
-            fontWeight: 500,
-            textTransform: 'none',
-            letterSpacing: 0,
-          }}>
+          <span
+            style={{
+              fontSize: "var(--font-size-sm)",
+              color: "var(--text-muted)",
+              fontWeight: 500,
+              textTransform: "none",
+              letterSpacing: 0,
+            }}
+          >
             ({items.length})
           </span>
         </h6>
-        <span style={{ color: 'var(--primary)' }}>
+        <span style={{ color: "var(--primary)" }}>
           {open ? <FiChevronUp /> : <FiChevronDown />}
         </span>
       </div>
 
       {open && (
-        <div className="form-section-body" style={{ marginTop: 'var(--space-md)' }}>
+        <div
+          className="form-section-body"
+          style={{ marginTop: "var(--space-md)" }}
+        >
           {items.map((item) => {
             const id = `${prefix}-${item.id ?? item.header_id}`;
             const value = String(item.id ?? item.header_id);
@@ -44,16 +76,18 @@ const CheckboxGroup = ({ title, items = [], prefix, onChange, selected = [] }) =
                 key={id}
                 htmlFor={id}
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 'var(--space-sm)',
-                  padding: 'var(--space-xs) var(--space-sm)',
-                  borderRadius: 'var(--radius-sm)',
-                  cursor: 'pointer',
-                  background: isChecked ? 'var(--primary-light)' : 'transparent',
-                  fontSize: 'var(--font-size-sm)',
-                  color: 'var(--text-main)',
-                  transition: 'var(--transition-fast)',
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "var(--space-sm)",
+                  padding: "var(--space-xs) var(--space-sm)",
+                  borderRadius: "var(--radius-sm)",
+                  cursor: "pointer",
+                  background: isChecked
+                    ? "var(--primary-light)"
+                    : "transparent",
+                  fontSize: "var(--font-size-sm)",
+                  color: "var(--text-main)",
+                  transition: "var(--transition-fast)",
                 }}
               >
                 <input
@@ -62,7 +96,7 @@ const CheckboxGroup = ({ title, items = [], prefix, onChange, selected = [] }) =
                   value={value}
                   checked={isChecked}
                   onChange={onChange}
-                  style={{ accentColor: 'var(--primary)' }}
+                  style={{ accentColor: "var(--primary)" }}
                 />
                 <span>{item.value ?? item.header_name}</span>
               </label>
@@ -75,7 +109,7 @@ const CheckboxGroup = ({ title, items = [], prefix, onChange, selected = [] }) =
 };
 
 const SectionCard = ({
-  accent, 
+  accent,
   title,
   description,
   expanded,
@@ -88,35 +122,51 @@ const SectionCard = ({
   <div className={`swot-container`}>
     <div className="swot-header">
       <div>
-        <h3 style={{ margin: 0, fontSize: 'var(--font-size-lg)', fontWeight: 700 }}>
+        <h3
+          style={{
+            margin: 0,
+            fontSize: "var(--font-size-lg)",
+            fontWeight: 700,
+          }}
+        >
           {title}
         </h3>
-        <p className="swot-desc" style={{ marginTop: 'var(--space-sm)' }}>
+        <p className="swot-desc" style={{ marginTop: "var(--space-sm)" }}>
           {description}
         </p>
       </div>
-      <button type="button" className="swot-link" onClick={onToggle} style={{ cursor: 'pointer', background: expanded ? 'var(--primary)' : undefined, color: expanded ? 'var(--text-inverse)' : undefined }}>
-        {expanded ? 'Hide options' : 'Select items'}
+      <button
+        type="button"
+        className="swot-link"
+        onClick={onToggle}
+        style={{
+          cursor: "pointer",
+          background: expanded ? "var(--primary)" : undefined,
+          color: expanded ? "var(--text-inverse)" : undefined,
+        }}
+      >
+        {expanded ? "Hide options" : "Select items"}
       </button>
     </div>
 
-    {expanded && (
-      <div style={{ marginTop: 'var(--space-lg)' }}>{children}</div>
-    )}
+    {expanded && <div style={{ marginTop: "var(--space-lg)" }}>{children}</div>}
 
     <div
       style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        gap: 'var(--space-md)',
-        marginTop: 'var(--space-lg)',
-        paddingTop: 'var(--space-lg)',
-        borderTop: '1px solid var(--border-color)',
-        flexWrap: 'wrap',
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        gap: "var(--space-md)",
+        marginTop: "var(--space-lg)",
+        paddingTop: "var(--space-lg)",
+        borderTop: "1px solid var(--border-color)",
+        flexWrap: "wrap",
       }}
     >
-      <span className="status-active" style={{ background: 'var(--primary-light)', color: 'var(--primary)' }}>
+      <span
+        className="status-active"
+        style={{ background: "var(--primary-light)", color: "var(--primary)" }}
+      >
         {selectedCount} selected
       </span>
       <button
@@ -157,7 +207,7 @@ const AddLink = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const params = new URLSearchParams(location.search);
-  const decision_name = params.get('name');
+  const decision_name = params.get("name");
 
   const fetchProfiles = async () => {
     try {
@@ -166,40 +216,56 @@ const AddLink = () => {
       setAttitude(Array.isArray(response.attitude) ? response.attitude : []);
       setStrength(Array.isArray(response.strength) ? response.strength : []);
       setWeakness(Array.isArray(response.weakness) ? response.weakness : []);
-      setOpportunity(Array.isArray(response.opportunity) ? response.opportunity : []);
+      setOpportunity(
+        Array.isArray(response.opportunity) ? response.opportunity : [],
+      );
       setThreat(Array.isArray(response.threat) ? response.threat : []);
-    } catch (err) { console.log(err); }
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const fetchAdvancedProfiles = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/data/advanced`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setAdvancedProfiles(Array.isArray(response.data.advancedProfiles) ? response.data.advancedProfiles : []);
-      setGoals(Array.isArray(response.data.goals) ? response.data.goals : []);
-      setValues(Array.isArray(response.data.values) ? response.data.values : []);
-      setResolutions(Array.isArray(response.data.resolutions) ? response.data.resolutions : []);
-      setConstraints(Array.isArray(response.data.constraints) ? response.data.constraints : []);
-      setOtherfactors(Array.isArray(response.data.otherfactors) ? response.data.otherfactors : []);
-    } catch (error) { console.log(error); }
+      const response = await getAdvancedProfile();
+      setAdvancedProfiles(
+        Array.isArray(response.advancedProfiles)
+          ? response.advancedProfiles
+          : [],
+      );
+      setGoals(Array.isArray(response.goals) ? response.goals : []);
+      setValues(Array.isArray(response.values) ? response.values : []);
+      setResolutions(
+        Array.isArray(response.resolutions) ? response.resolutions : [],
+      );
+      setConstraints(
+        Array.isArray(response.constraints) ? response.constraints : [],
+      );
+      setOtherfactors(
+        Array.isArray(response.otherfactors) ? response.otherfactors : [],
+      );
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const fetchSkills = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/skill/get`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setSkills(response.data.skills || []);
-    } catch (err) { console.log(err); }
+      const response = await getAllSkill();
+      setSkills(response.skills || []);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   useEffect(() => {
     const loadAll = async () => {
       setLoading(true);
-      await Promise.all([fetchProfiles(), fetchAdvancedProfiles(), fetchSkills()]);
+      await Promise.all([
+        fetchProfiles(),
+        fetchAdvancedProfiles(),
+        fetchSkills(),
+      ]);
       setLoading(false);
     };
     loadAll();
@@ -207,42 +273,46 @@ const AddLink = () => {
 
   const toggle = (setter, value) =>
     setter((prev) =>
-      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value],
     );
 
-  const handleProfileChange = (e) => toggle(setSelectedProfiles, e.target.value);
-  const handleAdvancedProfileChange = (e) => toggle(setSelectedAdvancedProfiles, e.target.value);
+  const handleProfileChange = (e) =>
+    toggle(setSelectedProfiles, e.target.value);
+  const handleAdvancedProfileChange = (e) =>
+    toggle(setSelectedAdvancedProfiles, e.target.value);
   const handleSkillChange = (e) => toggle(setSelectedSkills, e.target.value);
 
   const handleProfileSubmit = async () => {
     try {
-      const token = localStorage.getItem('token');
       await postProfileLink(id, selectedProfiles);
-      toast.success('SWOT links saved');
-      navigate('/profile/linked-decision');
-    } catch (err) { toast.error('Error saving SWOT links'); }
+      toast.success("SWOT links saved");
+      navigate("/profile/linked-decision");
+    } catch (err) {
+      toast.error("Error saving SWOT links");
+    }
   };
 
   const handleAdvancedProfileSubmit = async () => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.post(
-        `${process.env.REACT_APP_API_URL}/link/advancedLink`,
-        { v_ids: selectedAdvancedProfiles, decision_id: id },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      toast.success('Advanced profile links saved');
-      navigate('/profile/linked-decision');
-    } catch (err) { toast.error('Error saving advanced profile links'); }
+      await postAdvancedProfile({
+        decision_id: id,
+        v_ids: selectedAdvancedProfiles,
+      });
+      toast.success("Advanced profile links saved");
+      navigate("/profile/linked-decision");
+    } catch (err) {
+      toast.error("Error saving advanced profile links");
+    }
   };
 
   const handleSkillSubmit = async () => {
     try {
-      const token = localStorage.getItem('token');
       await postSkillLink(id, selectedSkills);
-      toast.success('Skill links saved');
-      navigate('/profile/linked-decision');
-    } catch (err) { toast.error('Error saving skill links'); }
+      toast.success("Skill links saved");
+      navigate("/profile/linked-decision");
+    } catch (err) {
+      toast.error("Error saving skill links");
+    }
   };
 
   if (loading) {
@@ -257,41 +327,54 @@ const AddLink = () => {
 
   return (
     <div className="card1 addlink-page">
-      <div className="profile-top-section" style={{ marginBottom: 'var(--space-xl)' }}>
+      <div
+        className="profile-top-section"
+        style={{ marginBottom: "var(--space-xl)" }}
+      >
         <div className="profile-basic-info">
-          <h3 className="profile-name">
-            {decision_name || 'Link Data'}
-          </h3>
+          <h3 className="profile-name">{decision_name || "Link Data"}</h3>
         </div>
         <div className="profile-action-container">
-          <Link to="/profile/linked-decision" className="linked-decisions-btn">
+          <button
+            className="subscribe-btn"
+            onClick={() => navigate("/profile/linked-decision")}
+          >
             View linked decisions →
-          </Link>
+          </button>
         </div>
       </div>
 
       <div
         style={{
-          background: 'var(--primary-light)',
-          borderLeft: '4px solid var(--primary)',
-          borderRadius: 'var(--radius-md)',
-          padding: 'var(--space-md) var(--space-lg)',
-          display: 'flex',
-          gap: 'var(--space-sm)',
-          alignItems: 'flex-start',
-          marginBottom: 'var(--space-xl)',
-          color: 'var(--text-main)',
-          fontSize: 'var(--font-size-base)',
+          background: "var(--primary-light)",
+          borderLeft: "4px solid var(--primary)",
+          borderRadius: "var(--radius-md)",
+          padding: "var(--space-md) var(--space-lg)",
+          display: "flex",
+          gap: "var(--space-sm)",
+          alignItems: "flex-start",
+          marginBottom: "var(--space-xl)",
+          color: "var(--text-main)",
+          fontSize: "var(--font-size-base)",
         }}
       >
-        <IoIosInformationCircle className="fs-4" style={{ color: 'var(--primary)', flexShrink: 0 }} />
+        <IoIosInformationCircle
+          className="fs-4"
+          style={{ color: "var(--primary)", flexShrink: 0 }}
+        />
         <span>
-          Expand any card below to select the data you want to link to this decision.
-          Your selection is saved per card.
+          Expand any card below to select the data you want to link to this
+          decision. Your selection is saved per card.
         </span>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xl)' }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "var(--space-xl)",
+        }}
+      >
         <SectionCard
           accent="blue"
           title="SWOT Profile"
@@ -302,13 +385,55 @@ const AddLink = () => {
           onSave={handleProfileSubmit}
           saveLabel="Save SWOT links"
         >
-          <div style={{ maxHeight: '480px', overflowY: 'auto', paddingRight: 'var(--space-sm)' }}>
-            <CheckboxGroup title="Attitude" items={attitude} prefix="att" onChange={handleProfileChange} selected={selectedProfiles} />
-            <CheckboxGroup title="Strength" items={strength} prefix="str" onChange={handleProfileChange} selected={selectedProfiles} />
-            <CheckboxGroup title="Weakness" items={weakness} prefix="wk" onChange={handleProfileChange} selected={selectedProfiles} />
-            <CheckboxGroup title="Opportunity" items={opportunity} prefix="op" onChange={handleProfileChange} selected={selectedProfiles} />
-            <CheckboxGroup title="Threat" items={threat} prefix="thr" onChange={handleProfileChange} selected={selectedProfiles} />
-            <CheckboxGroup title="Profile headers" items={profiles} prefix="prof" onChange={handleProfileChange} selected={selectedProfiles} />
+          <div
+            style={{
+              maxHeight: "480px",
+              overflowY: "auto",
+              paddingRight: "var(--space-sm)",
+            }}
+          >
+            <CheckboxGroup
+              title="Attitude"
+              items={attitude}
+              prefix="att"
+              onChange={handleProfileChange}
+              selected={selectedProfiles}
+            />
+            <CheckboxGroup
+              title="Strength"
+              items={strength}
+              prefix="str"
+              onChange={handleProfileChange}
+              selected={selectedProfiles}
+            />
+            <CheckboxGroup
+              title="Weakness"
+              items={weakness}
+              prefix="wk"
+              onChange={handleProfileChange}
+              selected={selectedProfiles}
+            />
+            <CheckboxGroup
+              title="Opportunity"
+              items={opportunity}
+              prefix="op"
+              onChange={handleProfileChange}
+              selected={selectedProfiles}
+            />
+            <CheckboxGroup
+              title="Threat"
+              items={threat}
+              prefix="thr"
+              onChange={handleProfileChange}
+              selected={selectedProfiles}
+            />
+            <CheckboxGroup
+              title="Profile headers"
+              items={profiles}
+              prefix="prof"
+              onChange={handleProfileChange}
+              selected={selectedProfiles}
+            />
           </div>
         </SectionCard>
 
@@ -322,13 +447,55 @@ const AddLink = () => {
           onSave={handleAdvancedProfileSubmit}
           saveLabel="Save advanced links"
         >
-          <div style={{ maxHeight: '480px', overflowY: 'auto', paddingRight: 'var(--space-sm)' }}>
-            <CheckboxGroup title="Goals" items={goals} prefix="goal" onChange={handleAdvancedProfileChange} selected={selectedAdvancedProfiles} />
-            <CheckboxGroup title="Values" items={values} prefix="val" onChange={handleAdvancedProfileChange} selected={selectedAdvancedProfiles} />
-            <CheckboxGroup title="Resolutions" items={resolutions} prefix="res" onChange={handleAdvancedProfileChange} selected={selectedAdvancedProfiles} />
-            <CheckboxGroup title="Constraints" items={constraints} prefix="con" onChange={handleAdvancedProfileChange} selected={selectedAdvancedProfiles} />
-            <CheckboxGroup title="Other factors" items={otherfactors} prefix="oth" onChange={handleAdvancedProfileChange} selected={selectedAdvancedProfiles} />
-            <CheckboxGroup title="Advanced profiles" items={advancedProfiles} prefix="aprof" onChange={handleAdvancedProfileChange} selected={selectedAdvancedProfiles} />
+          <div
+            style={{
+              maxHeight: "480px",
+              overflowY: "auto",
+              paddingRight: "var(--space-sm)",
+            }}
+          >
+            <CheckboxGroup
+              title="Goals"
+              items={goals}
+              prefix="goal"
+              onChange={handleAdvancedProfileChange}
+              selected={selectedAdvancedProfiles}
+            />
+            <CheckboxGroup
+              title="Values"
+              items={values}
+              prefix="val"
+              onChange={handleAdvancedProfileChange}
+              selected={selectedAdvancedProfiles}
+            />
+            <CheckboxGroup
+              title="Resolutions"
+              items={resolutions}
+              prefix="res"
+              onChange={handleAdvancedProfileChange}
+              selected={selectedAdvancedProfiles}
+            />
+            <CheckboxGroup
+              title="Constraints"
+              items={constraints}
+              prefix="con"
+              onChange={handleAdvancedProfileChange}
+              selected={selectedAdvancedProfiles}
+            />
+            <CheckboxGroup
+              title="Other factors"
+              items={otherfactors}
+              prefix="oth"
+              onChange={handleAdvancedProfileChange}
+              selected={selectedAdvancedProfiles}
+            />
+            <CheckboxGroup
+              title="Advanced profiles"
+              items={advancedProfiles}
+              prefix="aprof"
+              onChange={handleAdvancedProfileChange}
+              selected={selectedAdvancedProfiles}
+            />
           </div>
         </SectionCard>
 
@@ -342,7 +509,13 @@ const AddLink = () => {
           onSave={handleSkillSubmit}
           saveLabel="Save skill links"
         >
-          <div style={{ maxHeight: '480px', overflowY: 'auto', paddingRight: 'var(--space-sm)' }}>
+          <div
+            style={{
+              maxHeight: "480px",
+              overflowY: "auto",
+              paddingRight: "var(--space-sm)",
+            }}
+          >
             {skills.length === 0 ? (
               <div className="no-profile-data">No skills found.</div>
             ) : (
@@ -355,13 +528,17 @@ const AddLink = () => {
                     htmlFor={skillId}
                     className="swot-card attitude"
                     style={{
-                      display: 'flex',
-                      gap: 'var(--space-md)',
-                      alignItems: 'flex-start',
-                      cursor: 'pointer',
-                      marginBottom: 'var(--space-sm)',
-                      background: checked ? 'var(--primary-light)' : 'var(--bg-primary)',
-                      borderLeftColor: checked ? 'var(--primary)' : 'var(--border-color)',
+                      display: "flex",
+                      gap: "var(--space-md)",
+                      alignItems: "flex-start",
+                      cursor: "pointer",
+                      marginBottom: "var(--space-sm)",
+                      background: checked
+                        ? "var(--primary-light)"
+                        : "var(--bg-primary)",
+                      borderLeftColor: checked
+                        ? "var(--primary)"
+                        : "var(--border-color)",
                     }}
                   >
                     <input
@@ -370,24 +547,57 @@ const AddLink = () => {
                       value={skill.skill_id}
                       checked={checked}
                       onChange={handleSkillChange}
-                      style={{ accentColor: 'var(--primary)', marginTop: '4px' }}
+                      style={{
+                        accentColor: "var(--primary)",
+                        marginTop: "4px",
+                      }}
                     />
                     <div style={{ flex: 1 }}>
-                      <strong style={{ color: 'var(--text-main)', fontSize: 'var(--font-size-base)' }}>
+                      <strong
+                        style={{
+                          color: "var(--text-main)",
+                          fontSize: "var(--font-size-base)",
+                        }}
+                      >
                         {skill.skill_name}
                       </strong>
-                      <div style={{ display: 'flex', gap: 'var(--space-sm)', flexWrap: 'wrap', marginTop: 'var(--space-xs)' }}>
-                        <span className="status-active" style={{ background: 'var(--primary-light)', color: 'var(--primary)' }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "var(--space-sm)",
+                          flexWrap: "wrap",
+                          marginTop: "var(--space-xs)",
+                        }}
+                      >
+                        <span
+                          className="status-active"
+                          style={{
+                            background: "var(--primary-light)",
+                            color: "var(--primary)",
+                          }}
+                        >
                           Rating: {skill.rating}
                         </span>
                         {skill.comments && (
-                          <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)' }}>
+                          <span
+                            style={{
+                              fontSize: "var(--font-size-sm)",
+                              color: "var(--text-muted)",
+                            }}
+                          >
                             💬 {skill.comments}
                           </span>
                         )}
                       </div>
                       {skill.description && (
-                        <p style={{ margin: 'var(--space-sm) 0 0', fontSize: 'var(--font-size-sm)', color: 'var(--text-muted)', lineHeight: 1.55 }}>
+                        <p
+                          style={{
+                            margin: "var(--space-sm) 0 0",
+                            fontSize: "var(--font-size-sm)",
+                            color: "var(--text-muted)",
+                            lineHeight: 1.55,
+                          }}
+                        >
                           {skill.description}
                         </p>
                       )}

@@ -13,6 +13,7 @@ const BubbleChart = ({ onBubbleClick }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isChartReady, setIsChartReady] = useState(false);
+  const token = localStorage.getItem("token");
 
   const chartOptions = {
     chart: {
@@ -79,7 +80,7 @@ const BubbleChart = ({ onBubbleClick }) => {
 
   const fetchData = async () => {
     try {
-      const token = localStorage.getItem("token");
+      
       if (!token) {
         throw new Error("Authentication token missing");
       }
@@ -89,8 +90,8 @@ const BubbleChart = ({ onBubbleClick }) => {
         getAllSkillLink(),
       ]);
 
-      setProfiles(profileResponse.data.profiles || []);
-      setSkills(skillResponse.data.skills || []);
+      setProfiles(profileResponse.profiles || []);
+      setSkills(skillResponse.skills || []);
     } catch (err) {
       setError(err.message || "Failed to fetch data");
     } finally {
@@ -106,7 +107,7 @@ const BubbleChart = ({ onBubbleClick }) => {
         x: `${profile.header_name} - ${profile.header_value}`,
         y: index * 10 + 10,
         z: Math.min(profile.v_id || 20, 50) * scaleFactor,
-        metadata: profile, // Add metadata for filtering
+        metadata: profile, 
       })),
     };
 
@@ -116,7 +117,7 @@ const BubbleChart = ({ onBubbleClick }) => {
         x: skill.skill_name,
         y: index * 10 + 10,
         z: Math.min(skill.skill_id || 10, 50) * scaleFactor,
-        metadata: skill, // Add metadata for filtering
+        metadata: skill,  
       })),
     };
 

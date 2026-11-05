@@ -112,7 +112,7 @@
 //         .map(decision => ({
 //           ...decision,
 //           decision_name: decisionMap.get(decision.decisionId),
-//           tag_names: getTagNames(decision.decisionId) 
+//           tag_names: getTagNames(decision.decisionId)
 //         }));
 //     };
 
@@ -127,7 +127,7 @@
 //           value={searchQuery}
 //           onChange={(e) => setSearchQuery(e.target.value)}
 //           style={{width:'400px' }}
-//         /> 
+//         />
 //         <Select
 //           value={selectedTag}
 //           onChange={e => setSelectedTag(e.target.value)}
@@ -206,7 +206,6 @@
 
 // export default withAuth(ShareWithMe);
 
-
 // import React, { useEffect, useState } from 'react';
 // import { useNavigate } from 'react-router-dom';
 // import { getSharedDecisionDetails } from '../Group/Network_Call';
@@ -239,7 +238,6 @@
 //     };
 //     fetchSharedDecisionsDetails();
 //   }, []);
-
 
 //   useEffect(() => {
 //     const fetchSharedDecisionsCircleDetails = async () => {
@@ -305,7 +303,6 @@
 
 //     return decision.tags.map(tag => tag.tag_name);
 //   };
-
 
 //   const handleCardClick = (decisionId) => {
 //     navigate(`/views/${decisionId}`);
@@ -467,11 +464,11 @@
 
 // export default withAuth(ShareWithMe);
 
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { getSharedDecisionDetails } from '../../../api/InnerCircle/Network_Call';
-import { getUserSharedDecisions } from '../../../api/DecisionCircle/Network_Call';
-import withAuth from '../../../utils/withAuth';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { getSharedDecisionDetails } from "../../../api/InnerCircle/Network_Call";
+import { getUserSharedDecisions } from "../../../api/DecisionCircle/Network_Call";
+import withAuth from "../../../utils/withAuth";
 import {
   Card,
   Typography,
@@ -483,9 +480,9 @@ import {
   Avatar,
   Tooltip,
   IconButton,
-} from '@mui/material';
-import { Link } from 'react-router-dom';
-import SwapVertIcon from '@mui/icons-material/SwapVert';
+} from "@mui/material";
+import { Link } from "react-router-dom";
+import SwapVertIcon from "@mui/icons-material/SwapVert";
 
 const ShareByMe = () => {
   const [sharedDecisionDetails, setSharedDecisionDetails] = useState({
@@ -493,26 +490,33 @@ const ShareByMe = () => {
     decisions: [],
     tasks: [],
   });
-  const [sharedDecisionCircleDetails, setSharedDecisionCircleDetails] = useState({
-    decisions: [],
-  });
+  const [sharedDecisionCircleDetails, setSharedDecisionCircleDetails] =
+    useState({
+      decisions: [],
+    });
   const [loading, setLoading] = useState(true);
   const [showPendingDecisions, setShowPendingDecisions] = useState(false);
-  const [selectedTag, setSelectedTag] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [dateSortOrder, setDateSortOrder] = useState('desc');
+  const [selectedTag, setSelectedTag] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [dateSortOrder, setDateSortOrder] = useState("desc");
   const [selectedUser, setSelectedUser] = useState(null);
-  const [autocompleteValue, setAutocompleteValue] = useState('');
+  const [autocompleteValue, setAutocompleteValue] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchSharedDecisionsDetails = async () => {
       try {
         const details = await getSharedDecisionDetails();
-        setSharedDecisionDetails(details || { sharedDecisions: [], decisions: [], tasks: [] });
+        setSharedDecisionDetails(
+          details || { sharedDecisions: [], decisions: [], tasks: [] },
+        );
       } catch (error) {
         console.error("Failed to fetch shared decisions details", error);
-        setSharedDecisionDetails({ sharedDecisions: [], decisions: [], tasks: [] });
+        setSharedDecisionDetails({
+          sharedDecisions: [],
+          decisions: [],
+          tasks: [],
+        });
       } finally {
         setLoading(false);
       }
@@ -524,7 +528,7 @@ const ShareByMe = () => {
     const fetchSharedDecisionsCircleDetails = async () => {
       try {
         const response = await getUserSharedDecisions();
-        setSharedDecisionCircleDetails({ decisions: response || [] });
+        setSharedDecisionCircleDetails({ decisions: response.results || [] });
       } catch (error) {
         console.error("Failed to fetch shared decision circle details", error);
         setSharedDecisionCircleDetails({ decisions: [] });
@@ -536,29 +540,35 @@ const ShareByMe = () => {
   }, []);
 
   const getUserName = (userId) => {
-    const user = sharedDecisionDetails?.tasks?.find(task => task.user_id === userId);
-    return user ? user.displayname : 'Unknown User';
+    const user = sharedDecisionDetails?.tasks?.find(
+      (task) => task.user_id === userId,
+    );
+    return user ? user.displayname : "Unknown User";
   };
 
   const getDecisionName = (decisionId) => {
-    const decision = sharedDecisionDetails?.decisions?.find(decision => decision.decision_id === decisionId);
-    return decision ? decision.decision_name : 'Unknown Decision';
+    const decision = sharedDecisionDetails?.decisions?.find(
+      (decision) => decision.decision_id === decisionId,
+    );
+    return decision ? decision.decision_name : "Unknown Decision";
   };
 
   const getTagNames = (decisionId) => {
-    const decision = sharedDecisionDetails?.decisions?.find(decision => decision.decision_id === decisionId);
-    return decision?.tags?.map(tag => tag.tag_name) || [];
+    const decision = sharedDecisionDetails?.decisions?.find(
+      (decision) => decision.decision_id === decisionId,
+    );
+    return decision?.tags?.map((tag) => tag.tag_name) || [];
   };
 
   const handleCardClick = (decisionId) => {
-    navigate(`/views/${decisionId}`);
+    navigate(`/decision/view/${decisionId}`);
   };
 
   const decisionMap = new Map(
-    (sharedDecisionDetails?.decisions || []).map(decision => [
+    (sharedDecisionDetails?.decisions || []).map((decision) => [
       decision.decision_id,
       decision.decision_name,
-    ])
+    ]),
   );
 
   // Get unique users for the "Sort by Name" dropdown
@@ -567,7 +577,7 @@ const ShareByMe = () => {
     const emails = new Set();
     (decisions || []).forEach((decision) => {
       const user = sharedDecisionDetails?.tasks?.find(
-        (task) => task.user_id === decision.groupMember
+        (task) => task.user_id === decision.groupMember,
       );
       if (user && !emails.has(user.email)) {
         emails.add(user.email);
@@ -579,8 +589,10 @@ const ShareByMe = () => {
 
   const handleAutocompleteChange = (event) => {
     setAutocompleteValue(event.target.value);
-    const selected = getUniqueUsers(sharedDecisionDetails?.sharedDecisions).find(
-      (user) => `${user.displayname} (${user.email})` === event.target.value
+    const selected = getUniqueUsers(
+      sharedDecisionDetails?.sharedDecisions,
+    ).find(
+      (user) => `${user.displayname} (${user.email})` === event.target.value,
     );
     setSelectedUser(selected);
   };
@@ -588,7 +600,9 @@ const ShareByMe = () => {
   const filterDecisions = (sharedDecisions = [], decisions = []) => {
     return sharedDecisions
       .filter((sharedDecision) => {
-        const decision = decisions.find((d) => d.decision_id === sharedDecision.decisionId);
+        const decision = decisions.find(
+          (d) => d.decision_id === sharedDecision.decisionId,
+        );
         if (showPendingDecisions) {
           return decision && decision.decision_taken_date === null;
         }
@@ -596,21 +610,29 @@ const ShareByMe = () => {
       })
       .filter((decision) => {
         const decisionName = decisionMap.get(decision.decisionId);
-        return decisionName && decisionName.toLowerCase().includes(searchQuery.toLowerCase());
+        return (
+          decisionName &&
+          decisionName.toLowerCase().includes(searchQuery.toLowerCase())
+        );
       })
       .filter((decision) => {
         if (selectedUser) {
           const user = sharedDecisionDetails?.tasks?.find(
-            (task) => task.user_id === decision.groupMember
+            (task) => task.user_id === decision.groupMember,
           );
           return user?.email === selectedUser.email;
         }
         return true;
       })
       .filter((decision) => {
-        const tags = decisions.find((d) => d.decision_id === decision.decisionId)?.tags;
-        if (selectedTag && selectedTag !== 'All Tags') {
-          return tags?.some((tag) => tag.tag_type === selectedTag || tag.tag_name === selectedTag);
+        const tags = decisions.find(
+          (d) => d.decision_id === decision.decisionId,
+        )?.tags;
+        if (selectedTag && selectedTag !== "All Tags") {
+          return tags?.some(
+            (tag) =>
+              tag.tag_type === selectedTag || tag.tag_name === selectedTag,
+          );
         }
         return true;
       })
@@ -619,7 +641,7 @@ const ShareByMe = () => {
         const decisionB = decisions.find((d) => d.decision_id === b.decisionId);
         const dateA = new Date(decisionA?.creation_date || 0).getTime();
         const dateB = new Date(decisionB?.creation_date || 0).getTime();
-        return dateSortOrder === 'desc' ? dateB - dateA : dateA - dateB;
+        return dateSortOrder === "desc" ? dateB - dateA : dateA - dateB;
       })
       .map((decision) => ({
         ...decision,
@@ -630,11 +652,13 @@ const ShareByMe = () => {
 
   const filteredDecisions = filterDecisions(
     sharedDecisionDetails?.sharedDecisions || [],
-    sharedDecisionDetails?.decisions || []
+    sharedDecisionDetails?.decisions || [],
   );
 
-  const showNoInnerCircleDecisionsCard = sharedDecisionDetails?.sharedDecisions?.length === 0;
-  const showNoDecisionCircleDecisionsCard = sharedDecisionCircleDetails?.decisions?.length === 0;
+  const showNoInnerCircleDecisionsCard =
+    sharedDecisionDetails?.sharedDecisions?.length === 0;
+  const showNoDecisionCircleDecisionsCard =
+    sharedDecisionCircleDetails?.decisions?.length === 0;
 
   if (loading) {
     return (
@@ -650,7 +674,8 @@ const ShareByMe = () => {
     <Box className="sharedDecision-page">
       <h2 className="sharedDecision-heading">Share By Me</h2>
       <p className="sharedDecision-subheading">
-        Review the decisions you've shared with your Inner Circle and Decision Circle.
+        Review the decisions you've shared with your Inner Circle and Decision
+        Circle.
       </p>
 
       <Box
@@ -700,11 +725,13 @@ const ShareByMe = () => {
           style={{ maxWidth: "290px", flex: "1 1 220px" }}
         >
           <option value="">Sort by Name</option>
-          {getUniqueUsers(sharedDecisionDetails?.sharedDecisions).map((user, index) => (
-            <option key={index} value={`${user.displayname} (${user.email})`}>
-              {user.displayname} ({user.email})
-            </option>
-          ))}
+          {getUniqueUsers(sharedDecisionDetails?.sharedDecisions).map(
+            (user, index) => (
+              <option key={index} value={`${user.displayname} (${user.email})`}>
+                {user.displayname} ({user.email})
+              </option>
+            ),
+          )}
         </select>
 
         <Button
@@ -731,15 +758,21 @@ const ShareByMe = () => {
             },
           }}
         >
-          {showPendingDecisions ? 'Show All Decisions' : 'Show Pending Decisions'}
+          {showPendingDecisions
+            ? "Show All Decisions"
+            : "Show Pending Decisions"}
         </Button>
 
         <Tooltip
-          title={dateSortOrder === "desc" ? "Newest to Oldest" : "Oldest to Newest"}
+          title={
+            dateSortOrder === "desc" ? "Newest to Oldest" : "Oldest to Newest"
+          }
         >
           <IconButton
             className="sharedDecision-toolbar"
-            onClick={() => setDateSortOrder((prev) => (prev === "desc" ? "asc" : "desc"))}
+            onClick={() =>
+              setDateSortOrder((prev) => (prev === "desc" ? "asc" : "desc"))
+            }
             sx={{
               width: "42px",
               height: "42px",
@@ -758,14 +791,19 @@ const ShareByMe = () => {
         </Tooltip>
       </Box>
 
-      <Typography variant="h5" className="sharedDecision-comments-title" sx={{ mt: 3 }}>
+      <Typography
+        variant="h5"
+        className="sharedDecision-comments-title"
+        sx={{ mt: 3 }}
+      >
         Inner Circle Decisions
       </Typography>
 
       {showNoInnerCircleDecisionsCard ? (
         <Box className="sharedDecision-empty">
           <Typography variant="h6" gutterBottom>
-            To share a decision, open one of your decisions and share with your Inner Circle
+            To share a decision, open one of your decisions and share with your
+            Inner Circle
           </Typography>
           <Link to="/inner-circle" style={{ textDecoration: "none" }}>
             <Button
@@ -787,13 +825,15 @@ const ShareByMe = () => {
         </Box>
       ) : filteredDecisions.length === 0 ? (
         <Box className="sharedDecision-empty">
-          <Typography variant="body1">No decisions match your filters.</Typography>
+          <Typography variant="body1">
+            No decisions match your filters.
+          </Typography>
         </Box>
       ) : (
         <Grid container spacing={2} className="mt-2">
           {filteredDecisions.map((sharedDecision) => {
             const user = sharedDecisionDetails?.tasks?.find(
-              (task) => task.user_id === sharedDecision.groupMember
+              (task) => task.user_id === sharedDecision.groupMember,
             );
             const tags = getTagNames(sharedDecision.decisionId);
             return (
@@ -813,10 +853,12 @@ const ShareByMe = () => {
                       </Grid>
                       <Grid item xs>
                         <Typography variant="h6">
-                          {sharedDecision.decision_name || getDecisionName(sharedDecision.decisionId)}
+                          {sharedDecision.decision_name ||
+                            getDecisionName(sharedDecision.decisionId)}
                         </Typography>
                         <Typography variant="body2">
-                          {user?.displayname || "Unknown User"} | {user?.email || ""}
+                          {user?.displayname || "Unknown User"} |{" "}
+                          {user?.email || ""}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -829,7 +871,8 @@ const ShareByMe = () => {
                     </Typography>
 
                     <Typography variant="body2" color="textSecondary">
-                      Shared with: <b>{getUserName(sharedDecision.groupMember)}</b>
+                      Shared with:{" "}
+                      <b>{getUserName(sharedDecision.groupMember)}</b>
                     </Typography>
                   </CardContent>
                 </Card>
@@ -839,7 +882,11 @@ const ShareByMe = () => {
         </Grid>
       )}
 
-      <Typography variant="h5" className="sharedDecision-comments-title" sx={{ mt: 4 }}>
+      <Typography
+        variant="h5"
+        className="sharedDecision-comments-title"
+        sx={{ mt: 4 }}
+      >
         Decision Circle Decisions
       </Typography>
 
@@ -867,7 +914,9 @@ const ShareByMe = () => {
                       </Avatar>
                     </Grid>
                     <Grid item xs>
-                      <Typography variant="h6">{decision.decision_name}</Typography>
+                      <Typography variant="h6">
+                        {decision.decision_name}
+                      </Typography>
                       <Typography variant="body2">
                         {decision.group_name || "No Group Name"}
                       </Typography>
@@ -878,11 +927,15 @@ const ShareByMe = () => {
                     Tags:
                   </Typography>
                   <Typography variant="body2" sx={{ ml: "16px", mb: 1 }}>
-                    {decision.tags?.map((tag) => tag.tag_name).join(", ") || "No Tags"}
+                    {decision.tags?.map((tag) => tag.tag_name).join(", ") ||
+                      "No Tags"}
                   </Typography>
 
                   <Typography variant="body2" color="textSecondary">
-                    <b>Shared with: {decision.shared_with_names || "No Shared Names"}</b>
+                    <b>
+                      Shared with:{" "}
+                      {decision.shared_with_names || "No Shared Names"}
+                    </b>
                   </Typography>
                 </CardContent>
               </Card>

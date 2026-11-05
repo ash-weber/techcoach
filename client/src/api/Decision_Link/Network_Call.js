@@ -2,7 +2,6 @@ import axios from "axios";
 import { getAuthHeaders } from "../api";
 
 const postSkillLink = async ({ decision_id, skill_ids, skill_names }) => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.post(
       `${process.env.REACT_APP_API_URL}/api/link`,
@@ -14,10 +13,9 @@ const postSkillLink = async ({ decision_id, skill_ids, skill_names }) => {
     console.error("Error linking skills to decision", error);
     throw error;
   }
-};  
+};
 
 const postProfileLink = async ({ decision_id, v_ids }) => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.post(
       `${process.env.REACT_APP_API_URL}/api/links`,
@@ -32,13 +30,12 @@ const postProfileLink = async ({ decision_id, v_ids }) => {
 };
 
 const getAllSkillLink = async () => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}/api/link`,
       getAuthHeaders(),
     );
-    return response.data.skills;
+    return response.data;
   } catch (error) {
     console.error("Error fetching all skill links", error);
     throw error;
@@ -46,13 +43,12 @@ const getAllSkillLink = async () => {
 };
 
 const getAllProfileLink = async () => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}/api/links`,
       getAuthHeaders(),
     );
-    return response.data.profiles;
+    return response.data;
   } catch (error) {
     console.error("Error fetching all profile links", error);
     throw error;
@@ -60,7 +56,6 @@ const getAllProfileLink = async () => {
 };
 
 const deleteSkillLink = async (id) => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.delete(
       `${process.env.REACT_APP_API_URL}/api/link/${id}`,
@@ -74,7 +69,6 @@ const deleteSkillLink = async (id) => {
 };
 
 const deleteProfileLink = async (id) => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.delete(
       `${process.env.REACT_APP_API_URL}/api/links/${id}`,
@@ -86,7 +80,47 @@ const deleteProfileLink = async (id) => {
     throw error;
   }
 };
-  
+
+const postAdvancedProfileLink = async ({ decision_id, v_ids }) => {
+  try {
+    const response = await axios.post(
+      `${process.env.REACT_APP_API_URL}/link/advancedLink`,
+      { decision_id, v_ids },
+      getAuthHeaders(),
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error linking advanced profile to decision", error);
+    throw error;
+  }
+};
+
+const getAllAdvancedProfileLink = async () => {
+  try {
+    const response = await axios.get(
+      `${process.env.REACT_APP_API_URL}/link/advancedLink`,
+      getAuthHeaders(),
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching advanced profile links", error);
+    throw error;
+  }
+};
+
+const deleteAdvancedProfileLink = async (id) => {
+  try {
+    const response = await axios.delete(
+      `${process.env.REACT_APP_API_URL}/link/advancedLink/${id}`,
+      getAuthHeaders(),
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting advanced profile link", error);
+    throw error;
+  }
+};
+
 export {
   postProfileLink,
   postSkillLink,
@@ -94,4 +128,7 @@ export {
   deleteSkillLink,
   getAllProfileLink,
   getAllSkillLink,
+  postAdvancedProfileLink,
+  getAllAdvancedProfileLink,
+  deleteAdvancedProfileLink,
 };

@@ -37,12 +37,11 @@ const InnerCircleForm = () => {
   const queryParams = new URLSearchParams(location.search);
   const type_of_group = queryParams.get("type_of_group");
 
-  /* ---------------- Fetch users ---------------- */
   useEffect(() => {
     const fetchNames = async () => {
       try {
         const data = await getUserListForInnerCircle();
-        const list = Array.isArray(data) ? data : [];
+        const list = Array.isArray(data.tasks) ? data.tasks : [];
 
         setUsers(list);
 
@@ -66,7 +65,6 @@ const InnerCircleForm = () => {
     fetchNames();
   }, []);
 
-  /* ---------------- Selection ---------------- */
   const isSelected = (userId) =>
     selectedUsers.some((u) => u.user_id === userId);
 
@@ -95,8 +93,6 @@ const InnerCircleForm = () => {
 
   const filteredUsers = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-
-    // Don't display all users initially
     if (!q) return [];
 
     const [typedLocal, typedDomain] = q.split("@");
@@ -123,7 +119,6 @@ const InnerCircleForm = () => {
     });
   }, [searchQuery, selectedDomain, users]);
 
-  /* ---------------- Submit ---------------- */
   const handleSubmit = async () => {
     if (selectedUsers.length === 0) {
       return toast.error("No users selected.");
@@ -149,10 +144,8 @@ const InnerCircleForm = () => {
     }
   };
 
-  /* ---------------- Render ---------------- */
   return (
     <div className="dc-page">
-      {/* Back */}
       <button
         className="dc-back-link"
         onClick={() => navigate(-1)}
@@ -161,7 +154,6 @@ const InnerCircleForm = () => {
         <MdOutlineArrowBack /> Back
       </button>
 
-      {/* ---------- Header ---------- */}
       <header className="dc-group-header">
         <div className="dc-group-header__main">
           <div className="dc-group-header__avatar">
@@ -181,9 +173,7 @@ const InnerCircleForm = () => {
         )}
       </header>
 
-      {/* ---------- Two-column layout ---------- */}
       <div className="dc-two-col">
-        {/* ------- Left: Available users ------- */}
         <section className="dc-section dc-panel">
           <h2 className="dc-section__title">
             <MdOutlinePeople className="dc-section__icon" />
@@ -211,7 +201,6 @@ const InnerCircleForm = () => {
             </select>
           </div>
 
-          {/* Search box */}
           <div className="dc-search">
             <MdOutlineSearch className="dc-search__icon" />
             <input
@@ -223,7 +212,6 @@ const InnerCircleForm = () => {
             />
           </div>
 
-          {/* User list */}
           {loadingUsers ? (
             <div className="dc-loading">
               <CircularProgress size={28} />
@@ -284,7 +272,6 @@ const InnerCircleForm = () => {
           )}
         </section>
 
-        {/* ------- Right: Selected users ------- */}
         <aside className="dc-section dc-panel">
           <h2 className="dc-section__title">
             <MdOutlineGroups className="dc-section__icon" />
@@ -299,7 +286,6 @@ const InnerCircleForm = () => {
             </div>
           ) : (
             <>
-              {/* Avatar stack */}
               <div className="dc-avatar-stack">
                 {selectedUsers.slice(0, 5).map((user, index) => (
                   <div
@@ -318,7 +304,6 @@ const InnerCircleForm = () => {
                 )}
               </div>
 
-              {/* Selected list */}
               <ul className="dc-selected-list">
                 {selectedUsers.map((user) => (
                   <li key={user.user_id} className="dc-selected-item">

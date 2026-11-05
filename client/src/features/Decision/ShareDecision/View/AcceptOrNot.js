@@ -25,7 +25,7 @@ const AcceptOrNot = ({ innerCircleDetails, decision, id }) => {
     if (!groupId) return setLoading(false);
     try {
       const response = await getSharedMembers({ groupId, decisionId: id });
-      setSharedMembers(response);
+      setSharedMembers(response.result);
     } catch (error) {
       console.error('Error in fetching the shared members:', error);
       toast('An error occurred while fetching the shared member decision');

@@ -26,7 +26,7 @@ const DecisionCircleShare = () => {
       try {
         const token = localStorage.getItem('token');
         const res = await getReferredDecisionById(id);
-        const d = res.data?.decisionData?.[0];
+        const d = res?.decisionData?.[0];
         if (!d) return;
         const fmt = (s) => (s ? new Date(s).toISOString().split('T')[0] : '');
         setDecision({

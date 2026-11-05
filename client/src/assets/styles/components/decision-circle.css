@@ -2,7 +2,7 @@
 .getGroup {
   padding: var(--space-2xl) var(--space-xl);
   max-width: 1200px;
-  margin: 0 auto;
+  margin: 0 auto;   
   background: var(--surface-canvas);
   min-height: 100vh;
   box-sizing: border-box;
@@ -1393,5 +1393,113 @@
   .dc-panel__footer .decision-btn {
     width: 100%;
     justify-content: center;
+  }
+}
+
+
+.card-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.card-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--text-subtle);
+}
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.card-actions .icon-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  font-size: 1.05rem;
+}
+
+.card-actions .icon-btn-edit:hover {
+  background: var(--brand-primary-light);
+  border-color: var(--brand-primary);
+}
+
+.card-actions .icon-btn-delete:hover {
+  background: var(--status-danger-light);
+  border-color: var(--status-danger);
+}
+
+.circle-management {
+  padding: var(--space-md) var(--space-lg) var(--space-lg);
+}
+
+.management-label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: var(--space-sm);
+}
+
+.circle-management-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.management-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.65rem 0.5rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--surface-border);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  transition: var(--transition-fast);
+  white-space: nowrap;
+}
+
+.management-btn svg {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.management-btn-view {
+  color: var(--brand-primary);
+  background: var(--brand-primary-light);
+  border-color: var(--brand-primary-ring);
+}
+
+.management-btn-view:hover {
+  background: var(--brand-primary);
+  color: #fff;
+  border-color: var(--brand-primary);
+  transform: translateY(-1px);
+}
+
+.management-btn-add {
+  color: var(--status-success);
+  background: var(--status-success-light);
+  border-color: var(--status-success);
+}
+
+.management-btn-add:hover {
+  background: var(--status-success);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 380px) {
+  .circle-management-actions {
+    grid-template-columns: 1fr;
   }
 }

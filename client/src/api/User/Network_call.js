@@ -43,7 +43,7 @@ const getMasterProfiles = async () => {
 };
 
 const getProfile = async () => {
-    try {
+    try {  
         const response = await axios.get(
             `${process.env.REACT_APP_API_URL}/api/user/data`,
             getAuthHeaders()

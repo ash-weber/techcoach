@@ -72,17 +72,14 @@ const DecisionCircle = () => {
 
   useEffect(() => {
     fetchDecisionGroup();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   return (
     <div className="dc-form-page">
-      {/* ---------- Back Link ---------- */}
       <Link to="/decision-circle" className="dc-back-link">
         <MdOutlineArrowBack /> Back to Decision Circles
       </Link>
 
-      {/* ---------- Card ---------- */}
       <div className="dc-form-card">
         <header className="dc-form-card__head">
           <div className="dc-form-card__icon">
@@ -149,7 +146,6 @@ const DecisionCircle = () => {
         </form>
       </div>
 
-      {/* ---------- Quick Action ---------- */}
       <div className="dc-form-footer">
         <Link to="/decision-circle" className="dc-form-footer__link">
           <MdOutlineGroups /> View all decision circles

@@ -3,20 +3,19 @@ import { toast } from "react-toastify";
 import { getAuthHeaders } from "../api";
    
 const getUserListForInnerCircle = async () => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}/group/fetchUserList`,
       getAuthHeaders(),
     );
-    return response.data.tasks;
+    return response.data;
   } catch (error) {
     return error.message;
   }
 };
 
 const innerCircleCreation = async (groupData) => {
-  const token = localStorage.getItem("token");
+  
   try {
     const response = await axios.post(
       `${process.env.REACT_APP_API_URL}/group/innerCircleCreation`,
@@ -30,20 +29,20 @@ const innerCircleCreation = async (groupData) => {
 };
 
 const checkInnerCircleExists = async () => {
-  const token = localStorage.getItem("token");
+  
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}/group/checkInnerCircleExists`,
       getAuthHeaders(),
     );
-    return response.data.exists;
+    return response.data;
   } catch (error) {
     return error.message;
   }
 };
 
 const getInnerCircleDetails = async () => {
-  const token = localStorage.getItem("token");
+  
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}/group/getInnerCircleDetails`,
@@ -57,7 +56,7 @@ const getInnerCircleDetails = async () => {
 };
 
 const removeMemberFromInner = async (userId, group_id) => {
-  const token = localStorage.getItem("token");
+  
   try {
     const response = await axios.delete(
       `${process.env.REACT_APP_API_URL}/group/removeMemberFromInner`,
@@ -76,7 +75,7 @@ const removeMemberFromInner = async (userId, group_id) => {
 };
 
 const getAddMemberNameListFetch = async (existingMemberIds) => {
-  const token = localStorage.getItem("token");
+  
   try {
     const response = await axios.post(
       `${process.env.REACT_APP_API_URL}/group/getAddMemberNameList`,
@@ -90,7 +89,7 @@ const getAddMemberNameListFetch = async (existingMemberIds) => {
 };
 
 const addMemberToInnerCircle = async (userId, groupId) => {
-  const token = localStorage.getItem("token");
+  
   try {
     const response = await axios.put(
       `${process.env.REACT_APP_API_URL}/group/addMemberInInnerCircle`,
@@ -109,7 +108,7 @@ const addMemberToInnerCircle = async (userId, groupId) => {
 };
 
 const shareDecisionInInnerCircle = async (payload) => {
-  const token = localStorage.getItem("token");
+  
   const response = await axios.post(
     `${process.env.REACT_APP_API_URL}/group/shareDecisionInInnerCircle`,
     payload,
@@ -119,17 +118,17 @@ const shareDecisionInInnerCircle = async (payload) => {
 };
 
 const getSharedMembers = async (payload) => {
-  const token = localStorage.getItem("token");
+  
   const response = await axios.post(
     `${process.env.REACT_APP_API_URL}/group/getSharedMembers`,
     payload,
     getAuthHeaders(),
   );
-  return response.data.result;
+  return response.data;
 };
 
 const getInnerCircleAcceptNotification = async () => {
-  const token = localStorage.getItem("token");
+  
   const response = await axios.get(
     `${process.env.REACT_APP_API_URL}/group/getInnerCircleAcceptNotification`,
     getAuthHeaders(),
@@ -139,7 +138,7 @@ const getInnerCircleAcceptNotification = async () => {
 };
 
 const acceptOrRejectInnerCircle = async (groupId, status) => {
-  const token = localStorage.getItem("token");
+  
   const response = await axios.put(
     `${process.env.REACT_APP_API_URL}/group/acceptOrRejectInnerCircle`,
     {
@@ -154,13 +153,13 @@ const acceptOrRejectInnerCircle = async (groupId, status) => {
 };
 
 const getSharedDecisions = async () => {
-  const token = localStorage.getItem("token");
+  
   const response = await axios.get(
     `${process.env.REACT_APP_API_URL}/group/getSharedDecisions`,
     getAuthHeaders(),
   );
 
-  return response.data.results;
+  return response.data;
 };
 
 const postCommentForDecision = async (
@@ -169,7 +168,7 @@ const postCommentForDecision = async (
   commentText,
   groupId,
 ) => {
-  const token = localStorage.getItem("token");
+  
   const response = await axios.put(
     `${process.env.REACT_APP_API_URL}/group/postCommentForDecision`,
     {
@@ -187,7 +186,7 @@ const postCommentForDecision = async (
 };
 
 const getSharedComments = async (decisionId) => {
-  const token = localStorage.getItem("token");
+  
   try {
     const response = await axios.post(
       `${process.env.REACT_APP_API_URL}/group/getSharedComments`,
@@ -204,7 +203,7 @@ const getSharedComments = async (decisionId) => {
 };
 
 const deleteCommentAdded = async (commentId) => {
-  const token = localStorage.getItem("token");
+  
   try {
     const response = await axios.delete(
       `${process.env.REACT_APP_API_URL}/group/removeCommentsAdded`,
@@ -223,7 +222,7 @@ const deleteCommentAdded = async (commentId) => {
 };
 
 const postReplyComment = async (commentId, reply, groupId, decisionId) => {
-  const token = localStorage.getItem("token");
+  
   try {
     const response = await axios.post(
       `${process.env.REACT_APP_API_URL}/group/postReplyComment`,
@@ -238,7 +237,7 @@ const postReplyComment = async (commentId, reply, groupId, decisionId) => {
 };
 
 const EditCommentAdded = async (commentId, editedContent) => {
-  const token = localStorage.getItem("token");
+  
   try {
     const response = await axios.put(
       `${process.env.REACT_APP_API_URL}/group/editCommentsAdded`,
@@ -258,7 +257,7 @@ const EditCommentAdded = async (commentId, editedContent) => {
 };
 
 const mailToInnerCircleDecisionShare = async (memberEmail, decisionSummary) => {
-  const token = localStorage.getItem("token");
+  
   try {
     const response = await axios.post(
       `${process.env.REACT_APP_API_URL}/group/innerCircleDecisionShare`,
@@ -278,7 +277,7 @@ const innerCirclePostComment = async (
   commentText,
   email,
 ) => {
-  const token = localStorage.getItem("token");
+  
   try {
     const response = await axios.post(
       `${process.env.REACT_APP_API_URL}/group/innerCirclePostComment`,
@@ -298,7 +297,7 @@ const innerCirclePostReplyComment = async (
   groupId,
   decisionId,
 ) => {
-  const token = localStorage.getItem("token");
+  
   try {
     const response = await axios.post(
       `${process.env.REACT_APP_API_URL}/group/innerCirclePostReply`,
@@ -316,7 +315,7 @@ const innerCirclePostReplyComment = async (
 };
 
 const innerCircleInvitation = async (invitationData) => {
-  const token = localStorage.getItem("token");
+  
   try {
     const response = await axios.post(
       `${process.env.REACT_APP_API_URL}/group/innerCircleInvitation`,
@@ -331,7 +330,7 @@ const innerCircleInvitation = async (invitationData) => {
 };
 
 const innerCircleAddInvitation = async (email) => {
-  const token = localStorage.getItem("token");
+  
   try {
     const response = await axios.post(
       `${process.env.REACT_APP_API_URL}/group/innerCircleAddInvitation`,
@@ -346,7 +345,7 @@ const innerCircleAddInvitation = async (email) => {
 };
 
 const getSharedDecisionDetails = async () => {
-  const token = localStorage.getItem("token");
+  
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}/group/getSharedDecisionDetails`,
@@ -360,7 +359,7 @@ const getSharedDecisionDetails = async () => {
 };
 
 const getSharedWithDecisionsCount = async () => {
-  const token = localStorage.getItem("token");
+  
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}/group/getSharedDecisionsCount`,
@@ -374,7 +373,7 @@ const getSharedWithDecisionsCount = async () => {
 };
 
 const getSharedByDecisionsCount = async () => {
-  const token = localStorage.getItem("token");
+  
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}/group/getSharedByDecisionsCount`,

@@ -1,26 +1,29 @@
 import axios from "axios";
 import { getAuthHeaders } from "../api";
-  
+
 const getUserListForDecisionCircle = async () => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}/group/fetchUserList`,
       getAuthHeaders(),
     );
-    return response.data.tasks;
+    return response.data;
   } catch (error) {
     console.log(error);
     return error.message;
   }
 };
 
-const decisionCircleCreation = async (created_by, type_of_group = 'decision_circle', group_id, members) => {
-  const token = localStorage.getItem("token");
+const decisionCircleCreation = async (
+  created_by,
+  type_of_group = "decision_circle",
+  group_name,
+  members,
+) => {
   try {
     const response = await axios.post(
       `${process.env.REACT_APP_API_URL}/group/decisionCircleCreation`,
-      {created_by, type_of_group, group_id, members },
+      { created_by, type_of_group, group_name, members },
       getAuthHeaders(),
     );
     return response.data;
@@ -35,7 +38,6 @@ const decisionCircleCreation = async (created_by, type_of_group = 'decision_circ
 };
 
 const getUserDecisionCircles = async () => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}/group/getUserDecisionCircles`,
@@ -52,7 +54,6 @@ const getUserDecisionCircles = async () => {
 };
 
 const getdecisionCirclesByUser = async () => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}/group/getdecisionCirclesByUser`,
@@ -69,7 +70,6 @@ const getdecisionCirclesByUser = async () => {
 };
 
 const getdecisionCirclesByUserAndMember = async () => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}/group/getdecisionCirclesByUserAndMember`,
@@ -86,7 +86,6 @@ const getdecisionCirclesByUserAndMember = async () => {
 };
 
 const getUsersForGroup = async (groupId) => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}/group/getUsersForGroup/${groupId}`,
@@ -100,7 +99,6 @@ const getUsersForGroup = async (groupId) => {
 };
 
 const getGroupDetails = async (groupId) => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}/group/getGroupDetails/${groupId}`,
@@ -114,7 +112,6 @@ const getGroupDetails = async (groupId) => {
 };
 
 const removeUsersFromGroup = async (groupId, userId) => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.delete(
       `${process.env.REACT_APP_API_URL}/group/removeUsersFromGroup/${groupId}/${userId}`,
@@ -128,7 +125,6 @@ const removeUsersFromGroup = async (groupId, userId) => {
 };
 
 const sendDecisionCircleInvitation = async (email) => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.post(
       `${process.env.REACT_APP_API_URL}/group/sendDecisionCircleInvitation`,
@@ -143,7 +139,6 @@ const sendDecisionCircleInvitation = async (email) => {
 };
 
 const decisionshareDecisionCircle = async (group_id, decision_id) => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.post(
       `${process.env.REACT_APP_API_URL}/group/decisionshareDecisionCircle`,
@@ -159,6 +154,7 @@ const decisionshareDecisionCircle = async (group_id, decision_id) => {
 
 const getdecisionSharedDecisionCircle = async (groupId) => {
   const token = localStorage.getItem("token");
+
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}/group/getdecisionSharedDecisionCircle/${groupId}`,
@@ -166,10 +162,9 @@ const getdecisionSharedDecisionCircle = async (groupId) => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        params: { group_id: groupId },
       },
     );
-    return response.data.results;
+    return response.data;
   } catch (error) {
     console.error("Error Fetching Decision Get Circles:", error);
     throw error;
@@ -178,6 +173,7 @@ const getdecisionSharedDecisionCircle = async (groupId) => {
 
 const getMemberSharedDecisions = async (groupId) => {
   const token = localStorage.getItem("token");
+
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}/group/getMemberSharedDecisions/${groupId}`,
@@ -188,7 +184,7 @@ const getMemberSharedDecisions = async (groupId) => {
         params: { group_id: groupId },
       },
     );
-    return response.data.results;
+    return response.data;
   } catch (error) {
     console.error("Error Fetching Decision Get Circles:", error);
     throw error;
@@ -201,7 +197,6 @@ const mailToDecisionCirclePostComment = async (
   comment,
   email,
 ) => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.post(
       `${process.env.REACT_APP_API_URL}/group/decisionCirclePostComment`,
@@ -213,7 +208,7 @@ const mailToDecisionCirclePostComment = async (
       },
       getAuthHeaders(),
     );
-    return response.data.message;
+    return response.data;
   } catch (error) {
     console.error("Error fetching added comments", error);
     throw error;
@@ -226,8 +221,6 @@ const mailToDecisionCircleReplyComment = async (
   reply,
   groupId,
 ) => {
-  const token = localStorage.getItem("token");
-
   try {
     const response = await axios.post(
       `${process.env.REACT_APP_API_URL}/group/decisionCircleReplyComment`,
@@ -240,7 +233,7 @@ const mailToDecisionCircleReplyComment = async (
       getAuthHeaders(),
     );
 
-    return response.data.message;
+    return response.data;
   } catch (error) {
     console.error(
       "Error sending reply:",
@@ -262,13 +255,12 @@ const mailToDecisionCircleReplyComment = async (
 // }
 
 const getUserSharedDecisions = async () => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}/group/sharedbyme`,
       getAuthHeaders(),
     );
-    return response.data.results;
+    return response.data;
   } catch (error) {
     console.error("Error Fetching Decision Get Circles:", error);
     throw error;
@@ -276,13 +268,12 @@ const getUserSharedDecisions = async () => {
 };
 
 const getdecisionSharedDecisionCirclebyuser = async () => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}/group/sharedwithme`,
       getAuthHeaders(),
     );
-    return response.data.results;
+    return response.data;
   } catch (error) {
     console.error("Error Fetching Decision Get Circles:", error);
     throw error;
@@ -293,7 +284,6 @@ const postdecisionGroup = async (
   group_name,
   type_of_group = "decision_circle",
 ) => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.post(
       `${process.env.REACT_APP_API_URL}/group/decisionGroup`,
@@ -311,7 +301,6 @@ const postdecisionGroup = async (
 };
 
 const getAlldecisionGroup = async () => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}/group/decisiongroup`,
@@ -325,7 +314,6 @@ const getAlldecisionGroup = async () => {
 };
 
 const getDecisionGroup = async (id) => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}/group/decisiongroup/${id}`,
@@ -343,7 +331,6 @@ const putDecisionGroup = async (
   group_name,
   type_of_group = "decision_circle",
 ) => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.put(
       `${process.env.REACT_APP_API_URL}/group/decisiongroup/${id}`,
@@ -361,7 +348,6 @@ const putDecisionGroup = async (
 };
 
 const deleteDecisionGroup = async (id) => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.delete(
       `${process.env.REACT_APP_API_URL}/group/decisiongroup/${id}`,
@@ -375,8 +361,6 @@ const deleteDecisionGroup = async (id) => {
 };
 
 const postComment = async (groupId, comment, decisionId) => {
-  const token = localStorage.getItem("token");
-
   try {
     const response = await axios.post(
       `${process.env.REACT_APP_API_URL}/group/comment`,
@@ -432,8 +416,6 @@ const postComment = async (groupId, comment, decisionId) => {
 // };
 
 const postShareWithComment = async (groupId, commentText, decisionId) => {
-  const token = localStorage.getItem("token");
-
   try {
     const response = await axios.post(
       `${process.env.REACT_APP_API_URL}/group/comment`,
@@ -461,13 +443,12 @@ const postShareWithComment = async (groupId, commentText, decisionId) => {
 };
 
 const getComments = async (groupId, decisionId) => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}/group/comments/${groupId}/${decisionId}`,
       getAuthHeaders(),
     );
-    return response.data.comments;
+    return response.data;
   } catch (error) {
     console.error("Error fetching comments:", error);
     throw new Error("Failed to fetch comments");
@@ -475,13 +456,19 @@ const getComments = async (groupId, decisionId) => {
 };
 
 const getWithComments = async (decisionId, groupId) => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.get(
-      `${process.env.REACT_APP_API_URL}/group/comment/${groupId}/${decisionId}`,
-      getAuthHeaders(),
+      `${process.env.REACT_APP_API_URL}/group/comment`,
+      {
+        ...getAuthHeaders(),
+        params: {
+          groupId,
+          decisionId,
+        },
+      }
     );
-    return response.data.comments;
+
+    return response.data;
   } catch (error) {
     console.error("Error fetching comments:", error);
     throw new Error("Failed to fetch comments");
@@ -489,13 +476,12 @@ const getWithComments = async (decisionId, groupId) => {
 };
 
 const getDecisionComments = async (decisionId) => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_API_URL}/group/comments/${decisionId}`,
       getAuthHeaders(),
     );
-    return response.data.comments;
+    return response.data;
   } catch (error) {
     console.error("Error fetching comments:", error);
     throw new Error("Failed to fetch comments");
@@ -503,8 +489,6 @@ const getDecisionComments = async (decisionId) => {
 };
 
 const updateComment = async (commentId, updatedComment) => {
-  const token = localStorage.getItem("token");
-
   try {
     const response = await axios.put(
       `${process.env.REACT_APP_API_URL}/group/comments/${commentId}`,
@@ -525,7 +509,6 @@ const updateComment = async (commentId, updatedComment) => {
 };
 
 const editComments = async (commentId, comment) => {
-  const token = localStorage.getItem("token");
   try {
     const response = await axios.put(
       `${process.env.REACT_APP_API_URL}/group/comment/${commentId}`,
@@ -546,8 +529,6 @@ const editComments = async (commentId, comment) => {
 };
 
 const replyToComment = async (data) => {
-  const token = localStorage.getItem("token");
-
   try {
     const response = await axios.post(
       `${process.env.REACT_APP_API_URL}/group/comments/reply`,
@@ -563,8 +544,6 @@ const replyToComment = async (data) => {
 };
 
 const deleteComment = async (commentId) => {
-  const token = localStorage.getItem("token");
-
   try {
     const response = await axios.delete(
       `${process.env.REACT_APP_API_URL}/group/comments/${commentId}`,
@@ -575,6 +554,40 @@ const deleteComment = async (commentId) => {
   } catch (error) {
     console.error("Error posting comment:", error.response.data);
     throw error.response.data;
+  }
+};
+
+const sendTeamsDecisionCard = async (payload) => {
+  const token = localStorage.getItem("token");
+  try {
+    const response = await axios.post(
+      `${process.env.REACT_APP_API_URL}/api/teams/notify`,
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error sending Teams decision card", error);
+    throw error;
+  }
+};
+
+const sendTeamsCommentNotification = async (payload) => {
+  const token = localStorage.getItem("token");
+  try {
+    const response = await axios.post(
+      `${process.env.REACT_APP_API_URL}/api/teams/notify-comment`,
+      payload,
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error sending Teams comment notification", error);
+    throw error;
   }
 };
 
@@ -613,5 +626,7 @@ export {
   postShareWithComment,
   getWithComments,
   editComments,
-  getGroupDetails
+  getGroupDetails,
+  sendTeamsDecisionCard,
+  sendTeamsCommentNotification
 };

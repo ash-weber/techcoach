@@ -36,12 +36,12 @@ const DecisionCircleAddMember = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  /* ---------------- Fetch users ---------------- */
   useEffect(() => {
     const fetchNames = async () => {
       try {
         const data = await getUserListForDecisionCircle();
-        const list = Array.isArray(data) ? data : [];
+        console.log("ssssss", data)
+        const list = Array.isArray(data.tasks) ? data.tasks : [];
         setUsers(list);
 
         const domains = [
@@ -62,7 +62,6 @@ const DecisionCircleAddMember = () => {
     fetchNames();
   }, []);
 
-  /* ---------------- Selection ---------------- */
   const isSelected = (userId) =>
     selectedUsers.some((u) => u.user_id === userId);
 
@@ -74,7 +73,6 @@ const DecisionCircleAddMember = () => {
     );
   };
 
-  /* ---------------- Filtering ---------------- */
   const handleSearchInputChange = (e) => {
     const raw = e.target.value;
     const lower = raw.toLowerCase();
@@ -111,7 +109,6 @@ const DecisionCircleAddMember = () => {
     });
   }, [searchQuery, selectedDomain, users]);
 
-  /* ---------------- Submit ---------------- */
   const handleSubmit = async () => {
     if (!id) return toast.error("Group ID is not specified.");
     if (selectedUsers.length === 0) return toast.error("No users selected.");
@@ -120,7 +117,7 @@ const DecisionCircleAddMember = () => {
     setSubmitting(true);
 
     try {
-      const token = localStorage.getItem("token");
+      
       const userId = localStorage.getItem("user_id");
 
       if (!userId) {
@@ -147,17 +144,15 @@ const DecisionCircleAddMember = () => {
       toast.error("Error creating decision circle");
       console.error(
         "Error creating decision circle:",
-        error.response ? error.response.data : error.message,
+        error.response ? error.response : error.message,
       );
     } finally {
       setSubmitting(false);
     }
   };
 
-  /* ---------------- Render ---------------- */
   return (
     <div className="dc-page">
-      {/* Back */}
       <button
         className="dc-back-link"
         onClick={() => navigate(-1)}
@@ -166,7 +161,6 @@ const DecisionCircleAddMember = () => {
         <MdOutlineArrowBack /> Back
       </button>
 
-      {/* ---------- Header ---------- */}
       <header className="dc-group-header">
         <div className="dc-group-header__main">
           <div className="dc-group-header__avatar">
@@ -188,9 +182,7 @@ const DecisionCircleAddMember = () => {
         )}
       </header>
 
-      {/* ---------- Two-column layout ---------- */}
       <div className="dc-two-col">
-        {/* ------- Left: Available users ------- */}
         <section className="dc-section dc-panel">
           <h2 className="dc-section__title">
             <MdOutlinePeople className="dc-section__icon" />
@@ -200,7 +192,6 @@ const DecisionCircleAddMember = () => {
             )}
           </h2>
 
-          {/* Domain picker */}
           <div className="form-group">
             <label htmlFor="domain-select">
               <MdOutlinePublic style={{ verticalAlign: "middle" }} /> Filter by
@@ -232,7 +223,6 @@ const DecisionCircleAddMember = () => {
             </select>
           </div>
 
-          {/* Search box */}
           <div className="dc-search">
             <MdOutlineSearch className="dc-search__icon" />
             <input
@@ -244,7 +234,6 @@ const DecisionCircleAddMember = () => {
             />
           </div>
 
-          {/* User list */}
           {loadingUsers ? (
             <div className="dc-loading">
               <CircularProgress size={28} />
@@ -304,7 +293,6 @@ const DecisionCircleAddMember = () => {
           )}
         </section>
 
-        {/* ------- Right: Selected users ------- */}
         <aside className="dc-section dc-panel">
           <h2 className="dc-section__title">
             <MdOutlineGroups className="dc-section__icon" />
@@ -319,7 +307,6 @@ const DecisionCircleAddMember = () => {
             </div>
           ) : (
             <>
-              {/* Avatar stack */}
               <div className="dc-avatar-stack">
                 {selectedUsers.slice(0, 5).map((user, index) => (
                   <div
@@ -338,7 +325,6 @@ const DecisionCircleAddMember = () => {
                 )}
               </div>
 
-              {/* Selected list */}
               <ul className="dc-selected-list">
                 {selectedUsers.map((user) => (
                   <li key={user.user_id} className="dc-selected-item">
