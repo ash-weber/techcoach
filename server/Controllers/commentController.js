@@ -120,7 +120,7 @@ const postComment = async (req, res) => {
                 res.status(403).json({
                     message: 'You are not authorized to post comments in this group',
                 });
-                return;
+                return;   
             }
 
             // Insert the comment
@@ -398,9 +398,12 @@ const postShareWithComment = async (req, res) => {
         }
 
         const member = await conn.query(
-            'SELECT member_id FROM techcoach_lite.techcoach_group_members WHERE group_id = ? AND member_id = ?',
-            [groupId, memberId]
+            'SELECT member_id FROM techcoach_lite.techcoach_group_members WHERE group_id = ?',
+            [groupId]
         );
+
+        console.log("memberssss", member);
+
         if (member.length === 0) {
             return res.status(403).json({
                 message: 'You are not authorized to post comments in this group',

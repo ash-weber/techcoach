@@ -27,6 +27,7 @@ import { formatDistanceToNow, parseISO } from "date-fns";
 import { Link } from "react-router-dom";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
 import withAuth from "../../../utils/withAuth";
+import { sendTeamsCommentNotification } from "../../../api/DecisionCircle/Network_Call";
 
 const InnerCircleDecision = () => {
   const [sharedDecisions, setSharedDecisions] = useState([]);
@@ -99,6 +100,32 @@ const InnerCircleDecision = () => {
     );
   }, [dateSortOrder]);
 
+  const notifyDecisionOwner = (item, commentText) => {
+    const authUser = JSON.parse(localStorage.getItem("auth_user") || "{}");
+
+    const recipientEmail = item.decisionDetails.userDetails.email;
+
+    if (
+      !recipientEmail ||
+      recipientEmail.toLowerCase() === (authUser.email || "").toLowerCase()
+    ) {
+      return;
+    }
+
+    sendTeamsCommentNotification({
+      recipientEmails: [recipientEmail],
+      commenterEmail: authUser.email,
+      commenterName: authUser.name || "Circle Member",
+      circleType: "INNER_CIRCLE",
+      circleName: "Inner Circle",
+      decisionName: item.decisionDetails.decision_name,
+      decisionId: item.decisionDetails.decision_id,
+      commentText,
+      isReply: false,
+      actionUrl: `${window.location.origin}/inner-circle`,
+    }).catch((err) => console.error("Teams notify failed", err));
+  };
+
   const handlePostComment = async (decisionId, groupMemberID, groupId) => {
     try {
       setButtonLoading((prevState) => ({ ...prevState, [decisionId]: true }));
@@ -112,6 +139,12 @@ const InnerCircleDecision = () => {
       fetchSharedDecisions();
 
       if (response.status === 200) {
+
+        const item = sharedDecisions.find(
+          (d) => d.decisionDetails.decision_id === decisionId
+        );
+        if (item) notifyDecisionOwner(item, commentText);
+        
         toast("Comment posted successfully");
         setCommentTexts((prevState) => ({
           ...prevState,
@@ -744,6 +777,6 @@ const InnerCircleDecision = () => {
       <ToastContainer />
     </Box>
   );
-};   
+};
 
 export default withAuth(InnerCircleDecision);

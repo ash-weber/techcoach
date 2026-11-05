@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   getAlldecisionGroup,
   deleteDecisionGroup,
   getUserDecisionCircles,
-} from '../../../api/DecisionCircle/Network_Call';
+} from "../../../api/DecisionCircle/Network_Call";
 import {
   MdEdit,
   MdDeleteForever,
@@ -12,18 +12,18 @@ import {
   MdGroups,
   MdOutlineAddCircleOutline,
   MdOutlineSearchOff,
-} from 'react-icons/md';
-import { FaUsersViewfinder, FaUserShield } from 'react-icons/fa6';
-import { HiOutlineUsers } from 'react-icons/hi2';
-import { useNavigate, Link } from 'react-router-dom';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+} from "react-icons/md";
+import { FaUsersViewfinder, FaUserShield } from "react-icons/fa6";
+import { HiOutlineUsers } from "react-icons/hi2";
+import { useNavigate, Link } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const DecisionCircleView = () => {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(false);
   const [userCircles, setUserCircles] = useState([]);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const navigate = useNavigate();
 
@@ -44,19 +44,23 @@ const DecisionCircleView = () => {
       const data = await getUserDecisionCircles();
       setUserCircles(data.decisionCircles || []);
     } catch (error) {
-      setError('Failed to fetch user decision circles.');
-      console.error('Error fetching user decision circles:', error);
+      setError("Failed to fetch user decision circles.");
+      console.error("Error fetching user decision circles:", error);
     }
   };
 
   const handleDeleteGroup = async (id) => {
-    if (window.confirm('Are you sure that you want to delete this decision-circle group')) {
+    if (
+      window.confirm(
+        "Are you sure that you want to delete this decision-circle group",
+      )
+    ) {
       try {
         await deleteDecisionGroup(id);
         setGroups((prev) => prev.filter((g) => g.id !== id));
-        toast.success('Group deleted successfully');
+        toast.success("Group deleted successfully");
       } catch (error) {
-        toast.error('Failed to delete group');
+        toast.error("Failed to delete group");
       }
     }
   };
@@ -71,7 +75,9 @@ const DecisionCircleView = () => {
       <header className="page-header">
         <div className="page-header-text">
           <h1>Decision Circles</h1>
-          <p>Manage the circles you've created and explore others you belong to.</p>
+          <p>
+            Manage the circles you've created and explore others you belong to.
+          </p>
         </div>
         <Link to="/decision-circle/add" className="btn-primary">
           <MdOutlineAddCircleOutline className="btn-icon" />
@@ -83,7 +89,9 @@ const DecisionCircleView = () => {
         <div className="section-title">
           <MdGroups className="section-icon" />
           <h2>Created by Me</h2>
-          {groups.length > 0 && <span className="count-badge">{groups.length}</span>}
+          {groups.length > 0 && (
+            <span className="count-badge">{groups.length}</span>
+          )}
         </div>
 
         {loading ? (
@@ -109,21 +117,29 @@ const DecisionCircleView = () => {
                 <div className="card-top">
                   <div className="card-title-wrap">
                     <div className="avatar-badge">
-                      {group.group_name?.charAt(0)?.toUpperCase() || 'G'}
+                      {group.group_name?.charAt(0)?.toUpperCase() || "G"}
                     </div>
-                    <h3 className="card-title" title={group.group_name}>
-                      {group.group_name}
-                    </h3>
+
+                    <div className="card-heading">
+                      <h3 className="card-title" title={group.group_name}>
+                        {group.group_name}
+                      </h3>
+                      <span className="card-subtitle">Decision Circle</span>
+                    </div>
                   </div>
+
                   <div className="card-actions">
                     <button
                       type="button"
                       className="icon-btn icon-btn-edit"
                       title="Edit circle"
-                      onClick={() => navigate(`/decision-circle/edit/${group.id}`)}
+                      onClick={() =>
+                        navigate(`/decision-circle/edit/${group.id}`)
+                      }
                     >
                       <MdEdit />
                     </button>
+
                     <button
                       type="button"
                       className="icon-btn icon-btn-delete"
@@ -137,29 +153,26 @@ const DecisionCircleView = () => {
 
                 <div className="card-divider" />
 
-                <div className="card-footer">
-                  <Link
-                    to={`/decision-circle/view/${group.id}?group_name=${group.group_name}`}
-                    className="icon-btn icon-btn-view"
-                    title="View members"
-                  >
-                    <FaUsersViewfinder />
-                  </Link>
-                  <div className="footer-spacer" />
-                  <Link
-                    to={`/decision-circle/add/member/${group.group_name}?id=${group.id}`}
-                    className="icon-btn icon-btn-add"
-                    title="Add member"
-                  >
-                    <MdGroupAdd />
-                  </Link>
-                  <Link
-                    to={`/decision-circle/view/${group.id}?group_name=${group.group_name}`}
-                    className="icon-btn icon-btn-remove"
-                    title="Remove member"
-                  >
-                    <MdGroupRemove />
-                  </Link>
+                <div className="circle-management">
+                  <span className="management-label">Circle management</span>
+
+                  <div className="circle-management-actions">
+                    <Link
+                      to={`/decision-circle/view/${group.id}?group_name=${encodeURIComponent(group.group_name || "")}`}
+                      className="management-btn management-btn-view"
+                    >
+                      <FaUsersViewfinder />
+                      <span>View Members</span>
+                    </Link>
+
+                    <Link
+                      to={`/decision-circle/add/member/${encodeURIComponent(group.group_name || "")}?id=${group.id}`}
+                      className="management-btn management-btn-add"
+                    >
+                      <MdGroupAdd />
+                      <span>Add Member</span>
+                    </Link>
+                  </div>
                 </div>
               </article>
             ))}
@@ -171,7 +184,9 @@ const DecisionCircleView = () => {
         <div className="section-title">
           <HiOutlineUsers className="section-icon" />
           <h2>Shared With Me</h2>
-          {userCircles.length > 0 && <span className="count-badge">{userCircles.length}</span>}
+          {userCircles.length > 0 && (
+            <span className="count-badge">{userCircles.length}</span>
+          )}
         </div>
 
         {userCircles.length === 0 ? (
@@ -185,7 +200,7 @@ const DecisionCircleView = () => {
             {userCircles.map((circle) => (
               <article key={circle.id} className="shared-card">
                 <div className="shared-avatar">
-                  {circle.group_name?.charAt(0)?.toUpperCase() || 'G'}
+                  {circle.group_name?.charAt(0)?.toUpperCase() || "G"}
                 </div>
                 <div className="shared-body">
                   <h3 className="shared-title" title={circle.group_name}>
