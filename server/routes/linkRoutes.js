@@ -9,7 +9,7 @@ router.use(authMiddleware);
 router.use(createUserKey);
 
 router.post('/link', postSkillLink);
-router.post('/links', postProfileLink);
+router.post('/links', postProfileLink);     
 router.get('/link', getAllSkillLink);
 router.get('/links', getAllProfileLink);
 router.delete('/link/:id', deleteSkillLink);

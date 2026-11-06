@@ -8,7 +8,7 @@ const createUserKey = require("../utils/CreateUserKey");
 
 router.use(authMiddleware);
 router.use(createUserKey); 
-
+   
 router.get("/profile", userController.getUserList);
 
 router.post("/data",userController.postGeneralProfile);

@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom';
 import { TiDelete } from "react-icons/ti";
 import { toast, ToastContainer } from 'react-toastify';
 import withAuth from '../../../../utils/withAuth';
-import BubbleChart from '../../../Decision/Table/BubbleChart';
+import BubbleChart from './BubbleChart';
+import MindMapView from './MindMapChart';
 import { deleteProfileLink, deleteSkillLink, getAllProfileLink, getAllSkillLink } from '../../../../api/Decision_Link/Network_Call';
 
 const GetLink = () => {
@@ -112,7 +113,8 @@ const GetLink = () => {
 
   return (
     <div className="card1">
-      <BubbleChart onBubbleClick={handleBubbleClick} />
+      {/* <BubbleChart onBubbleClick={handleBubbleClick} /> */}
+      <MindMapView onNodeSelect={handleBubbleClick} />
 
       <div className="swot-container">
         <div className="swot-header">

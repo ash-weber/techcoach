@@ -13,5 +13,5 @@ router.get('/:id',adminController.getInfo);
 router.get('/decision/count/:id',adminController.getTotalDecisionsCount);
 router.get('/login/last/:userId',adminController.getLastLoginDate);
 router.delete('/account/:id',adminController.deleteAccount);
-
+   
 module.exports = router;

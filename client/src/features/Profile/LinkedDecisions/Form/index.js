@@ -283,6 +283,9 @@ const AddLink = () => {
   const handleSkillChange = (e) => toggle(setSelectedSkills, e.target.value);
 
   const handleProfileSubmit = async () => {
+
+        console.log("wwwwwwwwww", id, selectedProfiles)
+
     try {
       await postProfileLink(id, selectedProfiles);
       toast.success("SWOT links saved");
@@ -306,6 +309,8 @@ const AddLink = () => {
   };
 
   const handleSkillSubmit = async () => {
+
+    console.log("ssssssssssss", id, selectedSkills)
     try {
       await postSkillLink(id, selectedSkills);
       toast.success("Skill links saved");

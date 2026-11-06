@@ -1,8 +1,12 @@
-const getConnection = require('../Models/database');
-const crypto = require('crypto');
-const ALGORITHM = 'aes-256-cbc'; 
+const getConnection = require("../Models/database");
+const crypto = require("crypto");
+const ALGORITHM = "aes-256-cbc";
 const getSecureKey = (keyString) => {
-  return crypto.createHash('sha256').update(String(keyString)).digest('base64').substr(0, 32);
+  return crypto
+    .createHash("sha256")
+    .update(String(keyString))
+    .digest("base64")
+    .substr(0, 32);
 };
 
 const encryptText = (text, userKey) => {
@@ -11,20 +15,20 @@ const encryptText = (text, userKey) => {
   const cipher = crypto.createCipheriv(ALGORITHM, Buffer.from(key), iv);
   let encrypted = cipher.update(text);
   encrypted = Buffer.concat([encrypted, cipher.final()]);
-  return iv.toString('hex') + ':' + encrypted.toString('hex');
+  return iv.toString("hex") + ":" + encrypted.toString("hex");
 };
 
 const decryptText = (text, userKey) => {
-  if (!text || typeof text !== 'string') {
+  if (!text || typeof text !== "string") {
     return null;
   }
 
-  if (text.includes(':')) {
+  if (text.includes(":")) {
     try {
       const key = getSecureKey(userKey);
-      const textParts = text.split(':');
-      const iv = Buffer.from(textParts.shift(), 'hex');
-      const encryptedText = Buffer.from(textParts.join(':'), 'hex');
+      const textParts = text.split(":");
+      const iv = Buffer.from(textParts.shift(), "hex");
+      const encryptedText = Buffer.from(textParts.join(":"), "hex");
       const decipher = crypto.createDecipheriv(ALGORITHM, Buffer.from(key), iv);
       let decrypted = decipher.update(encryptedText);
       decrypted = Buffer.concat([decrypted, decipher.final()]);
@@ -35,9 +39,9 @@ const decryptText = (text, userKey) => {
     }
   } else {
     try {
-      const decipher = crypto.createDecipher('aes-256-cbc', userKey);
-      let decrypted = decipher.update(text, 'hex', 'utf8');
-      decrypted += decipher.final('utf8');
+      const decipher = crypto.createDecipher("aes-256-cbc", userKey);
+      let decrypted = decipher.update(text, "hex", "utf8");
+      decrypted += decipher.final("utf8");
       return decrypted;
     } catch (error) {
       console.error("Failed to decrypt old format data:", error);
@@ -47,194 +51,292 @@ const decryptText = (text, userKey) => {
 };
 
 const getUserList = async (req, res) => {
-    let conn;
-    try {
-        const userId = req.user.id;
-        conn = await getConnection();
-        const tasks = await conn.query(`SELECT * FROM techcoach_lite.techcoach_users WHERE user_id = ?;`, [userId]);
-        res.status(200).json({ message: 'User List Fetched successfully', tasks });
-    } catch (error) {
-        console.error('Error fetching data:', error);
-        res.status(500).json({ error: 'An error occurred while processing your request' });
-    } finally {
-        if (conn) conn.release();
-    }
+  let conn;
+  try {
+    const userId = req.user.id;
+    conn = await getConnection();
+    const tasks = await conn.query(
+      `SELECT * FROM techcoach_lite.techcoach_users WHERE user_id = ?;`,
+      [userId],
+    );
+    res.status(200).json({ message: "User List Fetched successfully", tasks });
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while processing your request" });
+  } finally {
+    if (conn) conn.release();
+  }
 };
 
 const postGeneralProfile = async (req, res) => {
-    const { attitude, strength, weakness, opportunity, threat } = req.body;
-    let conn;
-    try {
-        conn = await getConnection();
-        await conn.beginTransaction();
-        const userId = req.user.id;
+  const { attitude, strength, weakness, opportunity, threat } = req.body;
+  let conn;
+  try {
+    conn = await getConnection();
+    await conn.beginTransaction();
+    const userId = req.user.id;
 
-        const headersAndValues = [
-            { headerName: 'Attitude', headerValue: attitude },
-            { headerName: 'Strength', headerValue: strength },
-            { headerName: 'Weakness', headerValue: weakness },
-            { headerName: 'Opportunity', headerValue: opportunity },
-            { headerName: 'Threat', headerValue: threat }
-        ];
+    const headersAndValues = [
+      { headerName: "Attitude", headerValue: attitude },
+      { headerName: "Strength", headerValue: strength },
+      { headerName: "Weakness", headerValue: weakness },
+      { headerName: "Opportunity", headerValue: opportunity },
+      { headerName: "Threat", headerValue: threat },
+    ];
 
-        for (const { headerName, headerValue } of headersAndValues) {
-            if (headerValue && headerValue.length > 0) {
-                const headerRows = await conn.query(`SELECT header_id FROM techcoach_lite.techcoach_profile_swot_headers WHERE header_name = ? AND type_of_profile = 'Profile'`, [headerName]);
-                const headerId = headerRows[0]?.header_id;
-                if (!headerId) throw new Error(`Header ID not found for header name: ${headerName}`);
+    for (const { headerName, headerValue } of headersAndValues) {
+      if (headerValue && headerValue.length > 0) {
+        const headerRows = await conn.query(
+          `SELECT header_id FROM techcoach_lite.techcoach_profile_swot_headers WHERE header_name = ? AND type_of_profile = 'Profile'`,
+          [headerName],
+        );
+        const headerId = headerRows[0]?.header_id;
+        if (!headerId)
+          throw new Error(`Header ID not found for header name: ${headerName}`);
 
-                if (Array.isArray(headerValue)) {
-                    for (const value of headerValue) {
-                        const encryptedValue = encryptText(value, req.user.key); // Uses new helper
-                        await conn.query("INSERT INTO techcoach_lite.techcoach_profile_swot_values (user_id, header_id, header_value) VALUES (?, ?, ?)", [userId, headerId, encryptedValue]);
-                    }
-                } else {
-                    const encryptedValue = encryptText(headerValue, req.user.key); // Uses new helper
-                    await conn.query("INSERT INTO techcoach_lite.techcoach_profile_swot_values (user_id, header_id, header_value) VALUES (?, ?, ?)", [userId, headerId, encryptedValue]);
-                }
-            }
+        if (Array.isArray(headerValue)) {
+          for (const value of headerValue) {
+            const encryptedValue = encryptText(value, req.user.key);
+            await conn.query(
+              "INSERT INTO techcoach_lite.techcoach_profile_swot_values (user_id, header_id, header_value) VALUES (?, ?, ?)",
+              [userId, headerId, encryptedValue],
+            );
+          }
+        } else {
+          const encryptedValue = encryptText(headerValue, req.user.key); // Uses new helper
+          await conn.query(
+            "INSERT INTO techcoach_lite.techcoach_profile_swot_values (user_id, header_id, header_value) VALUES (?, ?, ?)",
+            [userId, headerId, encryptedValue],
+          );
         }
-        await conn.commit();
-        res.status(200).json({ message: 'General profile data inserted successfully' });
-    } catch (error) {
-        console.error('Error inserting general profile data:', error);
-        if (conn) await conn.rollback();
-        res.status(500).json({ error: 'An error occurred while processing your request' });
-    } finally {
-        if (conn) conn.release();
+      }
     }
+    await conn.commit();
+    res
+      .status(200)
+      .json({ message: "General profile data inserted successfully" });
+  } catch (error) {
+    console.error("Error inserting general profile data:", error);
+    if (conn) await conn.rollback();
+    res
+      .status(500)
+      .json({ error: "An error occurred while processing your request" });
+  } finally {
+    if (conn) conn.release();
+  }
 };
 
-const getMasterProfiles = async (req,res) => {
-    let conn;
-    try {
-        conn = await getConnection();
-        const rows = await conn.query("SELECT header_id ,header_name FROM techcoach_lite.techcoach_profile_swot_headers WHERE type_of_profile = 'Profile' ");
-        if (rows.length > 0) {
-            res.status(200).json({profiles : rows })
-        } else {
-            res.status(404).json({ message: 'No profiles found' });
-        }
-    } catch (error) {
-        res.status(500).json({ error:'An error occured while fetching master profiles'});
-    } finally {
-        if (conn) conn.release();
+const getMasterProfiles = async (req, res) => {
+  let conn;
+  try {
+    conn = await getConnection();
+    const rows = await conn.query(
+      "SELECT header_id ,header_name FROM techcoach_lite.techcoach_profile_swot_headers WHERE type_of_profile = 'Profile' ",
+    );
+    if (rows.length > 0) {
+      res.status(200).json({ profiles: rows });
+    } else {
+      res.status(404).json({ message: "No profiles found" });
     }
-}
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "An error occured while fetching master profiles" });
+  } finally {
+    if (conn) conn.release();
+  }
+};
 
 // NOTE: The old 'decryptText' function that was here has been removed and replaced
 // by the new secure version at the top of the file.
 
 const getProfile = async (req, res) => {
-    const userId = req.user.id;
-    const userKey = req.user.key;
-    let conn;
-    try {
-        conn = await getConnection();
-        const headerValuesResult = await conn.query(
-            `SELECT v.id, h.header_name, v.header_value 
+  const userId = req.user.id;
+  const userKey = req.user.key;
+  let conn;
+  try {
+    conn = await getConnection();
+    const headerValuesResult = await conn.query(
+      `SELECT v.id, h.header_name, v.header_value 
              FROM techcoach_lite.techcoach_profile_swot_values v 
              JOIN techcoach_lite.techcoach_profile_swot_headers h ON v.header_id = h.header_id 
-             WHERE v.user_id = ? AND h.type_of_profile = 'Profile'`, [userId]
-        );
-        const profileDetails = headerValuesResult.reduce((acc, { id, header_name, header_value }) => {
-            const key = header_name.toLowerCase();
-            if (!acc[key]) acc[key] = [];
-            const decryptedValue = decryptText(header_value, userKey); // Uses new helper
-            acc[key].push({ id, value: decryptedValue });
-            return acc;
-        }, {});
-        const fullProfile = { user_id: userId, ...profileDetails };
-        res.status(200).json(fullProfile);
-    } catch (error) {
-        console.error('Error retrieving profile data:', error);
-        res.status(500).json({ error: 'An error occurred while processing your request' });
-    } finally {
-        if (conn) conn.release();
-    }
+             WHERE v.user_id = ? AND h.type_of_profile = 'Profile'`,
+      [userId],
+    );
+    const profileDetails = headerValuesResult.reduce(
+      (acc, { id, header_name, header_value }) => {
+        const key = header_name.toLowerCase();
+        if (!acc[key]) acc[key] = [];
+        const decryptedValue = decryptText(header_value, userKey); // Uses new helper
+        acc[key].push({ id, value: decryptedValue });
+        return acc;
+      },
+      {},
+    );
+    const fullProfile = { user_id: userId, ...profileDetails };
+    res.status(200).json(fullProfile);
+  } catch (error) {
+    console.error("Error retrieving profile data:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while processing your request" });
+  } finally {
+    if (conn) conn.release();
+  }
 };
 
 const putProfile = async (req, res) => {
-    const { attitude, strength, weakness, opportunity, threat } = req.body;
-    const userKey = req.user.key;
-    const userId = req.user.id;
-    let conn;
-    try {
-        conn = await getConnection();
-        await conn.beginTransaction();
+  const { attitude, strength, weakness, opportunity, threat } = req.body;
+  const userKey = req.user.key;
+  const userId = req.user.id;
+  let conn;
+  try {
+    conn = await getConnection();
+    await conn.beginTransaction();
 
-        // NOTE: The old 'encryptText' function that was here has been removed.
+    // NOTE: The old 'encryptText' function that was here has been removed.
 
-        const allValues = [
-            ...attitude.map(item => ({ ...item, headerName: 'attitude' })),
-            ...strength.map(item => ({ ...item, headerName: 'strength' })),
-            ...weakness.map(item => ({ ...item, headerName: 'weakness' })),
-            ...opportunity.map(item => ({ ...item, headerName: 'opportunity' })),
-            ...threat.map(item => ({ ...item, headerName: 'threat' }))
-        ];
+    const allValues = [
+      ...attitude.map((item) => ({ ...item, headerName: "attitude" })),
+      ...strength.map((item) => ({ ...item, headerName: "strength" })),
+      ...weakness.map((item) => ({ ...item, headerName: "weakness" })),
+      ...opportunity.map((item) => ({ ...item, headerName: "opportunity" })),
+      ...threat.map((item) => ({ ...item, headerName: "threat" })),
+    ];
 
-        const existingItems = await conn.query("SELECT id FROM techcoach_lite.techcoach_profile_swot_values WHERE user_id = ?", [userId]);
-        const itemsToDelete = new Set(existingItems.map(item => item.id));
+    const existingItems = await conn.query(
+      "SELECT id FROM techcoach_lite.techcoach_profile_swot_values WHERE user_id = ?",
+      [userId],
+    );
+    const itemsToDelete = new Set(existingItems.map((item) => item.id));
 
-        for (const item of allValues) {
-            const encryptedValue = encryptText(item.value, userKey); // Uses new helper
-            if (item.id) {
-                // Update existing item
-                await conn.query("UPDATE techcoach_lite.techcoach_profile_swot_values SET header_value = ? WHERE id = ?", [encryptedValue, item.id]);
-                itemsToDelete.delete(item.id);
-            } else if (item.id === null) {
-                // Insert new item
-                const headerResult = await conn.query("SELECT header_id FROM techcoach_lite.techcoach_profile_swot_headers WHERE LOWER(header_name) = LOWER(?)", [item.headerName]);
-                const headerId = headerResult.length > 0 ? headerResult[0].header_id : null;
-                await conn.query("INSERT INTO techcoach_lite.techcoach_profile_swot_values (user_id, header_id, header_value) VALUES (?, ?, ?)", [userId, headerId, encryptedValue]);
-            }
-        }
-
-        if (itemsToDelete.size > 0) {
-            await conn.query("DELETE FROM techcoach_lite.techcoach_profile_swot_values WHERE id IN (?)", [[...itemsToDelete]]);
-        }
-
-        await conn.commit();
-        res.status(200).json({ message: 'General profile data updated successfully' });
-    } catch (error) {
-        console.error('Error updating general profile data:', error);
-        if (conn) await conn.rollback();
-        res.status(500).json({ error: 'An error occurred while processing your request' });
-    } finally {
-        if (conn) conn.release();
+    for (const item of allValues) {
+      const encryptedValue = encryptText(item.value, userKey); // Uses new helper
+      if (item.id) {
+        // Update existing item
+        await conn.query(
+          "UPDATE techcoach_lite.techcoach_profile_swot_values SET header_value = ? WHERE id = ?",
+          [encryptedValue, item.id],
+        );
+        itemsToDelete.delete(item.id);
+      } else if (item.id === null) {
+        // Insert new item
+        const headerResult = await conn.query(
+          "SELECT header_id FROM techcoach_lite.techcoach_profile_swot_headers WHERE LOWER(header_name) = LOWER(?)",
+          [item.headerName],
+        );
+        const headerId =
+          headerResult.length > 0 ? headerResult[0].header_id : null;
+        await conn.query(
+          "INSERT INTO techcoach_lite.techcoach_profile_swot_values (user_id, header_id, header_value) VALUES (?, ?, ?)",
+          [userId, headerId, encryptedValue],
+        );
+      }
     }
+
+    if (itemsToDelete.size > 0) {
+      await conn.query(
+        "DELETE FROM techcoach_lite.techcoach_profile_swot_values WHERE id IN (?)",
+        [[...itemsToDelete]],
+      );
+    }
+
+    await conn.commit();
+    res
+      .status(200)
+      .json({ message: "General profile data updated successfully" });
+  } catch (error) {
+    console.error("Error updating general profile data:", error);
+    if (conn) await conn.rollback();
+    res
+      .status(500)
+      .json({ error: "An error occurred while processing your request" });
+  } finally {
+    if (conn) conn.release();
+  }
 };
 
 const deleteProfile = async (req, res) => {
-    const userId = req.user.id;
-    let conn;
-    try {
-        conn = await getConnection();
-        await conn.beginTransaction();
-        await conn.query("DELETE FROM techcoach_lite.techcoach_decision_swot_linked_info WHERE decision_id IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)", [userId]);
-        await conn.query("DELETE FROM techcoach_lite.techcoach_decision_reason WHERE decision_id IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)", [userId]);
-        await conn.query("DELETE FROM techcoach_lite.techcoach_decision_tag_linked_info WHERE decision_id IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)", [userId]);
-        await conn.query("DELETE FROM techcoach_lite.techcoach_shared_decisions WHERE decisionId IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)", [userId]);
-        await conn.query("DELETE FROM techcoach_lite.techcoach_conversations WHERE decisionId IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)", [userId]);
-        await conn.query("DELETE FROM techcoach_lite.techcoach_decision_skill_linked_info WHERE decision_id IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)", [userId]);
-        await conn.query("DELETE FROM techcoach_lite.techcoach_decision WHERE user_id = ?", [userId]);
-        await conn.query("DELETE FROM techcoach_lite.techcoach_soft_skill_value WHERE user_id = ?", [userId]);
-        await conn.query("DELETE FROM techcoach_lite.techcoach_profile_swot_values WHERE user_id = ?", [userId]);
-        await conn.query("DELETE FROM techcoach_lite.techcoach_personal_info WHERE user_id = ?", [userId]);
-        await conn.query("DELETE FROM techcoach_lite.techcoach_login_history WHERE user_id = ?", [userId]);
-        await conn.query("DELETE FROM techcoach_lite.techcoach_group_members WHERE group_id IN (SELECT id FROM techcoach_lite.techcoach_groups WHERE created_by = ?)", [userId]);
-        await conn.query("DELETE FROM techcoach_lite.techcoach_group_members WHERE member_id = ?", [userId]);
-        await conn.query("DELETE FROM techcoach_lite.techcoach_groups WHERE created_by = ?", [userId]);
-        await conn.query("DELETE FROM techcoach_lite.techcoach_users WHERE user_id = ?", [userId]);
-        await conn.commit();
-        res.status(200).json({ message: 'Profile and associated data deleted successfully' });
-    } catch (error) {
-        console.error('Error deleting profile:', error);
-        if (conn) await conn.rollback();
-        res.status(500).json({ error: 'An error occurred while deleting the profile' });
-    } finally {
-        if (conn) conn.release();
-    }
+  const userId = req.user.id;
+  let conn;
+  try {
+    conn = await getConnection();
+    await conn.beginTransaction();
+    await conn.query(
+      "DELETE FROM techcoach_lite.techcoach_decision_swot_linked_info WHERE decision_id IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)",
+      [userId],
+    );
+    await conn.query(
+      "DELETE FROM techcoach_lite.techcoach_decision_reason WHERE decision_id IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)",
+      [userId],
+    );
+    await conn.query(
+      "DELETE FROM techcoach_lite.techcoach_decision_tag_linked_info WHERE decision_id IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)",
+      [userId],
+    );
+    await conn.query(
+      "DELETE FROM techcoach_lite.techcoach_shared_decisions WHERE decisionId IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)",
+      [userId],
+    );
+    await conn.query(
+      "DELETE FROM techcoach_lite.techcoach_conversations WHERE decisionId IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)",
+      [userId],
+    );
+    await conn.query(
+      "DELETE FROM techcoach_lite.techcoach_decision_skill_linked_info WHERE decision_id IN (SELECT decision_id FROM techcoach_lite.techcoach_decision WHERE user_id = ?)",
+      [userId],
+    );
+    await conn.query(
+      "DELETE FROM techcoach_lite.techcoach_decision WHERE user_id = ?",
+      [userId],
+    );
+    await conn.query(
+      "DELETE FROM techcoach_lite.techcoach_soft_skill_value WHERE user_id = ?",
+      [userId],
+    );
+    await conn.query(
+      "DELETE FROM techcoach_lite.techcoach_profile_swot_values WHERE user_id = ?",
+      [userId],
+    );
+    await conn.query(
+      "DELETE FROM techcoach_lite.techcoach_personal_info WHERE user_id = ?",
+      [userId],
+    );
+    await conn.query(
+      "DELETE FROM techcoach_lite.techcoach_login_history WHERE user_id = ?",
+      [userId],
+    );
+    await conn.query(
+      "DELETE FROM techcoach_lite.techcoach_group_members WHERE group_id IN (SELECT id FROM techcoach_lite.techcoach_groups WHERE created_by = ?)",
+      [userId],
+    );
+    await conn.query(
+      "DELETE FROM techcoach_lite.techcoach_group_members WHERE member_id = ?",
+      [userId],
+    );
+    await conn.query(
+      "DELETE FROM techcoach_lite.techcoach_groups WHERE created_by = ?",
+      [userId],
+    );
+    await conn.query(
+      "DELETE FROM techcoach_lite.techcoach_users WHERE user_id = ?",
+      [userId],
+    );
+    await conn.commit();
+    res
+      .status(200)
+      .json({ message: "Profile and associated data deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting profile:", error);
+    if (conn) await conn.rollback();
+    res
+      .status(500)
+      .json({ error: "An error occurred while deleting the profile" });
+  } finally {
+    if (conn) conn.release();
+  }
 };
 
 const migrateGoogleToMicrosoft = async (req, res) => {
@@ -278,7 +380,7 @@ const migrateGoogleToMicrosoft = async (req, res) => {
     seenWorkEmails.add(work);
   }
 
-  const decryptText = (text, key) => {
+  const decryptDecisionText = (text, key) => {
     if (text == null || text === "") {
       throw new Error("Encrypted value is empty.");
     }
@@ -289,7 +391,7 @@ const migrateGoogleToMicrosoft = async (req, res) => {
     return result;
   };
 
-  const encryptText = (text, key) => {
+  const encryptDecisionText = (text, key) => {
     if (text == null) {
       throw new Error("Cannot encrypt a null value.");
     }
@@ -317,7 +419,7 @@ const migrateGoogleToMicrosoft = async (req, res) => {
            FROM techcoach_lite.techcoach_users
            WHERE LOWER(email) = ?
            FOR UPDATE`,
-          [personalEmail.toLowerCase()]
+          [personalEmail.toLowerCase()],
         );
 
         const newUsers = await conn.query(
@@ -325,13 +427,13 @@ const migrateGoogleToMicrosoft = async (req, res) => {
            FROM techcoach_lite.techcoach_users
            WHERE LOWER(email) = ?
            FOR UPDATE`,
-          [workEmail.toLowerCase()]
+          [workEmail.toLowerCase()],
         );
 
         if (oldUsers.length !== 1 || newUsers.length !== 1) {
           throw new Error(
             `Expected exactly one account for each email: ` +
-            `${personalEmail} -> ${workEmail}`
+              `${personalEmail} -> ${workEmail}`,
           );
         }
 
@@ -339,16 +441,17 @@ const migrateGoogleToMicrosoft = async (req, res) => {
         const newUser = newUsers[0];
 
         if (oldUser.user_id === newUser.user_id) {
-          throw new Error("Personal and work accounts are already the same user.");
+          throw new Error(
+            "Personal and work accounts are already the same user.",
+          );
         }
 
         if (
           newUser.personal_email &&
-          newUser.personal_email.toLowerCase() !==
-            oldUser.email.toLowerCase()
+          newUser.personal_email.toLowerCase() !== oldUser.email.toLowerCase()
         ) {
           throw new Error(
-            `Work account ${workEmail} is already linked to another personal email.`
+            `Work account ${workEmail} is already linked to another personal email.`,
           );
         }
 
@@ -360,35 +463,32 @@ const migrateGoogleToMicrosoft = async (req, res) => {
            FROM techcoach_lite.techcoach_decision
            WHERE user_id = ?
            FOR UPDATE`,
-          [oldUser.user_id]
+          [oldUser.user_id],
         );
 
         const preparedDecisions = [];
 
         for (const decision of decisions) {
-          const plainName = decryptText(
-            decision.decision_name,
-            oldKey
-          );
+          const plainName = decryptDecisionText(decision.decision_name, oldKey);
 
           const plainStatement =
             decision.user_statement == null
               ? null
-              : decryptText(decision.user_statement, oldKey);
+              : decryptDecisionText(decision.user_statement, oldKey);
 
           const reasons = await conn.query(
             `SELECT decision_reason_text
              FROM techcoach_lite.techcoach_decision_reason
              WHERE decision_id = ?
              FOR UPDATE`,
-            [decision.decision_id]
+            [decision.decision_id],
           );
 
           const preparedReasons = reasons.map((reason) => ({
             oldCiphertext: reason.decision_reason_text,
-            newCiphertext: encryptText(
-              decryptText(reason.decision_reason_text, oldKey),
-              newKey
+            newCiphertext: encryptDecisionText(
+              decryptDecisionText(reason.decision_reason_text, oldKey),
+              newKey,
             ),
           }));
 
@@ -396,21 +496,96 @@ const migrateGoogleToMicrosoft = async (req, res) => {
             decisionId: decision.decision_id,
             oldName: decision.decision_name,
             oldStatement: decision.user_statement,
-            newName: encryptText(plainName, newKey),
+            newName: encryptDecisionText(plainName, newKey),
             newStatement:
               plainStatement == null
                 ? null
-                : encryptText(plainStatement, newKey),
+                : encryptDecisionText(plainStatement, newKey),
             reasons: preparedReasons,
           });
         }
 
-        await conn.query(
-          `UPDATE techcoach_lite.techcoach_users
-           SET personal_email = ?
-           WHERE user_id = ?`,
-          [oldUser.email, newUser.user_id]
+        const swotRows = await conn.query(
+          `SELECT id, header_value
+   FROM techcoach_lite.techcoach_profile_swot_values
+   WHERE user_id = ?
+   FOR UPDATE`,
+          [oldUser.user_id],
         );
+
+        const preparedSwotValues = swotRows.map((row) => {
+          if (row.header_value == null || row.header_value === "") {
+            throw new Error(
+              `Empty header_value for techcoach_profile_swot_values.id=${row.id}`,
+            );
+          }
+
+          const plain = decryptText(row.header_value, oldKey);
+          const reEncrypted = encryptText(plain, newKey);
+          return {
+            Id: row.id,
+            newCiphertext: reEncrypted,
+          };
+        });
+
+        for (const swot of preparedSwotValues) {
+          await conn.query(
+            `UPDATE techcoach_lite.techcoach_profile_swot_values
+     SET header_value = ?, user_id = ?
+     WHERE id = ? AND user_id = ?`,
+            [swot.newCiphertext, newUser.user_id, swot.Id, oldUser.user_id],
+          );
+        }
+
+        await conn.query(
+          `UPDATE techcoach_lite.techcoach_groups
+   SET created_by = ?
+   WHERE created_by = ?`,
+          [newUser.user_id, oldUser.user_id],
+        );
+
+        await conn.query(
+          `UPDATE techcoach_lite.techcoach_group_members
+   SET member_id = ?
+   WHERE member_id = ?`,
+          [newUser.user_id, oldUser.user_id],
+        );
+
+        await conn.query(
+          `UPDATE techcoach_lite.techcoach_conversations
+   SET groupMember = ?
+   WHERE groupMember = ?`,
+          [newUser.user_id, oldUser.user_id],
+        );
+
+        await conn.query(
+          `UPDATE techcoach_lite.techcoach_shared_decisions
+   SET groupMember = ?
+   WHERE groupMember = ?`,
+          [newUser.user_id, oldUser.user_id],
+        );
+
+        const userRelatedTables = [
+          "techcoach_mobile_number_info",
+          "techcoach_decision_comments_rating",
+          "techcoach_decision_swot_linked_info",
+          "techcoach_personal_info",
+          "techcoach_soft_skill_value",
+          "techcoach_decision_skill_linked_info",
+          "techcoach_login_history",
+          "techcoach_decision_ratings",
+          "user_subscription",
+          "techcoach_comment_reactions",
+        ];
+
+        for (const table of userRelatedTables) {
+          await conn.query(
+            `UPDATE techcoach_lite.${table}
+     SET user_id = ?
+     WHERE user_id = ?`,
+            [newUser.user_id, oldUser.user_id],
+          );
+        }
 
         for (const decision of preparedDecisions) {
           await conn.query(
@@ -425,7 +600,7 @@ const migrateGoogleToMicrosoft = async (req, res) => {
               newUser.user_id,
               decision.decisionId,
               oldUser.user_id,
-            ]
+            ],
           );
 
           for (const reason of decision.reasons) {
@@ -434,14 +609,17 @@ const migrateGoogleToMicrosoft = async (req, res) => {
                SET decision_reason_text = ?
                WHERE decision_id = ?
                  AND decision_reason_text = ?`,
-              [
-                reason.newCiphertext,
-                decision.decisionId,
-                reason.oldCiphertext,
-              ]
+              [reason.newCiphertext, decision.decisionId, reason.oldCiphertext],
             );
           }
         }
+
+        await conn.query(
+          `UPDATE techcoach_lite.techcoach_users
+           SET personal_email = ?
+           WHERE user_id = ?`,
+          [oldUser.email, newUser.user_id],
+        );
 
         await conn.commit();
 
@@ -467,11 +645,20 @@ const migrateGoogleToMicrosoft = async (req, res) => {
     console.error("Account migration failed:", error.message);
 
     return res.status(500).json({
-      error: "Migration failed. The current user's transaction was rolled back.",
+      error:
+        "Migration failed. The current user's transaction was rolled back.",
       completedMigrations: results,
       failedMigrationIndex: results.length,
     });
   }
 };
 
-module.exports = { getUserList, postGeneralProfile, getMasterProfiles, getProfile, putProfile, deleteProfile, migrateGoogleToMicrosoft };
+module.exports = {
+  getUserList,
+  postGeneralProfile,
+  getMasterProfiles,
+  getProfile,
+  putProfile,
+  deleteProfile,
+  migrateGoogleToMicrosoft,
+};
