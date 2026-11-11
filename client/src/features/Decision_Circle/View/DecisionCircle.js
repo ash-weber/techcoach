@@ -10,7 +10,7 @@ import {
   deleteComment,
   getUsersForGroup,
   getGroupDetails,
-  sendTeamsCommentNotification,
+  getBiasTags,
 } from "../../../api/DecisionCircle/Network_Call";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
@@ -31,8 +31,16 @@ import {
   MdOutlineSend,
   MdOutlineArrowBack,
 } from "react-icons/md";
-import { Modal, Box, CircularProgress } from "@mui/material";
+import {
+  Modal,
+  Box,
+  CircularProgress,
+  Autocomplete,
+  TextField,
+  Box as MuiBox,
+} from "@mui/material";
 import { formatDistanceToNow, parseISO } from "date-fns";
+import { notifyTeamsChannel } from "../../../utils/teamsWebhook";
 
 const DecisionCircle = () => {
   const [groups, setGroups] = useState(null);
@@ -48,6 +56,9 @@ const DecisionCircle = () => {
   const { groupId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const [biasTags, setBiasTags] = useState([]);
+  const [replyBiasTags, setReplyBiasTags] = useState({});
+  const [editBiasTags, setEditBiasTags] = useState([]);
 
   const params = new URLSearchParams(location.search);
   const groupName = params.get("group_name");
@@ -60,39 +71,44 @@ const DecisionCircle = () => {
     }
   }, [groupId]);
 
-const notifyCircleMembers = (decision, commentText, isReply = false) => {
-  const authUser = JSON.parse(localStorage.getItem("auth_user") || "{}");
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await getBiasTags();
+        setBiasTags(data.biasTags || []);
+      } catch (e) {
+        console.error("Failed to load bias tags", e);
+      }
+    })();
+  }, []);
 
-  const memberEmails = members.map((m) => m.email).filter(Boolean);
-  const adminEmail = user?.creator_email; 
-  const recipientEmails = [
-    ...new Set(
-      [...memberEmails, adminEmail]
-        .filter(Boolean)
-        .map((e) => e.trim().toLowerCase()),
-    ),
-  ];
+  const notifyCircleMembers = (decision, commentText, isReply = false) => {
+    const authUser = JSON.parse(localStorage.getItem("auth_user") || "{}");
 
-  if (!recipientEmails.length) return;
+    const memberEmails = members.map((m) => m.email).filter(Boolean);
+    const adminEmail = user?.creator_email;
+    const recipientEmails = [
+      ...new Set(
+        [...memberEmails, adminEmail]
+          .filter(Boolean)
+          .map((e) => e.trim().toLowerCase()),
+      ),
+    ];
 
-  sendTeamsCommentNotification({
-    recipientEmails,
-    commenterEmail: authUser.email,
-    circleType: "DECISION_CIRCLE",
-    circleName: groupName || groups?.group_name,
-    decisionName: decision.decision_name,
-    decisionId: decision.decision_id,
-    commentText,
-    isReply,
-    actionUrl: `${window.location.origin}/decision-circle/${groupId}?group_name=${encodeURIComponent(groupName || "")}`,
-  }).catch((err) => console.error("Teams notify failed", err));
-};
+    if (!recipientEmails.length) return;
+
+    notifyTeamsChannel(
+      "COMMENTED",
+      decision,
+      recipientEmails,
+      commentText,
+      groupName,
+    ).catch((err) => console.error("Teams notify failed", err));
+  };
 
   const fetchGroupDetails = async () => {
     try {
       const response = await getUsersForGroup(groupId);
-
-      console.log("aaaaaaaaaa", response);
 
       if (response.error) {
         toast.error(response.error);
@@ -176,6 +192,11 @@ const notifyCircleMembers = (decision, commentText, isReply = false) => {
     if (!commentText) return toast.error("Comment cannot be empty");
 
     const key = `${decisionId}_${parentCommentId}`;
+
+    const biasTagIds = (replyBiasTags[key] || [])
+      .map((t) => Number(t.id))
+      .filter((id) => Number.isInteger(id) && id > 0);
+
     setReplyLoading((prev) => ({ ...prev, [key]: true }));
     try {
       await replyToComment({
@@ -183,15 +204,19 @@ const notifyCircleMembers = (decision, commentText, isReply = false) => {
         commentText,
         decisionId,
         parentCommentId,
+        biasTagIds,
       });
 
       const decision = decisions.find((d) => d.decision_id === decisionId);
-    if (decision) notifyCircleMembers(decision, commentText, true); 
+      if (decision) notifyCircleMembers(decision, commentText, true);
 
       setReplyComment((prev) => ({
         ...prev,
         [decisionId]: { ...prev[decisionId], [parentCommentId]: "" },
       }));
+
+      setReplyBiasTags((prev) => ({ ...prev, [key]: [] }));
+
       toast.success("Reply comment successfully posted");
       fetchComments(groupId, decisionId);
     } catch (error) {
@@ -207,6 +232,10 @@ const notifyCircleMembers = (decision, commentText, isReply = false) => {
     if (!comment) return toast.error("Comment cannot be empty");
 
     const key = `${decisionId}_${parentCommentId}_email`;
+    const biasTagIds = (replyBiasTags[key] || [])
+      .map((t) => Number(t.id))
+      .filter((id) => Number.isInteger(id) && id > 0);
+
     setReplyLoading((prev) => ({ ...prev, [key]: true }));
     try {
       await replyToComment({
@@ -214,6 +243,7 @@ const notifyCircleMembers = (decision, commentText, isReply = false) => {
         parentCommentId,
         commentText: comment,
         decisionId,
+        biasTagIds,
       });
       const decisionDetails = decisions.find(
         (d) => d.decision_id === decisionId,
@@ -227,6 +257,7 @@ const notifyCircleMembers = (decision, commentText, isReply = false) => {
       );
 
       notifyCircleMembers(decisionDetails, comment, true);
+      setReplyBiasTags((prev) => ({ ...prev, [key]: [] }));
       toast.success("Comment posted and email sent successfully");
       fetchComments(groupId, decisionId);
     } catch (error) {
@@ -254,17 +285,24 @@ const notifyCircleMembers = (decision, commentText, isReply = false) => {
   const handleEditClick = (comment) => {
     setEditComment(comment.id);
     setEditContent(comment.comment);
+    setEditBiasTags(comment.biasTags || []); // ← new
     setEditModalOpen(true);
   };
 
   const handleSaveEditComment = async () => {
     if (!editContent.trim()) return toast.error("Comment cannot be empty");
 
+    const biasTagIds = (editBiasTags || [])
+      .map((t) => (typeof t === "object" ? Number(t.id) : Number(t)))
+      .filter((id) => Number.isInteger(id) && id > 0);
+
     setComments((prev) => {
       const updated = { ...prev };
       Object.keys(updated).forEach((decisionId) => {
         updated[decisionId] = updated[decisionId].map((c) =>
-          c.id === editComment ? { ...c, comment: editContent } : c,
+          c.id === editComment
+            ? { ...c, comment: editContent, biasTags: editBiasTags }
+            : c,
         );
       });
       return updated;
@@ -273,15 +311,44 @@ const notifyCircleMembers = (decision, commentText, isReply = false) => {
     setEditModalOpen(false);
     setEditComment(null);
     setEditContent("");
+    setEditBiasTags([]);
 
     try {
-      await updateComment(editComment, { comment: editContent });
+      await updateComment(editComment, {
+        comment: editContent,
+        biasTagIds,
+      });
       toast.success("Comment updated successfully");
     } catch (error) {
-      fetchComments();
       console.error("Failed to update comment:", error);
       toast.error("Failed to update comment");
     }
+  };
+
+  const handleReplyBiasTagsChange =
+    (decisionId, commentId) => (event, newValue) => {
+      const key = `${decisionId}_${commentId}`;
+      setReplyBiasTags((prev) => ({ ...prev, [key]: newValue }));
+    };
+
+  const DisplayBiasTags = ({ tags = [] }) => {
+    if (!Array.isArray(tags) || tags.length === 0) return null;
+    return (
+      <div className="comment-bias-list">
+        {tags.map((tag) => (
+          <span
+            key={tag.id}
+            className={
+              tag.tag_type === "Bias"
+                ? "comment-bias-chip"
+                : "comment-other-chip"
+            }
+          >
+            {tag.tag_name}
+          </span>
+        ))}
+      </div>
+    );
   };
 
   return (
@@ -480,6 +547,7 @@ const notifyCircleMembers = (decision, commentText, isReply = false) => {
                           >
                             <div className="comment__header">
                               <p className="comment__text">{comment.comment}</p>
+                              <DisplayBiasTags tags={comment.biasTags} />
                               {isAuthor && (
                                 <div className="dc-comment-actions">
                                   <button
@@ -552,6 +620,47 @@ const notifyCircleMembers = (decision, commentText, isReply = false) => {
                                     e.target.value,
                                   )
                                 }
+                              />
+
+                              <Autocomplete
+                                multiple
+                                size="small"
+                                className="bias-tags-autocomplete"
+                                options={biasTags}
+                                value={replyBiasTags[key] || []}
+                                getOptionLabel={(o) => o.tag_name || ""}
+                                isOptionEqualToValue={(o, v) =>
+                                  String(o.id) === String(v.id)
+                                }
+                                onChange={handleReplyBiasTagsChange(
+                                  decision.decision_id,
+                                  comment.id,
+                                )}
+                                renderOption={(props, option) => (
+                                  <li {...props} key={option.id}>
+                                    <MuiBox>
+                                      <div style={{ fontWeight: 600 }}>
+                                        {option.tag_name}
+                                      </div>
+                                      <div
+                                        style={{
+                                          fontSize: 12,
+                                          color: "#64748b",
+                                        }}
+                                      >
+                                        {option.tag_type}
+                                      </div>
+                                    </MuiBox>
+                                  </li>
+                                )}
+                                renderInput={(p) => (
+                                  <TextField
+                                    {...p}
+                                    placeholder="Add bias tags..."
+                                    variant="outlined"
+                                  />
+                                )}
+                                sx={{ mt: 1 }}
                               />
                               <div className="dc-reply-box__actions">
                                 <button
@@ -633,10 +742,41 @@ const notifyCircleMembers = (decision, commentText, isReply = false) => {
             onChange={(e) => setEditContent(e.target.value)}
             rows={4}
           />
+          <Autocomplete
+            multiple
+            size="small"
+            className="bias-tags-autocomplete"
+            options={biasTags}
+            value={editBiasTags}
+            getOptionLabel={(o) => o.tag_name || ""}
+            isOptionEqualToValue={(o, v) => String(o.id) === String(v.id)}
+            onChange={(e, newValue) => setEditBiasTags(newValue)}
+            renderOption={(props, option) => (
+              <li {...props} key={option.id}>
+                <MuiBox>
+                  <div style={{ fontWeight: 600 }}>{option.tag_name}</div>
+                  <div style={{ fontSize: 12, color: "#64748b" }}>
+                    {option.tag_type}
+                  </div>
+                </MuiBox>
+              </li>
+            )}
+            renderInput={(p) => (
+              <TextField
+                {...p}
+                placeholder="Edit bias tags..."
+                variant="outlined"
+              />
+            )}
+            sx={{ mt: 2 }}
+          />
           <div className="modal-card__actions">
             <button
               className="decision-btn"
-              onClick={() => setEditModalOpen(false)}
+              onClick={() => {
+                setEditModalOpen(false);
+                setEditBiasTags([]);
+              }}
             >
               Cancel
             </button>

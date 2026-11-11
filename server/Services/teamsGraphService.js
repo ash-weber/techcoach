@@ -213,7 +213,6 @@ async function sendCommentNotificationToMembers(
 
   const token = await getDelegatedToken();
 
-  console.log("ssssss", payload);
   const results = await Promise.allSettled(
     unique.map((email) => sendDecisionCardToUser(email, payload, token)),
   );

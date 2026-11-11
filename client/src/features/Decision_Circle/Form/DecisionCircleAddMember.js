@@ -40,7 +40,6 @@ const DecisionCircleAddMember = () => {
     const fetchNames = async () => {
       try {
         const data = await getUserListForDecisionCircle();
-        console.log("ssssss", data)
         const list = Array.isArray(data.tasks) ? data.tasks : [];
         setUsers(list);
 

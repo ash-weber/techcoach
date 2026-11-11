@@ -77,7 +77,7 @@ const AcceptOrNot = ({ innerCircleDetails, decision, id }) => {
       };
 
       await mailToInnerCircleDecisionShare(memberEmail, decisionSummary);
-      await notifyTeamsChannel('SHARED', decision, memberEmail);
+      await notifyTeamsChannel('SHARED', decision, memberEmail,"", "");
     } catch (error) {
       console.error('Error sharing decision:', error);
       toast('An error occurred while sharing the decision.');

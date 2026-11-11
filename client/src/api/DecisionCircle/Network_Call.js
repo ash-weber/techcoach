@@ -360,7 +360,7 @@ const deleteDecisionGroup = async (id) => {
   }
 };
 
-const postComment = async (groupId, comment, decisionId) => {
+const postComment = async (groupId, comment, decisionId, biasTagIds = []) => {
   try {
     const response = await axios.post(
       `${process.env.REACT_APP_API_URL}/group/comment`,
@@ -368,6 +368,7 @@ const postComment = async (groupId, comment, decisionId) => {
         groupId,
         commentText: comment,
         decisionId,
+        biasTagIds
       },
       getAuthHeaders(),
     );
@@ -415,7 +416,7 @@ const postComment = async (groupId, comment, decisionId) => {
 //     }
 // };
 
-const postShareWithComment = async (groupId, commentText, decisionId) => {
+const postShareWithComment = async (groupId, commentText, decisionId, biasTagIds = []) => {
   try {
     const response = await axios.post(
       `${process.env.REACT_APP_API_URL}/group/comment`,
@@ -423,6 +424,7 @@ const postShareWithComment = async (groupId, commentText, decisionId) => {
         groupId,
         commentText,
         decisionId,
+        biasTagIds
       },
       getAuthHeaders(),
     );
@@ -591,6 +593,32 @@ const sendTeamsCommentNotification = async (payload) => {
   }
 };
 
+const getTeamsWebhookByGroupName = async (group_name) => {
+    try {
+        const response = await axios.get(
+            `${process.env.REACT_APP_API_URL}/group/teams-webhook`,
+            {
+                ...getAuthHeaders(),
+                params: { group_name }
+            }
+        );
+
+        return response.data;
+
+    } catch (error) {
+        console.error("Error fetching Teams webhook:", error);
+        throw error;
+    }
+};
+
+const getBiasTags = async () => {
+  const res = await axios.get(
+    `${process.env.REACT_APP_API_URL}/group/biasTags`,
+    getAuthHeaders(),
+  );
+  return res.data;
+};
+
 export {
   getUserListForDecisionCircle,
   decisionCircleCreation,
@@ -628,5 +656,7 @@ export {
   editComments,
   getGroupDetails,
   sendTeamsDecisionCard,
-  sendTeamsCommentNotification
+  sendTeamsCommentNotification,
+  getTeamsWebhookByGroupName,
+  getBiasTags
 };

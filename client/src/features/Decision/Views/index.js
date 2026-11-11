@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import axios from 'axios';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-import withAuth from '../../../utils/withAuth';
+import withAuth from "../../../utils/withAuth";
 import {
   checkInnerCircleExists,
   getInnerCircleDetails,
@@ -13,17 +13,18 @@ import {
   deleteCommentAdded,
   EditCommentAdded,
   innerCirclePostReplyComment,
-} from '../../../api/InnerCircle/Network_Call';
+} from "../../../api/InnerCircle/Network_Call";
 import {
+  getBiasTags,
   getDecisionComments,
   updateComment,
-} from '../../../api/DecisionCircle/Network_Call';
+} from "../../../api/DecisionCircle/Network_Call";
 
-import ShareModal from '../ShareDecision/View/ShareModel';
-import DecisionInfoCard from './DecisionInfoCard';
-import CommentsList from './CommentsList';
-import { getReferredDecisionById } from '../../../api/Decisions/Network_Call';
-
+import ShareModal from "../ShareDecision/View/ShareModel";
+import DecisionInfoCard from "./DecisionInfoCard";
+import CommentsList from "./CommentsList";
+import { getReferredDecisionById } from "../../../api/Decisions/Network_Call";
+import { Autocomplete, TextField, Box } from "@mui/material";
 const DecisionView = () => {
   const { id } = useParams();
 
@@ -36,7 +37,10 @@ const DecisionView = () => {
   const [replies, setReplies] = useState({});
 
   const [editTarget, setEditTarget] = useState(null);
-  const [editContent, setEditContent] = useState('');
+  const [editContent, setEditContent] = useState("");
+  const [biasTags, setBiasTags] = useState([]);
+  const [replyBiasTags, setReplyBiasTags] = useState({});
+  const [editBiasTags, setEditBiasTags] = useState([]);
 
   useEffect(() => {
     (async () => setInnerGroup(await checkInnerCircleExists()))();
@@ -47,7 +51,7 @@ const DecisionView = () => {
       try {
         setInnerCircleDetails(await getInnerCircleDetails());
       } catch (e) {
-        console.error('Failed to fetch inner circle details', e);
+        console.error("Failed to fetch inner circle details", e);
       }
     })();
   }, []);
@@ -55,13 +59,23 @@ const DecisionView = () => {
   useEffect(() => {
     (async () => {
       try {
-        const token = localStorage.getItem('token');
+        const data = await getBiasTags();
+        setBiasTags(data.biasTags || []);
+      } catch (e) {
+        console.error("Failed to load bias tags", e);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const token = localStorage.getItem("token");
         const res = await getReferredDecisionById(id);
         const list = res.decisionData;
         if (!list?.length) return;
         const d = list[0];
-        const fmt = (s) =>
-          s ? new Date(s).toISOString().split('T')[0] : '';
+        const fmt = (s) => (s ? new Date(s).toISOString().split("T")[0] : "");
         setDecision({
           decision_name: d.decision_name,
           decision_due_date: fmt(d.decision_due_date),
@@ -75,7 +89,7 @@ const DecisionView = () => {
           decision_reason: d.decision_reason.map((r) => r.decision_reason_text),
         });
       } catch (e) {
-        console.error('Error fetching decision data:', e.message);
+        console.error("Error fetching decision data:", e.message);
       }
     })();
   }, [id]);
@@ -87,12 +101,12 @@ const DecisionView = () => {
       setReplies((prev) => {
         const next = { ...prev };
         c.comments.forEach((cm) => {
-          if (!(cm.id in next)) next[cm.id] = '';
+          if (!(cm.id in next)) next[cm.id] = "";
         });
         return next;
       });
     } catch (e) {
-      console.error('Failed to fetch shared comments', e);
+      console.error("Failed to fetch shared comments", e);
     }
   };
 
@@ -101,7 +115,7 @@ const DecisionView = () => {
       const c = await getDecisionComments(id);
       setDecisionComments(c.comments || []);
     } catch (e) {
-      console.error('Failed to fetch decision comments', e);
+      console.error("Failed to fetch decision comments", e);
     }
   };
 
@@ -115,55 +129,81 @@ const DecisionView = () => {
 
   const handleReplySubmit = async (commentId, groupId) => {
     try {
-      await postReplyComment(commentId, replies[commentId], groupId, id);
-      setReplies((prev) => ({ ...prev, [commentId]: '' }));
+      const biasTagIds = (replyBiasTags[commentId] || [])
+        .map((t) => Number(t.id))
+        .filter((id) => Number.isInteger(id) && id > 0);
+
+      await postReplyComment(
+        commentId,
+        replies[commentId],
+        groupId,
+        id,
+        biasTagIds,
+      );
+
+      setReplies((prev) => ({ ...prev, [commentId]: "" }));
+      setReplyBiasTags((prev) => ({ ...prev, [commentId]: [] }));
       await loadSharedComments();
     } catch (e) {
-      console.error('Error submitting reply:', e);
+      console.error("Error submitting reply:", e);
     }
   };
 
   const handleReplySendEmail = async (commentId, groupId) => {
     try {
-      await innerCirclePostReplyComment({
+      const biasTagIds = (replyBiasTags[commentId] || [])
+        .map((t) => Number(t.id))
+        .filter((id) => Number.isInteger(id) && id > 0);
+
+      await innerCirclePostReplyComment(
         commentId,
-        replyText: replies[commentId],
+        replies[commentId],
         groupId,
         id,
-      });
-      setReplies((prev) => ({ ...prev, [commentId]: '' }));
+        biasTagIds,
+      );
+
+      setReplies((prev) => ({ ...prev, [commentId]: "" }));
+      setReplyBiasTags((prev) => ({ ...prev, [commentId]: [] }));
       await loadSharedComments();
     } catch (e) {
-      console.error('Error submitting reply & email:', e);
+      console.error("Error submitting reply & email:", e);
     }
   };
 
   const openEdit = (kind) => (comment) => {
-    setEditTarget({ comment, kind });
-    setEditContent(comment.comment);
-  };
+  setEditTarget({ comment, kind });
+  setEditContent(comment.comment);
+  setEditBiasTags(comment.biasTags || []);
+};
 
   const closeEdit = () => {
-    setEditTarget(null);
-    setEditContent('');
-  };
+  setEditTarget(null);
+  setEditContent("");
+  setEditBiasTags([]);
+};
 
   const saveEdit = async () => {
     if (!editTarget) return;
     const { comment, kind } = editTarget;
+
+    const biasTagsPayload = (editBiasTags || []).map((t) =>
+    typeof t === "object" ? t : { id: Number(t) },
+  );
+
     try {
-      if (kind === 'reply') {
-        await EditCommentAdded(comment.id, editContent);
+      if (kind === "reply") {
+        await EditCommentAdded(comment.id, editContent, biasTagsPayload);
         await loadSharedComments();
       } else {
-        await updateComment(comment.id, { comment: editContent });
+        await updateComment(comment.id, { comment: editContent ,   biasTagIds: biasTagsPayload.map((t) => Number(t.id)).filter(Boolean),});
         await loadDecisionComments();
       }
-      toast.success('Updated successfully');
+      toast.success("Updated successfully");
       closeEdit();
     } catch (e) {
-      console.error('Edit failed:', e);
-      toast.error('Failed to update comment');
+      console.error("Edit failed:", e);
+      toast.error("Failed to update comment");
     }
   };
 
@@ -171,17 +211,21 @@ const DecisionView = () => {
   const handleClose = () => setShowModal(false);
 
   const memberComments = sharedComments.filter(
-    (c) => c.type_of_member === 'member'
+    (c) => c.type_of_member === "member",
   );
   const authorComments = sharedComments.filter(
-    (c) => c.type_of_member === 'author'
+    (c) => c.type_of_member === "author",
   );
   const visibleDecisionComments = [...decisionComments].sort((a, b) =>
-    a.type_of_member === 'member' ? -1 : 1
+    a.type_of_member === "member" ? -1 : 1,
   );
 
+  const handleReplyBiasTagsChange = (commentId) => (event, newValue) => {
+    setReplyBiasTags((prev) => ({ ...prev, [commentId]: newValue }));
+  };
+
   return (
-    <div className={'view-page' + (editTarget ? ' view-page--blurred' : '')}>
+    <div className={"view-page" + (editTarget ? " view-page--blurred" : "")}>
       <DecisionInfoCard decision={decision} />
 
       <div
@@ -191,8 +235,8 @@ const DecisionView = () => {
         tabIndex={0}
       >
         {innerGroup
-          ? 'Share The Above Decision in Inner Circle'
-          : 'Create Inner Circle to share this Decision'}
+          ? "Share The Above Decision in Inner Circle"
+          : "Create Inner Circle to share this Decision"}
       </div>
 
       <CommentsList
@@ -202,38 +246,86 @@ const DecisionView = () => {
         onReplyChange={handleReplyChange}
         onReply={handleReplySubmit}
         onReplyEmail={handleReplySendEmail}
-        onEditReply={openEdit('reply')}
+        onEditReply={openEdit("reply")}
         showAuthorReplies
+        biasTags={biasTags}
+        replyBiasTags={replyBiasTags}
+        onReplyBiasTagsChange={handleReplyBiasTagsChange}
       />
 
       <CommentsList
         title="Comments"
         comments={visibleDecisionComments}
-        onEditComment={openEdit('comment')}
+        onEditComment={openEdit("comment")}
       />
 
-      {editTarget && (
-        <div className="modal-overlay" onClick={closeEdit}>
-          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-            <h3>Edit Comment</h3>
-            <textarea
-              value={editContent}
-              onChange={(e) => setEditContent(e.target.value)}
-            />
-            <div className="modal-card__actions">
-              <button className="decision-btn" onClick={closeEdit}>
-                Cancel
-              </button>
-              <button
-                className="decision-btn decision-btn--primary"
-                onClick={saveEdit}
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+    
+{editTarget && (
+  <div className="modal-overlay" onClick={closeEdit}>
+    <div
+      className="modal-card"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <h3>Edit Comment</h3>
+
+      <textarea
+        value={editContent}
+        onChange={(e) => setEditContent(e.target.value)}
+        placeholder="Edit your comment..."
+      />
+
+      <Autocomplete
+        multiple
+        size="small"
+        options={biasTags}
+        value={editBiasTags}
+        getOptionLabel={(option) => option.tag_name || ""}
+        isOptionEqualToValue={(option, value) =>
+          String(option.id) === String(value.id)
+        }
+        onChange={(event, newValue) =>
+          setEditBiasTags(newValue)
+        }
+        renderOption={(props, option) => (
+          <li {...props} key={option.id}>
+            <Box>
+              <div style={{ fontWeight: 600 }}>
+                {option.tag_name}
+              </div>
+              <div style={{ fontSize: 12, color: "#64748b" }}>
+                {option.tag_type}
+              </div>
+            </Box>
+          </li>
+        )}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            placeholder="Add or remove bias tags..."
+          />
+        )}
+        sx={{ mt: 2 }}
+      />
+
+      <div className="modal-card__actions">
+        <button
+          className="decision-btn"
+          onClick={closeEdit}
+        >
+          Cancel
+        </button>
+
+        <button
+          className="decision-btn decision-btn--primary"
+          onClick={saveEdit}
+        >
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
 
       <ShareModal
         showModal={showModal}
