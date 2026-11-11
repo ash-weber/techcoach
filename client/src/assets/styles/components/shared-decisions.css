@@ -95,7 +95,6 @@
   margin: 1.25rem 0;
   border: 1px solid var(--surface-border);
   border-radius: var(--radius-lg);
-  background: var(--surface-card);
   box-shadow: var(--shadow-sm);
   transition:
     box-shadow 0.2s ease,
@@ -554,4 +553,263 @@
     scroll-behavior: auto !important;
     transition: none !important;
   }
+}
+
+
+
+.sharedDecision-page .sharedDecision-bias-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+  margin-left: 3.5rem; 
+}
+
+.sharedDecision-page .sharedDecision-bias-chip,
+.sharedDecision-page .sharedDecision-other-chip {
+  height: 24px;
+  border-radius: var(--radius-full);
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: var(--transition);
+}
+
+.sharedDecision-page .sharedDecision-bias-chip {
+  border: 1px solid #c7d2fe;
+  background: var(--brand-primary-light);
+  color: var(--brand-primary-hover);
+}
+
+.sharedDecision-page .sharedDecision-bias-chip:hover {
+  border-color: var(--brand-primary);
+  background: #e0e7ff;
+}
+
+.sharedDecision-page .sharedDecision-other-chip {
+  border: 1px solid var(--surface-border);
+  background: var(--surface-card-hover);
+  color: var(--text-muted);
+}
+
+.sharedDecision-page .sharedDecision-other-chip:hover {
+  border-color: var(--surface-border-hover);
+  color: var(--text-main);
+}
+
+@media (max-width: 768px) {
+  .sharedDecision-page .sharedDecision-bias-list {
+    margin-left: 0;
+  }
+
+  .sharedDecision-page .sharedDecision-reply .sharedDecision-bias-list {
+    margin-left: 0;
+  }
+
+  .sharedDecision-edit-popover .MuiPopover-paper {
+    padding: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .sharedDecision-page .sharedDecision-bias-chip,
+  .sharedDecision-page .sharedDecision-other-chip {
+    height: 22px;
+    font-size: 0.68rem;
+  }
+}
+
+
+
+.comment-bias-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+  margin-left: 3.5rem;
+}
+
+.comment-bias-chip,
+.comment-other-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.comment-bias-chip {
+  border: 1px solid #c7d2fe;
+  background: #eef2ff;
+  color: #4338ca;
+}
+
+.comment-bias-chip:hover {
+  border-color: #6366f1;
+  background: #e0e7ff;
+}
+
+.comment-other-chip {
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #64748b;
+}
+
+.comment-other-chip:hover {
+  border-color: #cbd5e1;
+  color: #334155;
+}
+
+.comment--reply .comment-bias-list {
+  margin-left: 3rem;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .comment-bias-list,
+  .comment--reply .comment-bias-list {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .comment-bias-chip,
+  .comment-other-chip {
+    min-height: 22px;
+    padding: 2px 8px;
+    font-size: 0.68rem;
+  }
+}
+
+.MuiAutocomplete-popper {
+  z-index: 1400;
+}
+
+.MuiAutocomplete-popper .MuiPaper-root {
+  margin-top: 6px;
+  padding: 4px;
+  border: 1px solid var(--surface-border, #e2e8f0);
+  border-radius: 10px;
+  background: var(--surface-card, #ffffff);
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.08),
+    0 4px 6px -4px rgb(0 0 0 / 0.04);
+  overflow: hidden;
+}
+
+.MuiAutocomplete-popper .MuiAutocomplete-listbox {
+  max-height: 260px;
+  padding: 4px;
+  font-family: inherit;
+}
+
+.MuiAutocomplete-popper .MuiAutocomplete-option {
+  min-height: 40px;
+  padding: 8px 12px;
+  margin: 2px 0;
+  border-radius: 8px;
+  color: var(--text-main, #0f172a);
+  font-family: inherit;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.MuiAutocomplete-popper .MuiAutocomplete-option:hover {
+  background: var(--surface-card-hover, #f1f5f9);
+}
+
+.MuiAutocomplete-popper .MuiAutocomplete-option.Mui-focused {
+  background: var(--brand-primary-light, #eef2ff);
+  color: var(--brand-primary-hover, #4338ca);
+}
+
+.MuiAutocomplete-popper .MuiAutocomplete-option[aria-selected="true"] {
+  background: var(--brand-primary-light, #eef2ff);
+  color: var(--brand-primary-hover, #4338ca);
+  font-weight: 600;
+}
+
+.MuiAutocomplete-popper .MuiAutocomplete-option[aria-selected="true"].Mui-focused {
+  background: #e0e7ff;
+}
+
+.MuiAutocomplete-popper .MuiAutocomplete-noOptions,
+.MuiAutocomplete-popper .MuiAutocomplete-loading {
+  padding: 10px 12px;
+  color: var(--text-muted, #64748b);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-style: italic;
+}
+
+.bias-tags-autocomplete .MuiOutlinedInput-root {
+  min-height: 44px;
+  padding: 4px 8px;
+  border-radius: 10px;
+  background: #ffffff;
+  font-size: 0.85rem;
+}
+.bias-tags-autocomplete .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
+  border: 1px solid #e2e8f0;
+}
+.bias-tags-autocomplete .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+.bias-tags-autocomplete .MuiChip-root {
+  height: 26px;
+  margin: 3px 4px 3px 0;
+  border-radius: 9999px;
+  border: 1px solid #c7d2fe;
+  background: #eef2ff;
+  color: #4338ca;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.bias-tags-autocomplete .MuiChip-deleteIcon {
+  color: #4f46e5;
+  font-size: 16px;
+}
+
+.MuiAutocomplete-popper .MuiPaper-root {
+  margin-top: 6px;
+  padding: 4px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.08),
+    0 4px 6px -4px rgb(0 0 0 / 0.04);
+}
+.MuiAutocomplete-popper .MuiAutocomplete-option {
+  min-height: 40px;
+  padding: 8px 12px;
+  margin: 2px 0;
+  border-radius: 8px;
+  color: #0f172a;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.MuiAutocomplete-popper .MuiAutocomplete-option:hover {
+  background: #f1f5f9;
+}
+.MuiAutocomplete-popper .MuiAutocomplete-option.Mui-focused {
+  background: #eef2ff;
+  color: #4338ca;
+}
+.MuiAutocomplete-popper .MuiAutocomplete-option[aria-selected="true"] {
+  background: #eef2ff;
+  color: #4338ca;
+  font-weight: 600;
 }

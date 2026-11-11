@@ -14,8 +14,6 @@ const TableView = ({
   onSortByDueDate,
   onDelete,
 }) => {
-
-  console.log("ajsasdas", comments)
   return (
     <div className="decision-table-wrap">
       <table className="decision-table">

@@ -73,17 +73,82 @@ export const notifyTeamsChannel = async (action, decision = {}, targetEmail = nu
   }
 }; */
 
-import { sendTeamsDecisionCard } from "../api/DecisionCircle/Network_Call";
+import { useEffect, useState } from "react";
+import {
+  getTeamsWebhookByGroupName,
+  sendTeamsDecisionCard,
+} from "../api/DecisionCircle/Network_Call";
 
-/* 
 //Teams incoming webhook
 
-const TEAMS_CHANNEL_WEBHOOK_URL = process.env.REACT_APP_FREE_TEAMS_WEBHOOK_URL;
+export const notifyTeamsChannel = async (
+  action,
+  decision = {},
+  targetEmail = null,
+  commentText = null,
+  group_name = null,
+) => {
 
-export const notifyTeamsChannel = async (action, decision = {}, targetEmail = null) => {
+  let TEAMS_CHANNEL_WEBHOOK_URL = "";
+
+  try {
+    if (!group_name) {
+      console.error("Group name is required for Teams notification");
+      return;
+    }
+
+    const response = await getTeamsWebhookByGroupName(group_name);
+
+    TEAMS_CHANNEL_WEBHOOK_URL = response?.teams_webhook_url;
+
+    if (!TEAMS_CHANNEL_WEBHOOK_URL) {
+      console.error("No Teams webhook URL configured for:", group_name);
+      return;
+    }
+  } catch (error) {
+    console.error("Failed to retrieve Teams webhook:", error);
+    return;
+  }
+
   const authUser = JSON.parse(localStorage.getItem("auth_user") || "{}");
-  const recipientEmail = targetEmail || authUser.email || "swetha@ibacustechlabs.in";
+  const recipientEmail =
+    targetEmail || authUser.email || "swetha@ibacustechlabs.in";
   const recipientName = authUser.name || "Member";
+  const senderName = authUser.name || authUser.email || "A team member";
+
+  const actionConfig = {
+    CREATED: { color: "Good", emoji: "🆕", verb: "created" },
+    UPDATED: { color: "Accent", emoji: "✏️", verb: "updated" },
+    DELETED: { color: "Attention", emoji: "🗑️", verb: "deleted" },
+    SHARED: { color: "Accent", emoji: "🔗", verb: "shared" },
+    COMMENTED: { color: "Warning", emoji: "💬", verb: "commented on" },
+  }[action] || { color: "Default", emoji: "📌", verb: action?.toLowerCase() };
+
+  const facts = [
+    { title: "Action:", value: action },
+    { title: "Due Date:", value: decision.decision_due_date || "N/A" },
+    { title: "Status:", value: decision.decision_taken_date || "Pending" },
+    { title: "By:", value: senderName },
+  ];
+
+  const commentBlock =
+    (action === "COMMENTED" || commentText) && commentText
+      ? [
+          {
+            type: "TextBlock",
+            text: "💬 Comment",
+            weight: "Bolder",
+            spacing: "Medium",
+            separator: true,
+          },
+          {
+            type: "TextBlock",
+            text: commentText,
+            wrap: true,
+            color: "Default",
+          },
+        ]
+      : [];
 
   const payload = {
     type: "message",
@@ -97,53 +162,44 @@ export const notifyTeamsChannel = async (action, decision = {}, targetEmail = nu
           body: [
             {
               type: "TextBlock",
-              text: `Decision Alert: ${action}`,
+              text: `${actionConfig.emoji} Decision ${action}: ${decision.decision_name || "Untitled"}`,
               weight: "Bolder",
               size: "Medium",
-              color: action === "DELETED" ? "Attention" : "Accent"
+              color: actionConfig.color,
+              wrap: true,
             },
             {
               type: "TextBlock",
-              text: `Attention <at>${recipientName}</at>: Decision "${decision.decision_name}" was ${action}.`,
-              wrap: true
+              text: `Attention <at>${recipientName}</at>: Decision "${decision.decision_name || "Untitled"}" was ${actionConfig.verb} by ${senderName}.`,
+              wrap: true,
             },
             {
               type: "FactSet",
-              facts: [
-                { title: "Due Date:", value: decision.decision_due_date || "N/A" },
-                { title: "Status:", value: decision.decision_taken_date || "Pending" }
-              ]
-            }
+              facts,
+            },
+            ...commentBlock,
           ],
-          msteams: {
-            entities: [
-              {
-                type: "mention",
-                text: `<at>${recipientName}</at>`,
-                mentioned: {
-                  id: recipientEmail,
-                  name: recipientName
-                }
-              }
-            ]
-          }
-        }
-      }
-    ]
+        },
+      },
+    ],
   };
 
-  await fetch(TEAMS_CHANNEL_WEBHOOK_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
-}; */
-
-
-
+  try {
+    const res = await fetch(TEAMS_CHANNEL_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      console.error("Teams webhook error:", res.status, await res.text());
+    }
+  } catch (err) {
+    console.error("Teams notification error:", err);
+  }
+};
 
 // Graph API
-
+/* 
 export const notifyTeamsChannel = async (action, decision = {}, targetEmail = null, commentText = null) => {
   const authUser = JSON.parse(localStorage.getItem("auth_user") || "{}");
 
@@ -207,4 +263,4 @@ export const notifyTeamsChannel = async (action, decision = {}, targetEmail = nu
   } catch (err) {
     console.error("Teams notification error:", err);
   }
-};
+}; */

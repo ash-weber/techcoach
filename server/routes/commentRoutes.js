@@ -25,6 +25,7 @@ router.get('/decisiongroup',commentController.getAlldecisionGroup);
 router.get('/decisiongroup/:id',commentController.getDecisionGroup);
 router.put('/decisiongroup/:id',commentController.putDecisionGroup);
 router.delete('/decisiongroup/:id',commentController.deleteDecisionGroup);
+router.get('/biasTags',commentController.getBiasTags);
 
 
 module.exports = router;

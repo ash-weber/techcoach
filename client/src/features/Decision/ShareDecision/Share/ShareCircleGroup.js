@@ -83,7 +83,7 @@ const DecisionCircleShare = () => {
 
       if (emails.length) {
         const results = await Promise.allSettled(
-          emails.map((email) => notifyTeamsChannel('SHARED', decision, email))
+          emails.map((email) => notifyTeamsChannel('SHARED', decision, email,"", currentGroup.group_name ))
         );
         results.forEach((r, i) => {
           if (r.status === 'rejected') {

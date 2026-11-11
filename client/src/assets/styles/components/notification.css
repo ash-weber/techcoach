@@ -173,3 +173,45 @@
     width: 100%;
   }
 }
+
+.desktop-notification {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+}
+
+.desktop-notification .notification-badge {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+}
+
+.mobile-notification {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .desktop-notification {
+    display: none;
+  }
+
+  .mobile-notification {
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+    gap: 0;
+  }
+
+  .mobile-notification-badge {
+    position: absolute !important;
+    top: -9px;
+    right: -20px;
+    transform: none !important;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

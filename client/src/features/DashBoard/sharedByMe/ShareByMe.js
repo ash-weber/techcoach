@@ -480,6 +480,7 @@ import {
   Avatar,
   Tooltip,
   IconButton,
+  Chip,
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
@@ -507,6 +508,7 @@ const ShareByMe = () => {
     const fetchSharedDecisionsDetails = async () => {
       try {
         const details = await getSharedDecisionDetails();
+
         setSharedDecisionDetails(
           details || { sharedDecisions: [], decisions: [], tasks: [] },
         );
@@ -560,6 +562,102 @@ const ShareByMe = () => {
     return decision?.tags?.map((tag) => tag.tag_name) || [];
   };
 
+  const getDecisionStatus = (decision) => {
+    const takenDate = decision?.decision_taken_date;
+    const dueDate = decision?.decision_due_date;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (takenDate && dueDate) {
+      const taken = new Date(takenDate);
+      const due = new Date(dueDate);
+
+      taken.setHours(0, 0, 0, 0);
+      due.setHours(0, 0, 0, 0);
+
+      if (taken >= due) {
+        return "Closed";
+      }
+
+      if (due < today) {
+        return "Overdue";
+      }
+
+      return "Pending";
+    }
+
+    if (takenDate && !dueDate) {
+      return "Closed";
+    }
+
+    if (!takenDate && dueDate) {
+      return "Pending";
+    }
+
+    return "Pending";
+  };
+  const getStatusColor = (takenDate, dueDate) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const taken = takenDate ? new Date(takenDate) : null;
+    const due = dueDate ? new Date(dueDate) : null;
+
+    if (taken) {
+      if (!due || taken >= due) {
+        return {
+          status: "Closed",
+          backgroundColor: "#E8F5E9",
+          color: "#2E7D32",
+        };
+      }
+
+      if (due < today) {
+        return {
+          status: "Overdue",
+          backgroundColor: "#FFEBEE",
+          color: "#C62828",
+        };
+      }
+    } else if (due && due < today) {
+      return {
+        status: "Pending",
+        backgroundColor: "#FFF3E0",
+        color: "#E65100",
+      };
+    }
+
+    return {
+      status: "Pending",
+      backgroundColor: "#FFF3E0",
+      color: "#E65100",
+    };
+  };
+
+  const getCardBackgroundColor = (status) => {
+    switch (status) {
+      case "Overdue":
+        return "#FFFFFF";
+      case "Pending":
+        return "#FFF3E0";
+      case "Closed":
+        return "#E8F5E9";
+      default:
+        return "#FFFFFF";
+    }
+  };
+
+  const formatDecisionDate = (date) => {
+    if (!date) return "Not available";
+
+    return new Date(date).toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
   const handleCardClick = (decisionId) => {
     navigate(`/decision/view/${decisionId}`);
   };
@@ -571,7 +669,6 @@ const ShareByMe = () => {
     ]),
   );
 
-  // Get unique users for the "Sort by Name" dropdown
   const getUniqueUsers = (decisions) => {
     const users = [];
     const emails = new Set();
@@ -604,7 +701,7 @@ const ShareByMe = () => {
           (d) => d.decision_id === sharedDecision.decisionId,
         );
         if (showPendingDecisions) {
-          return decision && decision.decision_taken_date === null;
+          return decision && getDecisionStatus(decision) === "Pending";
         }
         return true;
       })
@@ -643,11 +740,18 @@ const ShareByMe = () => {
         const dateB = new Date(decisionB?.creation_date || 0).getTime();
         return dateSortOrder === "desc" ? dateB - dateA : dateA - dateB;
       })
-      .map((decision) => ({
-        ...decision,
-        decision_name: decisionMap.get(decision.decisionId),
-        tag_names: getTagNames(decision.decisionId),
-      }));
+      .map((sharedDecision) => {
+        const decision = decisions.find(
+          (d) => d.decision_id === sharedDecision.decisionId,
+        );
+
+        return {
+          ...sharedDecision,
+          ...decision,
+          decision_name: decisionMap.get(sharedDecision.decisionId),
+          tag_names: getTagNames(sharedDecision.decisionId),
+        };
+      });
   };
 
   const filteredDecisions = filterDecisions(
@@ -842,7 +946,16 @@ const ShareByMe = () => {
                   className="sharedDecision-card"
                   variant="outlined"
                   onClick={() => handleCardClick(sharedDecision.decisionId)}
-                  sx={{ cursor: "pointer" }}
+                  sx={{
+                    cursor: "pointer",
+                    backgroundColor: getCardBackgroundColor(
+                      getDecisionStatus(sharedDecision),
+                    ),
+                    transition: "background-color 0.2s ease",
+                    "&:hover": {
+                      boxShadow: "0px 4px 12px rgba(0,0,0,0.12)",
+                    },
+                  }}
                 >
                   <CardContent>
                     <Grid container spacing={2} alignItems="center">
@@ -862,6 +975,74 @@ const ShareByMe = () => {
                         </Typography>
                       </Grid>
                     </Grid>
+
+                    <Box sx={{ mt: 2, mb: 1 }}>
+                      <Chip
+                        label={getDecisionStatus(sharedDecision)}
+                        size="small"
+                        sx={{
+                          ...getStatusColor(getDecisionStatus(sharedDecision)),
+                          fontWeight: 700,
+                          borderRadius: "6px",
+                        }}
+                      />
+                    </Box>
+
+                    <Typography variant="body1" sx={{ mt: 2, fontWeight: 600 }}>
+                      User Statement
+                    </Typography>
+
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        mt: 0.5,
+                        mb: 2,
+                        color: "var(--text-muted)",
+                        lineHeight: 1.6,
+                      }}
+                    >
+                      {sharedDecision.user_statement ||
+                        "No statement available"}
+                    </Typography>
+
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 2,
+                        mt: 1,
+                        mb: 2,
+                      }}
+                    >
+                      <Box>
+                        <Typography variant="caption" color="textSecondary">
+                          Decision Taken Date
+                        </Typography>
+                        <Typography variant="body2" fontWeight={600}>
+                          {formatDecisionDate(
+                            sharedDecision.decision_taken_date,
+                          )}
+                        </Typography>
+                      </Box>
+
+                      <Box>
+                        <Typography variant="caption" color="textSecondary">
+                          Due Date
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          fontWeight={600}
+                          sx={{
+                            color:
+                              getDecisionStatus(sharedDecision) === "Overdue"
+                                ? "#C62828"
+                                : "inherit",
+                          }}
+                        >
+                          {formatDecisionDate(sharedDecision.decision_due_date)}
+                        </Typography>
+                      </Box>
+                    </Box>
 
                     <Typography variant="body1" mt={2} fontWeight="bold">
                       Tags:
@@ -904,7 +1085,16 @@ const ShareByMe = () => {
                 className="sharedDecision-card"
                 variant="outlined"
                 onClick={() => handleCardClick(decision.decision_id)}
-                sx={{ cursor: "pointer" }}
+                sx={{
+                  cursor: "pointer",
+                  backgroundColor: getCardBackgroundColor(
+                    getDecisionStatus(decision),
+                  ),
+                  transition: "background-color 0.2s ease",
+                  "&:hover": {
+                    boxShadow: "0px 4px 12px rgba(0,0,0,0.12)",
+                  },
+                }}
               >
                 <CardContent>
                   <Grid container spacing={2} alignItems="center">
@@ -922,6 +1112,71 @@ const ShareByMe = () => {
                       </Typography>
                     </Grid>
                   </Grid>
+
+                  <Box sx={{ mt: 2, mb: 1 }}>
+                    <Chip
+                      label={getDecisionStatus(decision)}
+                      size="small"
+                      sx={{
+                        ...getStatusColor(getDecisionStatus(decision)),
+                        fontWeight: 700,
+                        borderRadius: "6px",
+                      }}
+                    />
+                  </Box>
+
+                  <Typography variant="body1" sx={{ mt: 2, fontWeight: 600 }}>
+                    User Statement
+                  </Typography>
+
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      mt: 0.5,
+                      mb: 2,
+                      color: "var(--text-muted)",
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    {decision.user_statement || "No statement available"}
+                  </Typography>
+
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: 2,
+                      mt: 1,
+                      mb: 2,
+                    }}
+                  >
+                    <Box>
+                      <Typography variant="caption" color="textSecondary">
+                        Decision Taken Date
+                      </Typography>
+                      <Typography variant="body2" fontWeight={600}>
+                        {formatDecisionDate(decision.decision_taken_date)}
+                      </Typography>
+                    </Box>
+
+                    <Box>
+                      <Typography variant="caption" color="textSecondary">
+                        Due Date
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        fontWeight={600}
+                        sx={{
+                          color:
+                            getDecisionStatus(decision) === "Overdue"
+                              ? "#C62828"
+                              : "inherit",
+                        }}
+                      >
+                        {formatDecisionDate(decision.decision_due_date)}
+                      </Typography>
+                    </Box>
+                  </Box>
 
                   <Typography variant="body1" mt={2} fontWeight="bold">
                     Tags:

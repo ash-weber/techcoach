@@ -167,6 +167,7 @@ const postCommentForDecision = async (
   groupMemberID,
   commentText,
   groupId,
+  biasTagIds
 ) => {
   
   const response = await axios.put(
@@ -178,6 +179,7 @@ const postCommentForDecision = async (
         groupMemberID,
         commentText,
         groupId,
+        biasTagIds
       },
     },
   );
@@ -221,12 +223,12 @@ const deleteCommentAdded = async (commentId) => {
   }
 };
 
-const postReplyComment = async (commentId, reply, groupId, decisionId) => {
+const postReplyComment = async (commentId, reply, groupId, decisionId , biasTagIds = [],) => {
   
   try {
     const response = await axios.post(
       `${process.env.REACT_APP_API_URL}/group/postReplyComment`,
-      { commentId, reply, groupId, decisionId },
+      { commentId, reply, groupId, decisionId, biasTagIds },
       getAuthHeaders(),
     );
     return response.data;
@@ -236,7 +238,7 @@ const postReplyComment = async (commentId, reply, groupId, decisionId) => {
   }
 };
 
-const EditCommentAdded = async (commentId, editedContent) => {
+const EditCommentAdded = async (commentId, editedContent, biasTags) => {
   
   try {
     const response = await axios.put(
@@ -246,6 +248,7 @@ const EditCommentAdded = async (commentId, editedContent) => {
         data: {
           commentId,
           editedContent,
+           biasTags: biasTags.map((tag) => tag.id),
         },
       },
     );
@@ -296,12 +299,13 @@ const innerCirclePostReplyComment = async (
   reply,
   groupId,
   decisionId,
+   biasTagIds = [],
 ) => {
   
   try {
     const response = await axios.post(
       `${process.env.REACT_APP_API_URL}/group/innerCirclePostReply`,
-      { commentId, reply, groupId, decisionId },
+      { commentId, reply, groupId, decisionId , biasTagIds},
       getAuthHeaders(),
     );
     if (response.status === 200) {

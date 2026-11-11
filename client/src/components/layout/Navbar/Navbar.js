@@ -176,21 +176,7 @@ const Header = () => {
                     Inner Circle
                   </NavLink>
                 </li>
-                <li>
-                  <NavLink
-                    to="/notification"
-                    className={({ isActive }) =>
-                      `nav-item-link ${isActive ? "active" : ""}`
-                    }
-                  >
-                    Notifications
-                    {notAcceptedMembersCount > 0 && (
-                      <span className="notification-badge">
-                        {notAcceptedMembersCount}
-                      </span>
-                    )}
-                  </NavLink>
-                </li>
+
                 <li>
                   <a
                     href="http://decisioncoach.techcoach4u.com"
@@ -267,6 +253,48 @@ const Header = () => {
                     </li>
                   </ul>
                 </li>
+
+               <li>
+  <NavLink
+    to="/notification"
+    title="Notifications"
+    aria-label="Notifications"
+    className={({ isActive }) =>
+      `nav-item-link notification-nav-link ${isActive ? "active" : ""}`
+    }
+  >
+    <span className="notification-icon-wrapper desktop-notification">
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+        <path d="M10 21h4" />
+      </svg>
+
+      {notAcceptedMembersCount > 0 && (
+        <span className="notification-badge">
+          {notAcceptedMembersCount}
+        </span>
+      )}
+    </span>
+
+    <span className="mobile-notification">
+      Notifications
+      {notAcceptedMembersCount > 0 && (
+        <span className="notification-badge mobile-notification-badge">
+          {notAcceptedMembersCount}
+        </span>
+      )}
+    </span>
+  </NavLink>
+</li>
               </>
             ) : (
               <li>

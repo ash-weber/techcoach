@@ -310,7 +310,6 @@ const AddLink = () => {
 
   const handleSkillSubmit = async () => {
 
-    console.log("ssssssssssss", id, selectedSkills)
     try {
       await postSkillLink(id, selectedSkills);
       toast.success("Skill links saved");

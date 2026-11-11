@@ -13,6 +13,9 @@ import {
   ButtonGroup,
   CircularProgress,
   Tooltip,
+  Chip,
+  Autocomplete,
+  TextField,
 } from "@mui/material";
 import { Edit as EditIcon } from "@mui/icons-material";
 import {
@@ -27,7 +30,8 @@ import { formatDistanceToNow, parseISO } from "date-fns";
 import { Link } from "react-router-dom";
 import SwapVertIcon from "@mui/icons-material/SwapVert";
 import withAuth from "../../../utils/withAuth";
-import { sendTeamsCommentNotification } from "../../../api/DecisionCircle/Network_Call";
+import { notifyTeamsChannel } from "../../../utils/teamsWebhook";
+import { getBiasTags } from "../../../api/DecisionCircle/Network_Call";
 
 const InnerCircleDecision = () => {
   const [sharedDecisions, setSharedDecisions] = useState([]);
@@ -42,6 +46,9 @@ const InnerCircleDecision = () => {
   const [loading, setLoading] = useState(true);
   const [buttonLoading, setButtonLoading] = useState({});
   const [dateSortOrder, setDateSortOrder] = useState("desc");
+  const [biasTags, setBiasTags] = useState([]);
+  const [selectedBiasTags, setSelectedBiasTags] = useState({});
+  const [editBiasTags, setEditBiasTags] = useState([]);
 
   const fetchSharedDecisions = async () => {
     try {
@@ -87,6 +94,18 @@ const InnerCircleDecision = () => {
   useEffect(() => {
     fetchSharedDecisions();
   }, []);
+  useEffect(() => {
+    const loadTags = async () => {
+      try {
+        const data = await getBiasTags();
+        setBiasTags(data.biasTags || []);
+      } catch (err) {
+        console.error("Failed to load bias tags", err);
+        toast.error("Could not load bias tags");
+      }
+    };
+    loadTags();
+  }, []);
 
   useEffect(() => {
     setSharedDecisions((prevDecisions) =>
@@ -112,18 +131,11 @@ const InnerCircleDecision = () => {
       return;
     }
 
-    sendTeamsCommentNotification({
-      recipientEmails: [recipientEmail],
-      commenterEmail: authUser.email,
-      commenterName: authUser.name || "Circle Member",
-      circleType: "INNER_CIRCLE",
-      circleName: "Inner Circle",
-      decisionName: item.decisionDetails.decision_name,
-      decisionId: item.decisionDetails.decision_id,
-      commentText,
-      isReply: false,
-      actionUrl: `${window.location.origin}/inner-circle`,
-    }).catch((err) => console.error("Teams notify failed", err));
+    /* notifyTeamsChannel(
+      "COMMENTED",
+      item,
+      [recipientEmail],
+      commentText,).catch((err) => console.error("Teams notify failed", err)); */
   };
 
   const handlePostComment = async (decisionId, groupMemberID, groupId) => {
@@ -135,21 +147,28 @@ const InnerCircleDecision = () => {
         groupMemberID,
         commentText,
         groupId,
+        selectedBiasTags,
       );
       fetchSharedDecisions();
 
       if (response.status === 200) {
-
         const item = sharedDecisions.find(
-          (d) => d.decisionDetails.decision_id === decisionId
+          (d) => d.decisionDetails.decision_id === decisionId,
         );
         if (item) notifyDecisionOwner(item, commentText);
-        
+
         toast("Comment posted successfully");
         setCommentTexts((prevState) => ({
           ...prevState,
           [decisionId]: "",
         }));
+
+        setSelectedBiasTags((prev) => ({
+          ...prev,
+          [decisionId]: [],
+        }));
+
+        await fetchSharedDecisions();
       } else {
         toast("Failed to post the comment");
       }
@@ -209,28 +228,42 @@ const InnerCircleDecision = () => {
     }));
   };
 
-  const handleEdit = (commentId, initialContent) => {
-    setEditingCommentId(commentId);
-    setEditedCommentContent(initialContent);
+  const handleEdit = (comment) => {
+    setEditingCommentId(comment.id);
+    setEditedCommentContent(comment.comment);
+
+    setEditBiasTags(
+      Array.isArray(comment.biasTags)
+        ? comment.biasTags.map((tag) => ({
+            id: tag.id,
+            tag_name: tag.tag_name,
+            tag_type: tag.tag_type,
+          }))
+        : [],
+    );
+
     setIsPopoverOpen(true);
   };
 
   const handleSaveEdit = async (commentId, editedContent) => {
     try {
-      await EditCommentAdded(commentId, editedContent);
-      fetchSharedDecisions();
+      await EditCommentAdded(commentId, editedContent, editBiasTags);
+
       toast("Comment edited successfully");
+      setEditingCommentId(null);
+      setIsPopoverOpen(false);
+      setEditBiasTags([]);
+      await fetchSharedDecisions();
     } catch (error) {
       console.error("Error editing comment:", error);
       toast("An error occurred while editing the comment");
     }
-    setEditingCommentId(null);
-    setIsPopoverOpen(false);
   };
 
   const handlePopoverClose = () => {
     setEditingCommentId(null);
     setIsPopoverOpen(false);
+    setEditBiasTags([]);
   };
 
   const getUniqueUsers = (decisions, showPending) => {
@@ -256,6 +289,101 @@ const InnerCircleDecision = () => {
       (user) => `${user.displayname} (${user.email})` === event.target.value,
     );
     setSelectedUser(selected);
+  };
+
+  const getDecisionStatus = (decision) => {
+    const takenDate = decision?.decision_taken_date;
+    const dueDate = decision?.decision_due_date;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (takenDate && dueDate) {
+      const taken = new Date(takenDate);
+      const due = new Date(dueDate);
+
+      taken.setHours(0, 0, 0, 0);
+      due.setHours(0, 0, 0, 0);
+
+      if (taken >= due) {
+        return "Closed";
+      }
+
+      if (due < today) {
+        return "Overdue";
+      }
+
+      return "Pending";
+    }
+
+    if (takenDate && !dueDate) {
+      return "Closed";
+    }
+
+    if (!takenDate && dueDate) {
+      return "Pending";
+    }
+
+    return "Pending";
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Closed":
+        return {
+          backgroundColor: "#E8F5E9",
+          color: "#2E7D32",
+        };
+
+      case "Overdue":
+        return {
+          backgroundColor: "#FFEBEE",
+          color: "#C62828",
+        };
+
+      default:
+        return {
+          backgroundColor: "#FFF3E0",
+          color: "#E65100",
+        };
+    }
+  };
+
+  const getCardBackgroundColor = (status) => {
+    switch (status) {
+      case "Overdue":
+        return "#FFFFFF";
+
+      case "Pending":
+        return "#FFF3E0";
+
+      case "Closed":
+        return "#E8F5E9";
+
+      default:
+        return "#FFFFFF";
+    }
+  };
+
+  const DisplayBiasTags = ({ tags = [] }) => {
+    if (!Array.isArray(tags) || tags.length === 0) return null;
+
+    return (
+      <Box className="sharedDecision-bias-list">
+        {tags.map((tag) => (
+          <Chip
+            key={tag.id}
+            label={tag.tag_name}
+            size="small"
+            className={
+              tag.tag_type === "Bias"
+                ? "sharedDecision-bias-chip"
+                : "sharedDecision-other-chip"
+            }
+          />
+        ))}
+      </Box>
+    );
   };
 
   return (
@@ -379,7 +507,19 @@ const InnerCircleDecision = () => {
                   )
                   .map((item, index) => (
                     <div key={index}>
-                      <Card className="sharedDecision-card" variant="outlined">
+                      <Card
+                        className="sharedDecision-card"
+                        variant="outlined"
+                        sx={{
+                          backgroundColor: getCardBackgroundColor(
+                            getDecisionStatus(item.decisionDetails),
+                          ),
+                          transition: "background-color 0.2s ease",
+                          "&:hover": {
+                            boxShadow: "0px 4px 12px rgba(0,0,0,0.12)",
+                          },
+                        }}
+                      >
                         <CardContent>
                           <Grid container spacing={2} alignItems="center">
                             <Grid item>
@@ -392,6 +532,7 @@ const InnerCircleDecision = () => {
                                 }
                               </Avatar>
                             </Grid>
+
                             <Grid item xs>
                               <Typography variant="h6">
                                 Decision: {item.decisionDetails.decision_name}
@@ -402,6 +543,20 @@ const InnerCircleDecision = () => {
                               </Typography>
                             </Grid>
                           </Grid>
+
+                          <Box sx={{ mt: 2, mb: 1 }}>
+                            <Chip
+                              label={getDecisionStatus(item.decisionDetails)}
+                              size="small"
+                              sx={{
+                                ...getStatusColor(
+                                  getDecisionStatus(item.decisionDetails),
+                                ),
+                                fontWeight: 700,
+                                borderRadius: "6px",
+                              }}
+                            />
+                          </Box>
                           <Typography variant="body1" mt={2} fontWeight="bold">
                             Reasons:
                           </Typography>
@@ -439,6 +594,8 @@ const InnerCircleDecision = () => {
                                 item.decisionDetails.decision_due_date,
                               ).toLocaleDateString()}
                             </span>
+
+                            <br />
 
                             {item.decisionDetails.decision_taken_date && (
                               <>
@@ -528,14 +685,14 @@ const InnerCircleDecision = () => {
                                 </Grid>
                                 <Grid item>
                                   <IconButton
-                                    onClick={() =>
-                                      handleEdit(comment.id, comment.comment)
-                                    }
+                                    onClick={() => handleEdit(comment)}
                                   >
                                     <EditIcon sx={{ color: "black" }} />
                                   </IconButton>
                                 </Grid>
                               </Grid>
+                              <DisplayBiasTags tags={comment.biasTags} />
+
                               {comment.replies &&
                                 comment.replies.length > 0 && (
                                   <Box
@@ -607,6 +764,9 @@ const InnerCircleDecision = () => {
                                               </Typography>
                                             </Grid>
                                           </Grid>
+                                          <DisplayBiasTags
+                                            tags={reply.biasTags}
+                                          />
                                         </Box>
                                       ),
                                     )}
@@ -629,6 +789,52 @@ const InnerCircleDecision = () => {
                                   e.target.value,
                                 )
                               }
+                            />
+                            <Autocomplete
+                              multiple
+                              size="small"
+                              options={biasTags}
+                              value={
+                                selectedBiasTags[
+                                  item.decisionDetails.decision_id
+                                ] || []
+                              }
+                              getOptionLabel={(option) => option.tag_name || ""}
+                              isOptionEqualToValue={(option, value) =>
+                                String(option.id) === String(value.id)
+                              }
+                              onChange={(event, newValue) =>
+                                setSelectedBiasTags((prev) => ({
+                                  ...prev,
+                                  [item.decisionDetails.decision_id]: newValue,
+                                }))
+                              }
+                              renderOption={(props, option) => (
+                                <li {...props} key={option.id}>
+                                  <Box>
+                                    <Typography
+                                      variant="body2"
+                                      fontWeight={600}
+                                    >
+                                      {option.tag_name}
+                                    </Typography>
+                                    <Typography
+                                      variant="caption"
+                                      color="text.secondary"
+                                    >
+                                      {option.tag_type}
+                                    </Typography>
+                                  </Box>
+                                </li>
+                              )}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  placeholder="Add bias tags..."
+                                  variant="outlined"
+                                />
+                              )}
+                              sx={{ mt: 1.5 }}
                             />
                             <Grid
                               className="sharedDecision-actions"
@@ -757,6 +963,37 @@ const InnerCircleDecision = () => {
               maxWidth: "100%",
               marginRight: "0.5rem",
             }}
+          />
+          <Autocomplete
+            multiple
+            size="small"
+            options={biasTags}
+            value={editBiasTags}
+            getOptionLabel={(option) => option.tag_name || ""}
+            isOptionEqualToValue={(option, value) =>
+              String(option.id) === String(value.id)
+            }
+            onChange={(event, newValue) => setEditBiasTags(newValue)}
+            renderOption={(props, option) => (
+              <li {...props} key={option.id}>
+                <Box>
+                  <Typography variant="body2" fontWeight={600}>
+                    {option.tag_name}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {option.tag_type}
+                  </Typography>
+                </Box>
+              </li>
+            )}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                placeholder="Edit bias tags..."
+                variant="outlined"
+              />
+            )}
+            sx={{ mt: 1.5 }}
           />
           <Box mt={2} display="flex" justifyContent="flex-end">
             <Button onClick={handlePopoverClose} style={{ marginRight: "8px" }}>

@@ -18,7 +18,7 @@ const ADVANCED_TAGS = [
   'Board', 'Brand', 'Consultant', 'Corporate Governance', 'Customer',
   'Employee', 'Expense', 'Hiring', 'Investment', 'Legal Compliance',
   'Operational', 'Partner', 'Policy', 'Product', 'Project', 'Prospect',
-  'Sales', 'Services', 'Statutory Compliance', 'Supplier',
+  'Sales', 'Services', 'Statutory Compliance', 'Supplier','Fully Reversible', 'Partially Reversible', 'Non Reversible'
 ];
 const DRIVER_TAGS = ['Fully Data Driven', 'Not Data Driven', 'Partially Data Driven'];
 
@@ -146,11 +146,11 @@ const DecisionForm = () => {
     try {
       if (!id) {
         await createDecision(payload);
-        await notifyTeamsChannel('CREATED', payload);
+       /*  await notifyTeamsChannel('CREATED', payload); */
         toast.success('Decision added successfully');
       } else {
         await updateDecision(id, payload);
-        await notifyTeamsChannel('UPDATED', payload);
+        /* await notifyTeamsChannel('UPDATED', payload); */
         toast.success('Decision updated successfully');
       }
       setIsDataSaved(true);
