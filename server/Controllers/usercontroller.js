@@ -159,23 +159,33 @@ const getProfile = async (req, res) => {
   try {
     conn = await getConnection();
     const headerValuesResult = await conn.query(
-      `SELECT v.id, h.header_name, v.header_value 
-             FROM techcoach_lite.techcoach_profile_swot_values v 
-             JOIN techcoach_lite.techcoach_profile_swot_headers h ON v.header_id = h.header_id 
-             WHERE v.user_id = ? AND h.type_of_profile = 'Profile'`,
+      `SELECT 
+      v.id,
+      u.email,
+      h.header_name,
+      v.header_value
+   FROM techcoach_lite.techcoach_profile_swot_values v
+   JOIN techcoach_lite.techcoach_profile_swot_headers h 
+      ON v.header_id = h.header_id
+   JOIN techcoach_lite.techcoach_users u
+      ON v.user_id = u.user_id
+   WHERE v.user_id = ? 
+     AND h.type_of_profile = 'Profile'`,
       [userId],
     );
+
+    const UserEmail = headerValuesResult.length > 0 ? headerValuesResult[0].email : null;
     const profileDetails = headerValuesResult.reduce(
       (acc, { id, header_name, header_value }) => {
         const key = header_name.toLowerCase();
         if (!acc[key]) acc[key] = [];
-        const decryptedValue = decryptText(header_value, userKey); // Uses new helper
+        const decryptedValue = decryptText(header_value, userKey); 
         acc[key].push({ id, value: decryptedValue });
         return acc;
       },
       {},
     );
-    const fullProfile = { user_id: userId, ...profileDetails };
+    const fullProfile = { user_id: userId, user_email:UserEmail, ...profileDetails };
     res.status(200).json(fullProfile);
   } catch (error) {
     console.error("Error retrieving profile data:", error);
@@ -433,7 +443,7 @@ const migrateGoogleToMicrosoft = async (req, res) => {
         if (oldUsers.length !== 1 || newUsers.length !== 1) {
           throw new Error(
             `Expected exactly one account for each email: ` +
-              `${personalEmail} -> ${workEmail}`,
+            `${personalEmail} -> ${workEmail}`,
           );
         }
 
@@ -642,15 +652,15 @@ const migrateGoogleToMicrosoft = async (req, res) => {
       results,
     });
   } catch (error) {
-  console.error("Account migration failed:", error);
-  return res.status(500).json({
-    error: "Migration failed.",
-    reason: error.message,          // ← ADD THIS
-    stack: error.stack,             // ← ADD THIS TEMPORARILY
-    completedMigrations: results,
-    failedMigrationIndex: results.length,
-  });
-}
+    console.error("Account migration failed:", error);
+    return res.status(500).json({
+      error: "Migration failed.",
+      reason: error.message,          // ← ADD THIS
+      stack: error.stack,             // ← ADD THIS TEMPORARILY
+      completedMigrations: results,
+      failedMigrationIndex: results.length,
+    });
+  }
 };
 
 module.exports = {

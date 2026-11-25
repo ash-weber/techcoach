@@ -28,10 +28,9 @@ const DecisionCircleShare = () => {
         const res = await getReferredDecisionById(id);
         const d = res?.decisionData?.[0];
         if (!d) return;
-        console.log("sssssssssssssssssssssss", d)
         const fmt = (s) => (s ? new Date(s).toISOString().split('T')[0] : '');
         setDecision({
-          decision_id:d.decision_id,
+          decision_id: d.decision_id,
           decision_name: d.decision_name,
           decision_due_date: fmt(d.decision_due_date),
           decision_taken_date: fmt(d.decision_taken_date),
@@ -78,20 +77,25 @@ const DecisionCircleShare = () => {
       toast.success('Decision shared successfully!');
 
       const currentGroup = groups.find((g) => g.group_id === group_id);
-      const emails =
-        currentGroup?.members
-          ?.map((m) => m.member_email)
-          .filter(Boolean) || [];
+
+      const emails = [
+        ...new Set(
+          (currentGroup?.members || [])
+            .map((m) => m.member_email)
+            .filter(Boolean)
+            .map((email) => email.trim().toLowerCase())
+        ),
+      ];
 
       if (emails.length) {
-        const results = await Promise.allSettled(
-          emails.map((email) => notifyTeamsChannel('SHARED', decision, email,"", currentGroup.group_name, group_id ))
-        );
-        results.forEach((r, i) => {
-          if (r.status === 'rejected') {
-            console.warn(`Failed to notify ${emails[i]}:`, r.reason);
-          }
-        });
+        notifyTeamsChannel(
+          'SHARED',
+          decision,
+          emails,
+          '',
+          currentGroup.group_name,
+          group_id
+        ).catch((err) => console.error('Teams notify failed:', err));
       }
     } catch (e) {
       console.error('Error sharing decision:', e);

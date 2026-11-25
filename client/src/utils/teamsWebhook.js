@@ -78,6 +78,7 @@ import {
   sendTeamsDecisionCard,
   sendTeamsChannelDecisionCard,
 } from "../api/DecisionCircle/Network_Call";
+import { getProfile } from "../api/User/Network_call";
 
 //Teams incoming webhook
 
@@ -91,6 +92,10 @@ export const notifyTeamsChannel = async (
 ) => {
   let TEAMS_CHANNEL_WEBHOOK_URL = "";
 
+
+  console.log("ressssss", targetEmail);
+
+  let UserData = null;
   try {
     if (!group_name) {
       console.error("Group name is required for Teams notification");
@@ -98,6 +103,8 @@ export const notifyTeamsChannel = async (
     }
 
     const response = await getTeamsWebhookByGroupName(group_name);
+
+    UserData = await getProfile();
 
     TEAMS_CHANNEL_WEBHOOK_URL = response?.teams_webhook_url;
 
@@ -109,12 +116,46 @@ export const notifyTeamsChannel = async (
     console.error("Failed to retrieve Teams webhook:", error);
     return;
   }
+  const senderEmail = UserData?.user_email;
 
-  const authUser = JSON.parse(localStorage.getItem("auth_user") || "{}");
-  const recipientEmail =
-    targetEmail || authUser.email || "swetha@ibacustechlabs.in";
-  const recipientName = authUser.name || "Member";
-  const senderName = authUser.name || authUser.email || "A team member";
+  if (!senderEmail) {
+    console.error("Sender email not found in profile");
+    return;
+  }
+
+  const recipientEmails = Array.isArray(targetEmail)
+    ? targetEmail
+    : targetEmail
+      ? [targetEmail]
+      : [];
+
+  const senderName = senderEmail.split("@")[0];
+
+  const recipientNames = [
+    ...new Set(
+      recipientEmails
+        .map(email => email.trim().toLowerCase())
+        .filter(email => email !== senderEmail.trim().toLowerCase())
+        .map(email => email.split("@")[0])
+    ),
+  ].join(", ");
+
+  const allMentionEmails = [
+    ...new Set(
+      [...recipientEmails, senderEmail].map(email =>
+        email.trim().toLowerCase()
+      )
+    ),
+  ];
+
+  const mentions = allMentionEmails.map((email, index) => ({
+    type: "mention",
+    text: `<at>${email}</at>`,
+    mentioned: {
+      id: email,
+      name: email.split("@")[0],
+    },
+  }));
 
   const actionConfig = {
     CREATED: { color: "Good", emoji: "🆕", verb: "created" },
@@ -128,26 +169,26 @@ export const notifyTeamsChannel = async (
     { title: "Action:", value: action },
     { title: "Due Date:", value: decision.decision_due_date || "N/A" },
     { title: "Status:", value: decision.decision_taken_date || "Pending" },
-    { title: "By:", value: senderName },
+    { title: "By:", value: senderName || "A team member" },
   ];
 
   const commentBlock =
     (action === "COMMENTED" || commentText) && commentText
       ? [
-          {
-            type: "TextBlock",
-            text: "💬 Comment",
-            weight: "Bolder",
-            spacing: "Medium",
-            separator: true,
-          },
-          {
-            type: "TextBlock",
-            text: commentText,
-            wrap: true,
-            color: "Default",
-          },
-        ]
+        {
+          type: "TextBlock",
+          text: "💬 Comment",
+          weight: "Bolder",
+          spacing: "Medium",
+          separator: true,
+        },
+        {
+          type: "TextBlock",
+          text: commentText,
+          wrap: true,
+          color: "Default",
+        },
+      ]
       : [];
 
   const payload = {
@@ -170,7 +211,7 @@ export const notifyTeamsChannel = async (
             },
             {
               type: "TextBlock",
-              text: `Attention <at>${recipientName}</at>: Decision "${decision.decision_name || "Untitled"}" was ${actionConfig.verb} by ${senderName}.`,
+              text: `Attention <at>${recipientNames}</at>: Decision "${decision.decision_name || "Untitled"}" was ${actionConfig.verb} by ${senderName}.`,
               wrap: true,
             },
             {
@@ -184,6 +225,9 @@ export const notifyTeamsChannel = async (
             },
             ...commentBlock,
           ],
+          msteams: {
+            entities: mentions,
+          },
         },
       },
     ],
