@@ -93,8 +93,6 @@ export const notifyTeamsChannel = async (
   let TEAMS_CHANNEL_WEBHOOK_URL = "";
 
 
-  console.log("ressssss", targetEmail);
-
   let UserData = null;
   try {
     if (!group_name) {
@@ -122,6 +120,9 @@ export const notifyTeamsChannel = async (
     console.error("Sender email not found in profile");
     return;
   }
+  const senderName = senderEmail.split("@")[0];
+
+  const normalizedSenderEmail = senderEmail.trim().toLowerCase();
 
   const recipientEmails = Array.isArray(targetEmail)
     ? targetEmail
@@ -129,33 +130,33 @@ export const notifyTeamsChannel = async (
       ? [targetEmail]
       : [];
 
-  const senderName = senderEmail.split("@")[0];
-
-  const recipientNames = [
+  const uniqueRecipientEmails = [
     ...new Set(
       recipientEmails
+        .filter(Boolean)
         .map(email => email.trim().toLowerCase())
-        .filter(email => email !== senderEmail.trim().toLowerCase())
-        .map(email => email.split("@")[0])
-    ),
-  ].join(", ");
-
-  const allMentionEmails = [
-    ...new Set(
-      [...recipientEmails, senderEmail].map(email =>
-        email.trim().toLowerCase()
-      )
+        .filter(email => email && email !== normalizedSenderEmail)
     ),
   ];
 
-  const mentions = allMentionEmails.map((email, index) => ({
-    type: "mention",
-    text: `<at>${email}</at>`,
-    mentioned: {
-      id: email,
-      name: email.split("@")[0],
-    },
-  }));
+  const recipientMentions = uniqueRecipientEmails.map(email => {
+    const name = email.split("@")[0];
+    const mentionText = `<at>${email}</at>`;
+
+    return {
+      type: "mention",
+      text: mentionText,
+      mentioned: {
+        id: email,
+        name,
+      },
+    };
+  });
+
+  const recipientMentionText = uniqueRecipientEmails
+    .map(email => `<at>${email}</at>`)
+    .join(", ");
+
 
   const actionConfig = {
     CREATED: { color: "Good", emoji: "🆕", verb: "created" },
@@ -211,7 +212,9 @@ export const notifyTeamsChannel = async (
             },
             {
               type: "TextBlock",
-              text: `Attention <at>${recipientNames}</at>: Decision "${decision.decision_name || "Untitled"}" was ${actionConfig.verb} by ${senderName}.`,
+              text: recipientMentionText
+                ? `Attention ${recipientMentionText}: Decision "${decision.decision_name || "Untitled"}" was ${actionConfig.verb} by ${senderName}.`
+                : `Decision "${decision.decision_name || "Untitled"}" was ${actionConfig.verb} by ${senderName}.`,
               wrap: true,
             },
             {
@@ -226,7 +229,7 @@ export const notifyTeamsChannel = async (
             ...commentBlock,
           ],
           msteams: {
-            entities: mentions,
+            entities: recipientMentions,
           },
         },
       },

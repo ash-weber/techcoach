@@ -221,7 +221,7 @@ const getAdvancedProfile = async (req, res) => {
       `SELECT v.id, h.header_name, v.header_value , h.type_of_profile
         FROM techcoach_lite.techcoach_profile_swot_values v 
         JOIN techcoach_lite.techcoach_profile_swot_headers h ON v.header_id = h.header_id 
-        WHERE v.user_id = ? AND h.type_of_profile = 'Advanced_Profile'`,
+        WHERE v.user_id = ? AND h.type_of_profile = 'Advanced_Profile' AND v.is_active = 1`,
       [userId],
     );
 
@@ -368,7 +368,7 @@ const getAdvancedProfile = async (req, res) => {
   }
 }; */
 
-const putAdvancedProfile = async (req, res) => {
+/* const putAdvancedProfile = async (req, res) => {
   const { goals, values, resolutions, constraints, other_factors } = req.body;
   const userKey = req.user.key;
 
@@ -553,8 +553,277 @@ const putAdvancedProfile = async (req, res) => {
   } finally {
     if (conn) conn.release();
   }
-};
+}; */
 
+const putAdvancedProfile = async (req, res) => {
+  const { goals, values, resolutions, constraints, other_factors } = req.body;
+  const userKey = req.user.key;
+  const userId = req.user.id;
+
+  let conn;
+  try {
+    conn = await getConnection();
+    await conn.beginTransaction();
+
+    const headersAndValues = [
+      { headerName: "Goals", headerValue: goals },
+      { headerName: "Values", headerValue: values },
+      { headerName: "Resolutions", headerValue: resolutions },
+      { headerName: "Constraints", headerValue: constraints },
+      { headerName: "OtherFactors", headerValue: other_factors },
+    ];
+
+    const safeDecrypt = (text) => {
+      if (!text) return text;
+      try { return decryptText(text, userKey); }
+      catch { return null; }
+    };
+
+    const norm = (s) =>
+      typeof s === "string" ? s.trim().replace(/\s+/g, " ") : "";
+
+    const unwrapInsertId = (r) =>
+      r?.insertId ??
+      r?.[0]?.insertId ??
+      (Array.isArray(r) ? r[0]?.insertId : undefined);
+
+    const unwrapAffected = (r) =>
+      r?.affectedRows ?? r?.[0]?.affectedRows ?? 0;
+
+    const plan = [];
+
+    for (const { headerName, headerValue } of headersAndValues) {
+      if (!headerValue || headerValue.length === 0) continue;
+
+      const headerRows = await conn.query(
+        `SELECT header_id FROM techcoach_lite.techcoach_profile_swot_headers
+         WHERE header_name = ? AND type_of_profile = 'Advanced_Profile'`,
+        [headerName],
+      );
+      const headerId = headerRows[0]?.header_id;
+      if (!headerId) throw new Error(`Header not found: ${headerName}`);
+
+      const existingRows = await conn.query(
+        `SELECT id, header_value
+         FROM techcoach_lite.techcoach_profile_swot_values
+         WHERE user_id = ? AND header_id = ? AND is_active = 1`,
+        [userId, headerId],
+      );
+
+      const existingByNorm = new Map();
+      for (const row of existingRows) {
+        const plain = safeDecrypt(row.header_value);
+        if (plain === null) continue;
+        const key = norm(plain);
+        if (key && !existingByNorm.has(key)) {
+          existingByNorm.set(key, { id: row.id, plain: plain.trim() });
+        }
+      }
+
+      const incoming = (Array.isArray(headerValue) ? headerValue : [headerValue])
+        .map((v) => (typeof v === "string" ? v.trim() : ""))
+        .filter((v) => v !== "");
+      const incomingByNorm = new Map(); // norm -> raw
+      for (const v of incoming) {
+        const k = norm(v);
+        if (!incomingByNorm.has(k)) incomingByNorm.set(k, v);
+      }
+
+      const inPlaceUpdates = [];
+      const inserts = [];
+      const softDeletes = [];
+      const linkedRemovals = [];
+
+      for (const [k, raw] of incomingByNorm.entries()) {
+        if (existingByNorm.has(k)) {
+          const ex = existingByNorm.get(k);
+          if (ex.plain === raw) continue;
+          inPlaceUpdates.push({ id: ex.id, value: raw });
+        } else {
+          inserts.push(raw);
+        }
+      }
+
+      for (const [k, ex] of existingByNorm.entries()) {
+        if (incomingByNorm.has(k)) continue;
+        softDeletes.push({ id: ex.id, plain: ex.plain });
+      }
+
+      plan.push({
+        headerId,
+        headerName,
+        inPlaceUpdates,
+        inserts,
+        removals: softDeletes,
+        linkedRemovals,
+      });
+    }
+
+    const allRemovalIds = plan.flatMap((p) => p.removals.map((r) => r.id));
+    const linkedInfoByOldId = new Map(); // oldId -> [ {decision_id, decision_name} ... ]
+    if (allRemovalIds.length > 0) {
+      const linkedRows = await conn.query(
+        `SELECT l.v_id, l.decision_id, d.decision_name
+         FROM techcoach_lite.techcoach_decision_swot_linked_info l
+         LEFT JOIN techcoach_lite.techcoach_decision d
+           ON d.decision_id = l.decision_id
+         WHERE l.v_id IN (?)`,
+        [allRemovalIds],
+      );
+      for (const r of linkedRows) {
+        if (!linkedInfoByOldId.has(r.v_id)) linkedInfoByOldId.set(r.v_id, []);
+        linkedInfoByOldId.get(r.v_id).push({
+          decision_id: r.decision_id,
+          decision_name: safeDecrypt(r.decision_name) || `Decision #${r.decision_id}`,
+        });
+      }
+    }
+
+
+    const versionPlan = [];
+    const blocked = [];
+
+    for (const p of plan) {
+      const linked = [];
+      const unlinked = [];
+      for (const r of p.removals) {
+        if (linkedInfoByOldId.has(r.id)) linked.push(r);
+        else unlinked.push(r);
+      }
+
+      p.removals = unlinked;
+      p.linkedRemovals = linked;
+
+      const availableInserts = [...p.inserts];
+      for (const r of linked) {
+        if (availableInserts.length === 0) {
+          blocked.push({
+            v_id: r.id,
+            header_name: p.headerName,
+            plain: r.plain,
+            decisions: linkedInfoByOldId.get(r.id) || [],
+          });
+        } else {
+          const replacementValue = availableInserts.shift();
+          versionPlan.push({
+            oldId: r.id,
+            headerId: p.headerId,
+            headerName: p.headerName,
+            replacementValue,
+          });
+        }
+      }
+      p.inserts = availableInserts;
+    }
+
+    if (blocked.length > 0) {
+      await conn.rollback();
+      return res.status(409).json({
+        error: "LINKED_VALUES",
+        message:
+          "Cannot remove value(s) that are linked to decisions unless you replace them " +
+          "with a new value in the same section (an edit). To remove, unlink from the decision first.",
+        linked: blocked.map((b) => ({
+          v_id: b.v_id,
+          v_header: b.plain,
+          header_name: b.header_name,
+          decisions: b.decisions,
+        })),
+      });
+    }
+
+    for (const p of plan) {
+      for (const u of p.inPlaceUpdates) {
+        await conn.query(
+          `UPDATE techcoach_lite.techcoach_profile_swot_values
+           SET header_value = ?
+           WHERE id = ? AND user_id = ? AND header_id = ? AND is_active = 1`,
+          [encryptText(u.value, userKey), u.id, userId, p.headerId],
+        );
+      }
+
+      for (const value of p.inserts) {
+        await conn.query(
+          `INSERT INTO techcoach_lite.techcoach_profile_swot_values
+             (user_id, header_id, header_value, is_active)
+           VALUES (?, ?, ?, 1)`,
+          [userId, p.headerId, encryptText(value, userKey)],
+        );
+      }
+
+      if (p.removals.length > 0) {
+        const ids = p.removals.map((r) => r.id);
+        const r = await conn.query(
+          `UPDATE techcoach_lite.techcoach_profile_swot_values
+           SET is_active = 0
+           WHERE id IN (?) AND user_id = ? AND is_active = 1`,
+          [ids, userId],
+        );
+        if (unwrapAffected(r) === 0) {
+          console.warn("[soft-delete] affected 0 rows for ids:", ids);
+        }
+      }
+    }
+
+    for (const v of versionPlan) {
+      // 5a. insert new value
+      const r = await conn.query(
+        `INSERT INTO techcoach_lite.techcoach_profile_swot_values
+           (user_id, header_id, header_value, is_active)
+         VALUES (?, ?, ?, 1)`,
+        [userId, v.headerId, encryptText(v.replacementValue, userKey)],
+      );
+      const newId = unwrapInsertId(r);
+      if (!newId) {
+        throw new Error(
+          `Could not resolve insertId for replacement value in ${v.headerName}`,
+        );
+      }
+
+      await conn.query(
+        `INSERT INTO techcoach_lite.techcoach_profile_swot_linked_info
+           (old_v_id, new_v_id, changed_by)
+         VALUES (?, ?, ?)`,
+        [v.oldId, newId, userId],
+      );
+
+      await conn.query(
+        `UPDATE techcoach_lite.techcoach_decision_swot_linked_info
+         SET v_id = ?
+         WHERE v_id = ? AND user_id = ?`,
+        [newId, v.oldId, userId],
+      );
+
+      await conn.query(
+        `UPDATE techcoach_lite.techcoach_profile_swot_values
+         SET is_active = 0
+         WHERE id = ? AND user_id = ?`,
+        [v.oldId, userId],
+      );
+    }
+
+    await conn.commit();
+    res
+      .status(200)
+      .json({ message: "Advanced Profile updated successfully" });
+  } catch (error) {
+    console.error("Error updating advanced profile:", error);
+    if (conn) await conn.rollback();
+
+    if (error?.code === "ER_ROW_IS_REFERENCED_2") {
+      return res.status(409).json({
+        error: "LINKED_VALUES",
+        message:
+          "Cannot remove value(s) linked to an existing decision. Unlink them first.",
+      });
+    }
+    res
+      .status(500)
+      .json({ error: "An error occurred while processing your request" });
+  } finally {
+    if (conn) conn.release();
+  }
+};
 module.exports = {
   getUserList,
   postAdvancedProfile,
